@@ -1,6 +1,6 @@
 {
-  "name": "spark-siteconfig-editor",
-  "displayName": "spark-siteconfig-editor",
+  "name": "spark-siteconfig-vscode-plugin",
+  "displayName": "spark-siteconfig-vscode-plugin",
   "description": "",
   "version": "0.0.1",
   "engines": {
@@ -14,7 +14,7 @@
   "contributes": {
     "commands": [
       {
-        "command": "spark-siteconfig-editor.helloWorld",
+        "command": "spark-siteconfig-vscode-plugin.helloWorld",
         "title": "Hello World"
       }
     ],

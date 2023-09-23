@@ -1,33 +1,32 @@
-import * as vscode from 'vscode';
-import { HtmlFrame, PlainText } from '../views/HtmlFrame';
+const vscode = require('vscode');
+const { HtmlFrame, PlainText } = require('../views/HtmlFrame');
 
 /**
  * Provider for spark menu editor editors.
  * 
  */
-export class MenuEditorProvider implements vscode.CustomTextEditorProvider {
-
-	public static register(context: vscode.ExtensionContext): vscode.Disposable {
+class MenuEditorProvider /*implements vscode.CustomTextEditorProvider*/ {
+	static register(context) {
 		const provider = new MenuEditorProvider(context);
-		const providerRegistration = vscode.window.registerCustomEditorProvider(MenuEditorProvider.viewType, provider);
+		const providerRegistration = vscode.window.registerCustomEditorProvider(MenuEditorProvider.#viewType, provider);
 		return providerRegistration;
 	}
 
-	private static readonly viewType = 'SparkSiteConfig.MenuEditor';
+	static #viewType = 'SparkSiteConfig.MenuEditor';
 
-	constructor(private readonly context: vscode.ExtensionContext) {
+	constructor(context) {
 	}
 	/**
 	 * Called when our custom editor is opened.
 	 * 
 	 * 
 	 */
-	public async resolveCustomTextEditor(document: vscode.TextDocument, webviewPanel: vscode.WebviewPanel, _token: vscode.CancellationToken): Promise<void> {
+	async resolveCustomTextEditor(document, webviewPanel, _token) {
 		// Setup initial content for the webview
 		webviewPanel.webview.options = {
 			enableScripts: true,
 		};
-		webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview, document);
+		webviewPanel.webview.html = this.#getHtmlForWebview(webviewPanel.webview, document);
 
 		function updateWebview() {
 			webviewPanel.webview.postMessage({
@@ -68,7 +67,7 @@ export class MenuEditorProvider implements vscode.CustomTextEditorProvider {
 	/**
 	 * Get the static html used for the editor webviews.
 	 */
-	private getHtmlForWebview(webview: vscode.Webview, document: vscode.TextDocument): string {
+	#getHtmlForWebview(webview, document) {
 		const html = new HtmlFrame('Test Nummer 1');
 		
 		// Local path to script and css for the webview
@@ -76,6 +75,7 @@ export class MenuEditorProvider implements vscode.CustomTextEditorProvider {
 		html.head.styleSheets.push(webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'vscode.css')));
 		html.head.styleSheets.push(webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'MenuEditor.css')));
 
+		//html.content.children.push(new PlainText(probieren()));
 		html.content.children.push(new PlainText(document.getText()));
 
 		return html.toString();
@@ -84,7 +84,7 @@ export class MenuEditorProvider implements vscode.CustomTextEditorProvider {
 	/**
 	 * Try to get a current document as json text.
 	 */
-	private getDocumentAsJson(document: vscode.TextDocument): any {
+	#getDocumentAsJson(document) {
 		const text = document.getText();
 		if (text.trim().length === 0) {
 			return {};
@@ -100,7 +100,7 @@ export class MenuEditorProvider implements vscode.CustomTextEditorProvider {
 	/**
 	 * Write out the json to a given document.
 	 */
-	private updateTextDocument(document: vscode.TextDocument, json: any) {
+	#updateTextDocument(document, json) {
 		const edit = new vscode.WorkspaceEdit();
 
 		// Just replace the entire document every time for this example extension.
@@ -113,3 +113,5 @@ export class MenuEditorProvider implements vscode.CustomTextEditorProvider {
 		return vscode.workspace.applyEdit(edit);
 	}
 }
+
+module.exports = MenuEditorProvider;

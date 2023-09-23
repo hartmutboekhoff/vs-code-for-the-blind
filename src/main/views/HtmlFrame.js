@@ -1,32 +1,32 @@
-import * as vscode from 'vscode';
+const vscode = require('vscode');
 
-export class Element {
-	private _children: Element[] | undefined = undefined;
-	public readonly name;
+class Element {
+	#children;
+	#name;
 	
 	constructor(name='') {
-		this.name = name ?? '';
+		this.#name = name ?? '';
 	}
 
-	public get children(): Element[] {
-		return this._children ??= [];
+	get name() {return this.#name;}
+	
+	get children() {
+		return this.#children ??= [];
 	}
 
-	public toString(): string {
+	toString() {
 		if( this.name.trim() == '' )
-			return this._children == undefined? '' : this.children.map(c=>c.toString()).join('\n');
+			return this.#children == undefined? '' : this.#children.map(c=>c.toString()).join('\n');
 		else
-			return `<${this.name}>\n`+this._children == undefined? '' : this.children.map(c=>c.toString()).join('\n')+`\n</${this.name}>`;
+			return `<${this.#name}>\n`+this.#children == undefined? '' : this.#children.map(c=>c.toString()).join('\n')+`\n</${this.name}>`;
 	}
 }
-export class PlainText extends Element {
-	public text: string;
-	
+class PlainText extends Element {
 	constructor(text='') {
 		super('');
 		this.text = text;	
 	}
-	public get children(): Element[] {
+	get children() {
 		return [];
 	}
 	public toString() {
@@ -35,16 +35,19 @@ export class PlainText extends Element {
 }
 
 class Head {
-	private readonly frame: HtmlFrame;
-	public readonly styleSheets: vscode.Uri[] = [];
-	public readonly scripts: vscode.Uri[] = [];
-	public title: string = '';
+	#frame;
+	#styleSheets  = [];
+	#scripts = [];
 	
 	constructor(frame: HtmlFrame) {
 		this.frame = frame;
+	  this.title = '';
 	}
 	
-	public toString() {
+	get styleSheets() {return this.#styleSheets;}
+	get scripts() {return this.#scripts;}
+	
+	toString() {
 		return '<head>'
 					 + '<meta charset="UTF-8">'
 					 //+ -- '<meta http-equiv="Content-Security-Policy" content="default-src "none"; img-src ${webview.cspSource}; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">'
@@ -57,47 +60,54 @@ class Head {
 	
 }
 class Body extends Element {
-	private readonly frame: HtmlFrame;
+	#frame;
 	
-	constructor(frame: HtmlFrame) {
+	constructor(frame) {
 		super('body');
-		this.frame = frame;
+		this.#frame = frame;
 	}
 }
 
-export class HtmlFrame {
-	private meta: Head;
-	private body: Body;
-	public readonly nonce: string;
+class HtmlFrame {
+	#head;
+	#body;
+	#nonce;
 	
 	constructor(name:string) {
-		this.nonce = this.getNonce();
-		this.meta = new Head(this);
-		this.body = new Body(this);
-		this.meta.title = name;
+		this.#head = new Head(this);
+		this.#body = new Body(this);
+		this.#head.title = name;
+		
+		this.#initNonce();
 	}
 	
-	public get head(): Head {
-		return this.meta;
+	get head() {
+		return this.#head;
 	}
-	public get content(): Body {
-		return this.body;
+	get content() {
+		return this.#body;
 	}
+	get nonce() {return this.#nonce;}
 	
-	private getNonce(): string {
+	#initNonce() {
 		let text = '';
 		const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 		for (let i = 0; i < 32; i++) {
 			text += possible.charAt(Math.floor(Math.random() * possible.length));
 		}
-		return text;
+		this.#nonce = text;
 	}
 	
-	public toString(): string {
+	toString() {
 		return '<!DOCTYPE html><html lang="en">'
 					 + this.meta.toString()
 					 + this.body.toString()
 					 + '</html>';
 	}
-	
+}
+
+module.exports = {
+  Element,
+  PlainText, 
+  HtmlFrame 
 }
