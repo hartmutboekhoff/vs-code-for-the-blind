@@ -29,7 +29,7 @@ class PlainText extends Element {
 	get children() {
 		return [];
 	}
-	public toString() {
+	toString() {
 		return this.text;
 	}
 }
@@ -39,7 +39,7 @@ class Head {
 	#styleSheets  = [];
 	#scripts = [];
 	
-	constructor(frame: HtmlFrame) {
+	constructor(frame) {
 		this.frame = frame;
 	  this.title = '';
 	}
@@ -73,7 +73,7 @@ class HtmlFrame {
 	#body;
 	#nonce;
 	
-	constructor(name:string) {
+	constructor(name) {
 		this.#head = new Head(this);
 		this.#body = new Body(this);
 		this.#head.title = name;
@@ -84,7 +84,7 @@ class HtmlFrame {
 	get head() {
 		return this.#head;
 	}
-	get content() {
+	get body() {
 		return this.#body;
 	}
 	get nonce() {return this.#nonce;}
@@ -100,7 +100,7 @@ class HtmlFrame {
 	
 	toString() {
 		return '<!DOCTYPE html><html lang="en">'
-					 + this.meta.toString()
+					 + this.head.toString()
 					 + this.body.toString()
 					 + '</html>';
 	}

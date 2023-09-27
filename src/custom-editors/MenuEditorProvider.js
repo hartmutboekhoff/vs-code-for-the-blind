@@ -6,15 +6,10 @@ const { HtmlFrame, PlainText } = require('../views/HtmlFrame');
  * 
  */
 class MenuEditorProvider /*implements vscode.CustomTextEditorProvider*/ {
-	static register(context) {
-		const provider = new MenuEditorProvider(context);
-		const providerRegistration = vscode.window.registerCustomEditorProvider(MenuEditorProvider.#viewType, provider);
-		return providerRegistration;
-	}
-
-	static #viewType = 'SparkSiteConfig.MenuEditor';
+	#context;
 
 	constructor(context) {
+		this.#context = context;
 	}
 	/**
 	 * Called when our custom editor is opened.
@@ -26,7 +21,13 @@ class MenuEditorProvider /*implements vscode.CustomTextEditorProvider*/ {
 		webviewPanel.webview.options = {
 			enableScripts: true,
 		};
-		webviewPanel.webview.html = this.#getHtmlForWebview(webviewPanel.webview, document);
+		try {
+  		webviewPanel.webview.html = this.#getHtmlForWebview(webviewPanel.webview, document);
+	  }
+	  catch(e) {
+	    console.error(e);
+	    webviewPanel.webview.html = e;
+	  }
 
 		function updateWebview() {
 			webviewPanel.webview.postMessage({
@@ -71,12 +72,12 @@ class MenuEditorProvider /*implements vscode.CustomTextEditorProvider*/ {
 		const html = new HtmlFrame('Test Nummer 1');
 		
 		// Local path to script and css for the webview
-		html.head.styleSheets.push(webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'MenuEditor.js')));
-		html.head.styleSheets.push(webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'vscode.css')));
-		html.head.styleSheets.push(webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'MenuEditor.css')));
+		html.head.styleSheets.push(webview.asWebviewUri(vscode.Uri.joinPath(this.#context.extensionUri, 'media', 'MenuEditor.js')));
+		html.head.styleSheets.push(webview.asWebviewUri(vscode.Uri.joinPath(this.#context.extensionUri, 'media', 'vscode.css')));
+		html.head.styleSheets.push(webview.asWebviewUri(vscode.Uri.joinPath(this.#context.extensionUri, 'media', 'MenuEditor.css')));
 
 		//html.content.children.push(new PlainText(probieren()));
-		html.content.children.push(new PlainText(document.getText()));
+		html.body.children.push(new PlainText(document.getText()));
 
 		return html.toString();
 	}

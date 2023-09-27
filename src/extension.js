@@ -1,23 +1,29 @@
+// The module 'vscode' contains the VS Code extensibility API
+// Import the module and reference it with the alias vscode in your code below
+//import * as vscode from 'vscode';
 const vscode = require('vscode');
-const MenuEditorProvider = require('./main/MenuEditor/MenuEditorProvider');
+const {loadModules, loadCommands, loadCustomEditors} = require('./Factory/loader.js');
 
+// This method is called when your extension is activated
+// Your extension is activated the very first time the command is executed
 
-function activate(context) {
-	console.log('spark-siteconfig-editor is now active!');
+/**
+ * @param {vscode.ExtensionContext} context
+ */
+async function activate(context) {
+	console.log('Congratulations, your extension "spark-siteconfig-vscode-plugin" is now active!');
+	console.log(context);
+//	console.log(__filename);
+	//console.log(await loadModules('','*.js',true));
 
-	let disposable = vscode.commands.registerCommand('spark-siteconfig-vscode-plugin.helloWorld', () => {
-		vscode.window.showInformationMessage('Hello World from spark-siteconfig-editor!\n' + listFiles(context,'').join('<br/>\n'));
-	});
-
-	context.subscriptions.push(disposable);
-	
-	context.subscriptions.push(MenuEditorProvider.register(context));
+  loadCommands(context, 'commands', 'SparkSiteConfig');
+  loadCustomEditors(context, 'custom-editors', 'SparkSiteConfig');
 }
 
-function deactivate() {
-}
+// This method is called when your extension is deactivated
+function deactivate() {}
 
 module.exports = {
-  activate, 
-  deactivate
-};
+	activate,
+	deactivate
+}
