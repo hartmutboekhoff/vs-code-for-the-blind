@@ -1,3 +1,5 @@
+const GenericArrayIndex = Symbol();
+
 const DEFAULT_BASE_URI = 'https://schema.funkemedien.de';
 const THROW_IMPLEMENTATION_MISSING = true;
 function IMPLEMENTATION_MISSING(result) {
@@ -15,8 +17,10 @@ function isValidIdentifier(s) {
 }
 function buildSchemaPath(base, ...keys) {
   const rel = keys.reduce((acc,k)=>{
-    if( typeof k == 'object' && k.constructor.name == 'RegExp' )
-      return `${acc}[/${k.source}/${k.flags}]`;
+    if( k == GenericArrayIndex )
+      return `${acc}[*]`;
+    else if( typeof k == 'object' && k.constructor.name == 'RegExp' )
+      return `${acc}[/${k.source}/]`;
     else if( isValidIdentifier(k) )
       return `${acc}/${k}`;
     else if( Number.isInteger(+k) )
@@ -39,82 +43,40 @@ function buildJsonPath(base, ...keys) {
   
 }
 function resolveSchemaPath(path,schema) {
-  
-}
-
-class SubSchema {
-  #parent; #schema;
-  #json;
-  #name; #path;
-  
-  constructor(name, json, parent) {
-    this.#name = name;
-    this.#json = json;
-    this.#parent = parent;
-    this.#schema = parent.schema;
-    this.#parseJson();
-  }
-  #parseJson() {
-    this.#ref = this.#json.$ref;
+  const resolve = {
+    'object': (step,subSchema)=>subSchema.properties?.[step] ?? subSchema.patternProperties?.[step],
+    'array': (step,subSchema)=>step == GenericArrayIndex
+                                  ? subSchema.items 
+                                  : Number.isInteger(step)
+                                  ? (subSchema.prefixedItems[step] ?? (subSchema.items == false? undefined : subSchema.items))
+                                  : undefined,
   }
   
-}
-class Schema {
-  #originalUri;
-  #uri;
-  #json
-  #subschemas = {}
-  
-  
-  constructor(uri,jsonSchema) {
-    this.#originalUri = this.#uri =
-      URL.canParse(uri)
-        ? new URL(uri)
-        : URL.canParse(uri, DEFAULT_BASE_URI) )
-        ? new URL(uri, DEFAULT_BASE_URI)
-        : new URL(DEFAULT_BAE_URI);
-
-      
-  }
-  
-  
-  get $uri() {
-    return this.#uri;
-  }
-  get $id() {
-    return this.#uri;
-  }
-  set $id(id) {
-    if( URL.canParse(id) )
-      this.#uri = URL.parse(id)
-    else if( URL.canParse(id,this.#uri))
-      this.#uri = URL.parse(id,this.#uri);
+  const splitRx = /^(.*?)\/|\[(\*)\]|\[(\d+)\]|(?<!\[)(?<=\/)([a-zA-Z_$][a-zA-Z0-9_$]*)(?=[\/\[]|$)(?!\])|\["(.*)(?<!\\)"\]|\[\/(.*?)(?<!\\)\/\]/g;
+  const splitPath = [...path.matchAll(splitRx)].reduce((acc,s)=>{
+    if( s[1] != undefined )
+      acc.root = s[1];
     else
-      thow 'invalid URI';
-  }
+      acc.steps.push(s[4] ?? s[5] ?? s[6] 
+                     ?? (s[2] == '*'? GenericArrayIndex : +s[3]);
+                     
+    return acc;
+  },{root:'',steps:[]});
   
-  getSubSchema(path) {
-    if( path.startsWith('#') )
-      path = path.slice(1);
-    const propNames = path.split('/');
-    
-  }
-
+  let subSchema = schema;
+  for( const step of splitPath.steps ) 
+    if( undefined == (subSchema = resolve[subSchema.type]?.(step,subSchema)) )
+      break;
+  return subSchema;
 }
-
-class SchemaPool {
-  static #instance;
-  
-  constructor() {
-    if( SchemaPool.#instance != undefined ) throw 'SchemaPool is a singleton';
-    SchemaPool.#instance = this;
-  }
-  static get instance() {
-    return SchemaPool.#instance;
-  }
+function resolveJsonPath(path,data) {
+  const splitRx = /(?<!\[)(?<=\.|^)([a-zA-Z_$][a-zA-Z0-9_$]*)(?=[\.\[]|$)(?!\])|\[(\d+)\]|\["(.*?)(?<!\\)"\]/g;
+  let nested = data;
+  for( const k of path.matchAll(splitRx) )
+    if( undefined == (nested = nested[k[1] ?? k[2] ?? k[3]]) )
+      break;
+  return nested;
 }
-
-
 
 class Match {
   #def; #data; #path;
@@ -218,17 +180,32 @@ class JSONSchemaMatcher {
     'array': {
       'type': data=>Array.isArray(data),
       'items': (data, itemSchema, schema, schemaPath, jsonPath)=>{
-        for( const i = 0 ; i < data.length ; i++ ) {
-          generateSchemaObjectTuples(
-            itemSchema,
-            data[i],
-            buildSchemaPath(schemaPath,))
+        const pfxCount = schema.prefixItems?.length ?? 0;
+        if( itemSchema == false && data.length > pfxCount ) return false;
+        const itemSchemaPath = buildSchemaPath(schemaPath,GenericArrayIndex);
+        for( let i = pfxCount ; i < data.length ; i++ ) {
+          if( !this.generateSchemaObjectTuples(
+                  itemSchema,
+                  data[i],
+                  itemSchemaPath,
+                  buildJsonPath(jsonPath,i)) ) {
+            return false;
+          }
         }
-        
-        return data.map((d,ix)=>this.checkMatch(def,d,`${path}[${ix}]`)
-                   .reduce((acc,v)=>acc&&v),
-      }
-      'prefixItems': (data,items)=>IMPLEMENTATION_MISSING8true),
+        return true;
+      },
+      'prefixItems': (data, prefixItems, schema, schemaPath, jsonPath)=>{
+        for( let i = 0 ; i < prefixItems.length ; i++ ) {
+          if( !this.generateSchemaObjectTuples(
+                  prefixSchemas[i],
+                  data[i],
+                  buildSchemPath(schemaPath,i),
+                  buildJsonPath(jsonPath,i)) ) {
+            return false;
+          }
+          return this.#validators.array.items(data, schema.items, schema, schemaPath, jsonPath);
+        }
+      },
       'contains': (data,contains,def)=>IMPLEMENTATIN_MISSING(true),
       'minContains': (data,limit,def)=>IMPLEMENTATION_MISSING(true),
       'maxContains': (data,limit,def)=>IMPLEMENTATION_MISSING(true),
