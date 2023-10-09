@@ -1,0 +1,329 @@
+{
+    "metaNav": [
+        {
+            "label": "Anzeigen",
+            "path": "https://anzeigen.waz.de/",
+            "type": "external",
+            "subMenu": [
+                { "label": "Inserieren", "path": "https://anzeigen.waz.de/", "type": "external" },
+                { "label": "ZEIG DICH!", "path": "http://zeig-dich.net/", "type": "external" },
+                { "label": "Experten", "path": "/expertenverzeichnis", "type": "internal" },
+                { "label": "Trauer", "path": "https://waz.trauer.de/", "type": "external" },
+                { "label": "Jobs in NRW", "path": "https://jobsnrw.de", "type": "external" }
+            ]
+        },
+        {
+            "label": "Jobs",
+            "path": "https://jobsnrw.de",
+            "type": "external",
+            "subMenu": [
+                { "label": "Jobs in NRW", "path": "https://jobsnrw.de", "type": "external" },
+                { "label": "Jobs bei uns", "path": "http://www.funkemedien.de/de/karriere/", "type": "external" }
+            ]
+        },
+        {
+            "label": "Prospekte",
+            "path": "https://angebote.waz.de/aktuell.html",
+            "type": "external",
+            "subMenu": [
+                { "label": "Aktuelle Beilagen", "path": "https://angebote.waz.de/aktuell.html", "type": "external" },
+                { "label": "Angebote", "path": "https://angebote.waz.de/anzeigen.html", "type": "external" }
+            ]
+        },
+        { "label": "Shop", "path": "https://leserladen.waz.de/", "type": "external" },
+        { "label": "Vor Ort", "path": "https://www.waz.de/leserlaeden_leserservices/", "type": "external" },
+        { "label": "Tickets", "path": "http://ruhrticket.wlec.ag/index.php?affiliate=waz", "type": "external" },
+        { "label": "Service & Mein Revier", "path": "https://www.waz.de/angebot-abo/vorteilsprogramm/", "type": "external" },
+        { "label": "E-Paper", "path": "https://www.waz.de/digital-angebot/digitale-zeitung-lesen/", "type": "external" }
+    ],
+    "mainNav": [
+        {
+            "label": "Home",
+            "path": "/",
+            "type": "internal",
+            "subMenu": [
+                { "label": "Infografik", "path": "/infografik/", "type": "internal" },
+                { "label": "Newsticker", "path": "/newsticker/", "type": "internal" },
+                { "label": "Interaktiv", "path": "/interaktiv/", "type": "internal" },
+                { "label": "Bildergalerien", "path": "/bilder/", "type": "internal" },
+                { "label": "Spiele", "path": "/spiele/", "type": "internal" }
+            ]
+        },
+        {
+            "label": "Berlin",
+            "path": "/berlin/",
+            "type": "internal",
+            "subMenu": [
+                { "label": "Polizeibericht", "path": "/berlin/polizeibericht/", "type": "internal" },
+                { "label": "Flughafen BER", "path": "/flughafen-BER/", "type": "internal" },
+                { "label": "Podcast", "path": "/podcast/", "type": "internal" },
+                { "label": "Familie", "path": "/familie/", "type": "internal" },
+                { "label": "Schüler", "path": "/schueler/", "type": "internal" },
+                { "label": "Best of Berlin", "path": "/berlin/best-of-berlin/", "type": "internal" },
+                { "label": "Berliner helfen", "path": "/berliner-helfen/", "type": "internal" },
+                { "label": "Berlin-Tipps", "path": "/Advertorials/berlintipps/", "type": "internal" },
+                { "label": "Brandenburg", "path": "/brandenburg/", "type": "internal" }
+            ]
+        },
+        {
+            "label": "Bezirke",
+            "path": "/bezirke/",
+            "type": "internal",
+            "subMenu": [
+                { "label": "Im Westen Berlins", "path": "/bezirke/im-westen-berlins/", "type": "internal" },
+                { "label": "Charlottenburg-Wilmersdorf", "path": "/bezirke/charlottenburg-wilmersdorf/", "type": "internal" },
+                { "label": "Friedrichshain-Kreuzberg", "path": "/bezirke/friedrichshain-kreuzberg/", "type": "internal" },
+                { "label": "Lichtenberg", "path": "/bezirke/lichtenberg/", "type": "internal" },
+                { "label": "Marzahn-Hellersdorf", "path": "/bezirke/marzahn-hellersdorf/", "type": "internal" },
+                { "label": "Mitte", "path": "/bezirke/mitte/", "type": "internal" },
+                { "label": "Neukölln", "path": "/bezirke/neukoelln/", "type": "internal" },
+                { "label": "Pankow", "path": "/bezirke/pankow/", "type": "internal" },
+                { "label": "Reinickendorf", "path": "/bezirke/reinickendorf/", "type": "internal" },
+                { "label": "Spandau", "path": "/bezirke/spandau/", "type": "internal" },
+                { 
+                  "label": "Steglitz-Zehlendorf", 
+                  "path": "/bezirke/steglitz-zehlendorf/", 
+                  "type": "internal",
+                  "subMenu": [
+                    { "label": "Tempelhof-Schöneberg", "path": "/bezirke/tempelhof-schoeneberg/", "type": "internal"},
+                    { "label": "Treptow-Köpenick", "path": "/bezirke/treptow-koepenick/", "type": "internal" }
+                  ]
+                }
+            ]
+        },
+        { "label": "Interaktiv", "path": "/interaktiv/", "type": "internal" },
+        {
+            "label": "Politik",
+            "path": "/politik/",
+            "type": "internal",
+            "subMenu": [
+                { "label": "Inland", "path": "/politik/inland/", "type": "internal" },
+                { "label": "Ausland", "path": "/politik/ausland/", "type": "internal" }
+            ]
+        },
+        {
+            "label": "Wirtschaft",
+            "path": "/wirtschaft/",
+            "type": "internal",
+            "subMenu": [
+                { "label": "Start-Ups Berlin", "path": "/berlin-aktuell/startups/", "type": "internal" },
+                { "label": "Finanzen", "path": "/wirtschaft/finanzen/", "type": "internal" },
+                { "label": "Karriere", "path": "/wirtschaft/karriere/", "type": "internal" },
+                { "label": "Presseportal", "path": "/wirtschaft/presseportal/", "type": "internal" },
+                { "label": "Steuern", "path": "/wirtschaft/steuern/", "type": "internal" },
+                { "label": "Tagesgeldkonto", "path": "/themen/tagesgeldkonto/", "type": "internal" },
+                { "label": "Börsendaten", "path": "/wirtschaft/boerse/boersendaten/", "type": "internal" }
+            ]
+        },
+        {
+            "label": "Sport",
+            "path": "/sport/",
+            "type": "internal",
+            "subMenu": [
+                { "label": "Hertha", "path": "/sport/hertha/", "type": "internal" },
+                { "label": "1. FC Union", "path": "/sport/union/", "type": "internal" },
+                { "label": "Eisbären", "path": "/sport/eisbaeren/", "type": "internal" },
+                { "label": "Alba", "path": "/sport/alba/", "type": "internal" },
+                { "label": "Füchse", "path": "/sport/fuechse/", "type": "internal" },
+                { "label": "BR Volleys", "path": "/sport/br-volleys/", "type": "internal" },
+                { "label": "Berlin-Marathon", "path": "/sport/berlinmarathon/", "type": "internal" },
+                { "label": "Fußball", "path": "/sport/fussball/", "type": "internal" },
+                {
+                    "label": "Fußball Bundesliga",
+                    "path": "http://liveticker.zeitung.de/fussball/bundesliga/ergebnisse-und-tabelle/",
+                    "type": "external"
+                },
+                { "label": "Leichtathletik-EM", "path": "/sport/Leichtathletik_EM/", "type": "internal" },
+                { "label": "Fußball-WM", "path": "/sport/fussball-wm/", "type": "internal" },
+                { "label": "Formel 1", "path": "/sport/formel1/", "type": "internal" },
+                { "label": "Live-Ticker", "path": "http://liveticker.zeitung.de/", "type": "external" },
+                {
+                    "label": "Nachwuchssportler des Monats",
+                    "path": "/themen/nachwuchssportler/",
+                    "type": "internal"
+                }
+            ]
+        },
+        {
+            "label": "Panorama",
+            "path": "/vermischtes/",
+            "type": "internal",
+            "subMenu": [
+                { "label": "Stars & Promis", "path": "/vermischtes/stars-und-promis/", "type": "internal" },
+                { "label": "Leute in Berlin", "path": "/berlin/leute/", "type": "internal" }
+            ]
+        },
+        {
+            "label": "Kultur",
+            "path": "/kultur/",
+            "type": "internal",
+            "subMenu": [
+                { "label": "Berlin-History", "path": "/berlin-history/", "type": "internal" },
+                { "label": "TV", "path": "/kultur/tv/", "type": "internal" },
+                { "label": "TV-Programm", "path": "https://www.tvdigital.de/tv-programm", "type": "external" }
+            ]
+        },
+        {
+            "label": "Wissen",
+            "path": "/web-wissen/",
+            "type": "internal",
+            "subMenu": [
+                { "label": "Gesundheit", "path": "/web-wissen/gesundheit/", "type": "internal" },
+                { "label": "Ratgeber", "path": "/ratgeber/", "type": "internal" },
+                {
+                    "label": "Wetterlexikon",
+                    "path": "https://wetter.zeitung.de/wetter/lexikon.asp?nr=1&page=0",
+                    "type": "external"
+                },
+                {
+                    "label": "Pollenflug",
+                    "path": "https://wetter.zeitung.de/wetter/biowetter/pollenflug.asp",
+                    "type": "external"
+                },
+                { "label": "Web & Technik", "path": "/web-wissen/web-technik/", "type": "internal" },
+                { "label": "Gut gepflegt", "path": "/web-wissen/gutgepflegt/", "type": "internal" }
+            ]
+        },
+        {
+            "label": "Reise",
+            "path": "/reise/",
+            "type": "internal",
+            "subMenu": [
+                { "label": "Fern", "path": "/reise/fern/", "type": "internal" },
+                { "label": "Nah", "path": "/reise/nah/", "type": "internal" },
+                { "label": "Leserreisen", "path": "https://leserreisen.zeitung.de", "type": "external" },
+                {
+                    "label": "Reisewetter",
+                    "path": "https://wetter.zeitung.de/wetter/europa.asp",
+                    "type": "external"
+                },
+                {
+                    "label": "Badewetter",
+                    "path": "https://wetter.zeitung.de/wetter/wasser.asp",
+                    "type": "external"
+                }
+            ]
+        },
+        {
+            "label": "Lifestyle",
+            "path": "/lifestyle/",
+            "type": "internal",
+            "subMenu": [
+                { "label": "Gastronomie", "path": "/gastronomie/", "type": "internal" },
+                { "label": "Mode", "path": "/lifestyle/mode/", "type": "internal" },
+                { "label": "Wohnen", "path": "/lifestyle/wohnen/", "type": "internal" },
+                { "label": "Motor", "path": "/motor/", "type": "internal" }
+            ]
+        }
+    ],
+    "mainNavThemes": [
+        { "label": "Ukraine", "path": "/themen/ukraine/", "type": "internal" },
+        { "label": "Corona", "path": "/themen/corona/", "type": "internal" },
+        { "label": "Alle Themen", "path": "/themen/", "type": "internal" }
+    ],
+    "abo": { "label": "Abo", "path": "/abo/", "type": "internal" },
+    "plusContent": { "label": "zeitung", "path": "/plus-artikel/", "type": "internal", "plusIcon": true },
+    "footerNav": [
+        {
+            "label": "Zeitungsarchiv",
+            "path": "/printarchiv/",
+            "type": "internal",
+            "subMenu": [{ "label": "Heute", "path": "/printarchiv/nachrichten-vom-1-12-2020.html", "type": "internal" }]
+        },
+        {
+            "label": "Specials",
+            "path": "/specials/",
+            "type": "internal",
+            "subMenu": [
+                {
+                    "label": "Berliner Stadtwerke",
+                    "path": "/specials/article228903757/Klimaneutral-bis-2050.html",
+                    "type": "internal"
+                },
+                {
+                    "label": "Fossilfrei in die Zukunft",
+                    "path": "/Advertorials/Fossilfrei/",
+                    "type": "internal"
+                },
+                { "label": "Stadler Radreise", "path": "/Advertorials/stadler/", "type": "internal" },
+                {
+                    "label": "Berliner Originale",
+                    "path": "/Advertorials/Berliner_Portraits/",
+                    "type": "internal"
+                },
+                { "label": "Berlin-Tipps", "path": "/Advertorials/berlintipps/", "type": "internal" },
+                {
+                    "label": "Bikini Berlin",
+                    "path": "/berlin/article227687885/WENN-KUNST-AUF-WEIHNACHTEN-TRIFFT.html",
+                    "type": "internal"
+                }
+            ]
+        },
+        {
+            "label": "Service",
+            "path": "/anzeigenmaerkte/",
+            "type": "internal",
+            "subMenu": [
+                { "label": "Mediadaten", "path": "https://mediadaten.zeitung.de/", "type": "external" },
+                { "label": "Anzeige buchen", "path": "https://anzeigenberlin.de/", "type": "external" },
+                { "label": "Stellenmarkt", "path": "https://jobsinberlin.de/", "type": "external" },
+                { "label": "Experten im Fokus", "path": "/anzeigenmaerkte/experten/", "type": "internal" },
+                { "label": "Ticketshop", "path": "https://zeitung.reservix.de/", "type": "external" },
+                { "label": "Leserreisen", "path": "https://leserreisen.zeitung.de/", "type": "external" },
+                { "label": "Reisen", "path": "https://www.globista.de/", "type": "external" },
+                { "label": "Gewinnspiele", "path": "/gewinnspiele/", "type": "internal" },
+                { "label": "Trauer", "path": "https://zeitung-anzeigen.de/trauer.php", "type": "external" },
+                {
+                    "label": "Themenwelten",
+                    "path": "https://themenwelten.zeitung.de/wirtschaft_finanzen",
+                    "type": "internal"
+                }
+            ]
+        },
+        {
+            "label": "In eigener Sache",
+            "path": "/berlin-aktuell/article1077710/Leider-falsch-wir-korrigieren.html",
+            "type": "internal",
+            "subMenu": [
+                { "label": "Anzeige schalten", "path": "https://anzeigenberlin.de/", "type": "external" },
+                { "label": "E-Paper", "path": "/services/epaper/", "type": "internal" },
+                { "label": "Abo", "path": "https://aboshop.zeitung.de/", "type": "external" },
+                {
+                    "label": "Leider falsch - Wir korrigieren",
+                    "path": "/berlin-aktuell/article1077710/Leider-falsch-wir-korrigieren.html",
+                    "type": "internal"
+                },
+                { "label": "Impressum", "path": "/impressum/", "type": "internal" }
+            ]
+        }
+    ],
+    "legalNav": [
+        { "label": "Impressum", "path": "/impressum/", "type": "internal" },
+        { "label": "Datenschutz", "path": "/datenschutz/", "type": "internal" },
+        { "label": "Cookie-Einstellungen", "path": "/?cmpscreen", "type": "internal" },
+        { "label": "Kontakt", "path": "https://www.zeitung.de/205304181", "type": "external" },
+        { "label": "Kodex", "path": "/kodex/", "type": "internal" },
+        { "label": "Online-Anzeigenannahme", "path": "https://anzeigenberlin.de/", "type": "external" },
+        { "label": "Mediadaten", "path": "https://mediadaten.zeitung.de/", "type": "external" },
+        { "label": "Nutzungsbasierte Online-Werbung", "path": "/nutzungsbedingungen/", "type": "internal"},
+        { "label": "Infos über Klarna", "path": "https://www.klarna.com/de/smoooth-mehrzuklarna/", "type": "external"},
+        { "label": "Abo kündigen", "path": "https://aboservice.zeitung.de/#/kuendigung", "type": "internal"}
+    ],
+    "publisherOffersNav": [
+        { "label": "Anzeige", "path": "#", "type": "external" },
+        { "label": "Jobs", "path": "#", "type": "external" },
+        { "label": "Prospekte", "path": "#", "type": "external" }
+    ],
+    "topicsTagsBox": [
+        {
+            "label": "Ukraine",
+            "fullPath": "/themen/ukraine",
+            "variant": "outlined"
+        },
+        {
+            "label": "Energiepreise",
+            "fullPath": "/themen/energiepreise",
+            "variant": "outlined"
+        }
+    ]
+}
