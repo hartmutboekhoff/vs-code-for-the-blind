@@ -111,7 +111,11 @@ function collectFiles(basepath, pattern, recursive) {
   return fileList;
 } 
 
-async function loadFile(path, name) {
+async function loadRessourceFile(path) {
+  
+}
+
+async function loadModule(path, name) {
 	try {
 		let filepath = buildPath(path, name);
 		console.info(`Loading file ${filepath}.`);
@@ -140,7 +144,7 @@ async function loadModules(relativepath, extensions, recursive) {
   const filelist = collectFiles(basepath, pattern, recursive);
   const promises = filelist.map(async f=>{
     try {
-      return new DynamicModule(f.name, f.directory, f.relativeDirectory, true, await loadFile(f.directory, f.name));
+      return new DynamicModule(f.name, f.directory, f.relativeDirectory, true, await loadModule(f.directory, f.name));
     }
     catch(e) {
       return new DynamicModule(f.name, f.directory, f.relativeDirectory, false, e);

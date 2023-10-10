@@ -1,5 +1,3 @@
-const GenericAccessor = Symbol();
-
 const DEFAULT_BASE_URI = 'https://schema.funkemedien.de';
 const THROW_IMPLEMENTATION_MISSING = true;
 function IMPLEMENTATION_MISSING(result) {
@@ -75,21 +73,6 @@ class JsonSchemaPath {
     return new JsonSchemaPath(this);
   }
   
-  _deprecated__append(key) {
-    this.paths = this.paths.map(p=>{
-      if( key == GenericAccessor )
-        return `${p}[*]`;
-      else if( typeof key == 'object' && key.constructor.name == 'RegExp' )
-        return `${p}[/${key.source}/]`;
-      else if( isValidIdentifier(key) )
-        return `${p}/${key}`;
-      else if( Number.isInteger(+key) )
-        return `${p}[${key}]`;
-      else
-        return `${p}["${key.replace('\\','\\\\').replace('"','\\"')}"]`;
-    });
-    return this;
-  }
   addSubschema(ref) {
     if( !this.paths.includes(ref) )
       this.paths.push(ref);
