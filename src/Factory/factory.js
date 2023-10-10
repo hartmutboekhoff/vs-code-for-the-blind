@@ -130,7 +130,7 @@ class Factory {
 	        }
 	      },{errors:[],modules:[]});
 	    });
-    this.#modules = Array.from(new Set(loaded.modules.map(m=>m.module)));
+    this.#modules = Array.from(new Set(loaded.modules));
     this.#errros = loaded.errors;
     console.log(this.#modules.length+' modules were successfully loaded.');
     if( this.#errors.length > 0 )
@@ -191,7 +191,8 @@ class Factory {
   #findAllMatches(sselectors) {
   	const matches = [];
    	for( const m of this.#modules )
-  		matches.push(...this.#findModuleMatches(m, selectors));
+   		if( Array.isArray(m.selectros) )
+  			matches.push(...this.#findModuleMatches(m, selectors));
 
   	return matches;
   } 

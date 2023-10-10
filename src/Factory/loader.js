@@ -3,12 +3,13 @@ const fs = require('fs');
 
 const RootDir = __dirname + '\\..';
 
-class DynamicModule {
+const ModuleCache = {};
+
+class ModuleWrapper {
   #name;
   #directory;
   #relativeDirectory;
   #loaded;
-  #module;
   #error;
   
   constructor(name,dir,relDir,loaded,moduleOrError) {
@@ -16,16 +17,28 @@ class DynamicModule {
     this.#directory = dir;
     this.#relativeDirectory = relDir;
     this.#loaded = loaded;
-    if( loaded )
-      this.#module = moduleOrError;
-    else
-      this.error = moduleOrError;
+    if( !loaded )
+      this.#error = moduleOrError;
+
+    return new Proxy(loaded? moduleOrError : {}, this);
   }
+	get(target,prop,reciever) {
+		if( prop.startsWith('$') && (prop in this || prop.slice(1) in this) ) {
+			const value = this[prop.slice(1)] ?? this[prop];
+			return value instanceof Function
+				? (...args)=>value.apply(this,args)
+				: value;
+		}
+		const value = target[prop];
+		return value instanceof Function
+						? (...args)=>value.apply(target,args)
+						: value;
+	}
+
   get name() { return this.#name; }
   get directory() { return this.#directory; }
   get relativeDirectory() { return this.#relativeDirectory; }
   get loaded() { return this.#loaded ; }
-  get module() { return this.#module; }
   get error() { return this.#error; }
   
   get extension() { return this.#name.split('.').slice(-1)[0]; }
@@ -111,20 +124,26 @@ function collectFiles(basepath, pattern, recursive) {
   return fileList;
 } 
 
-async function loadRessourceFile(path) {
-  
+async function loadRessourceFile(relativepath, encoding='utf8') {
+  const path = buildPath(RootDir,relativepath);
+  return await fs.readFile(path, {encoding});
 }
 
-async function loadModule(path, name) {
+async function loadModule(path, name, relPath='') {
 	try {
 		let filepath = buildPath(path, name);
 		console.info(`Loading file ${filepath}.`);
 		
-		return require(filepath);		
+		let module = ModuleCache[filepath];
+		if( module != undefined )
+			return module;
+
+		module = await require(filepath);
+		return ModuleCache[filepath] = ModuleWrapper(name, path, relPath, true, module);
 	}
 	catch(e) {
 		console.error(e);
-		throw e;
+		return ModuleWrapper(name, path, relPath, false, e);
 	}
 }	
 
@@ -142,20 +161,14 @@ async function loadModules(relativepath, extensions, recursive) {
   const pattern = buildExtensionRegExp()
 
   const filelist = collectFiles(basepath, pattern, recursive);
-  const promises = filelist.map(async f=>{
-    try {
-      return new DynamicModule(f.name, f.directory, f.relativeDirectory, true, await loadModule(f.directory, f.name));
-    }
-    catch(e) {
-      return new DynamicModule(f.name, f.directory, f.relativeDirectory, false, e);
-    }
-  });
+  const promises = filelist.map(f=>loadModule(f.directory, f.name, f.relativeDirectory));
+  
   return Promise.allSettled(promises)
     .then(results=>{
       return results.reduce((acc,r)=>{
         if( r.status == 'rejected' )
           acc.errors.push(r.reason);
-        else if( r.value.loaded == true )
+        else if( r.value.$loaded == true )
           acc.loaded.push(r.value);
         else
           acc.errors.push(r.value);            
@@ -168,28 +181,28 @@ async function loadCommands(context,rootDir,rootNS) {
   const commandModules = await loadModules(rootDir,'*.js',true);
 
   commandModules.loaded.forEach(m=>{
-    const key = m.getKey(rootNS);
+    const key = m.$getKey(rootNS);
 
     if( !verifyContribution(context, 'commands', key) ) {
-      console.warn(`Module "${m.relativePath}" does not match a registered command. Expected key: "${key}"`);
+      console.warn(`Module "${m.$relativePath}" does not match a registered command. Expected key: "${key}"`);
       return;
     }
 
     let f, msg;
-    if( typeof m.module == 'function' ) {
-      f = m.module;
+    if( typeof m == 'function' ) {
+      f = m;
       msg = 'module';
     }
-    else if( typeof m.module.default == 'function' ) {
-      f = m.module.default;
+    else if( typeof m.default == 'function' ) {
+      f = m.default;
       msg = 'module.default';
     }
-    else if( typeof m.module[m.plainName] == 'function' ) {
-      f = m.module[m.plainName];
-      msg = `module["${m.plainName}"]`;
+    else if( typeof me[m.$plainName] == 'function' ) {
+      f = m[m.$plainName];
+      msg = `module["${m.$plainName}"]`;
     }
     else {
-      console.error(`Could not find function for command "${key}" in module "${m.relativePath}".`);
+      console.error(`Could not find function for command "${key}" in module "${m.$relativePath}".`);
       return;
     }
 
@@ -210,35 +223,35 @@ async function loadCustomEditors(context, rootDir, rootNS) {
       key = key.slice(0,-8);
 
     if( !verifyContribution(context, 'customEditors', key) ) {
-      console.warn(`Module "${m.relativePath}" does not match a registered custom-editor. Expected key: "${key}"`);
+      console.warn(`Module "${m.$relativePath}" does not match a registered custom-editor. Expected key: "${key}"`);
       return;
     }
 
 		let provider, msg;
-		if( isClass(m.module) ) {
+		if( isClass(m) ) {
 		  msg = 'module';
-		  const cls = m.module;
+		  const cls = m;
 		  provider = new cls(context);
 		} 
-		else if( isClass(m.module.default) ) {
+		else if( isClass(m.default) ) {
 		  msg = 'module.default';
-		  const cls = m.module.default;
+		  const cls = m.default;
 		  provider = new cls(context);
 		}
-		else if( isClass( m.module[m.plainName]) ) {
-		  msg = `module["${m.plainName}"]`;
-		  const cls = m.module[m.plainName];
+		else if( isClass( m[m.$plainName]) ) {
+		  msg = `module["${m.$plainName}"]`;
+		  const cls = m[m.$plainName];
 		  provider = new cls(context);
 		}
-		else if( typeof m.module.getProvider == 'function' ) {
+		else if( typeof m.getProvider == 'function' ) {
 		  msg = 'module.getProvider()';
-		  provider = m.module.getProvider(context);
+		  provider = m.getProvider(context);
 		}
 		else {
-		  console.error(``)
+      console.error(`Could not find entry-point for custom-editor "${key}" in module "${m.$relativePath}".`);
 		  return;
 		}
-console.log(provider);		
+
     context.subscriptions.push(vscode.window.registerCustomEditorProvider(key, provider));
     console.log(`Registered custom-editor "${key}" from ${msg}`);
   });
@@ -247,9 +260,6 @@ console.log(provider);
 module.exports = {
   loadModules,
   loadCommands,
-  loadCustomEditors
+  loadCustomEditors,
+  loadRessourceFile,
 };
-
-		
-
-

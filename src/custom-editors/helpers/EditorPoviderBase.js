@@ -1,13 +1,16 @@
 const vscode = require('vscode');
 const Factory = require('../factory/factory.js');
-
+const {loadRessourceFile} = require('../factory/loader.js');
 
 class EditorProviderBase /* implements vscode.CustomTextEditorProvider */ {
   #context;
+  #factory;
+  #jsonSchema;
   
-  constructro(context, factoryOptions, jsonSchema) {
+  constructor(context, factoryConfig, jsonSchemaPath) {
     this.#context = context;
-    this.#factory = new Factory(factoryname, viewDirectories, selectorCategories);
+    this.#factory = new Factory(factoryConfig.name, factoryConfig.moduleDirectories, factoryConfig.selectorCategories);
+    loadRessourceFile(jsonSchemaPath).then(r=>this.#jsonSchema=r);
   }
 
 	/**
@@ -16,7 +19,6 @@ class EditorProviderBase /* implements vscode.CustomTextEditorProvider */ {
 	 * 
 	 */
 	async resolveCustomTextEditor(document, webviewPanel, _token) {
-		// Setup initial content for the webview
 		webviewPanel.webview.options = {
 			enableScripts: true,
 		};
