@@ -12,11 +12,14 @@ class Element {
 		return this.#children ??= [];
 	}
 
+  #renderChildren() {
+    return this.#children == undefined? '' : this.#children.map(c=>c.toString()).join('\n');
+  }
 	toString() {
 		if( this.name.trim() == '' )
-			return this.#children == undefined? '' : this.#children.map(c=>c.toString()).join('\n');
+			return this.#renderChildren();
 		else
-			return `<${this.#name}>\n`+this.#children == undefined? '' : this.#children.map(c=>c.toString()).join('\n')+`\n</${this.name}>`;
+			return `<${this.#name}>\n${this.#renderChildren()}\n</${this.name}>`;
 	}
 }
 class PlainText extends Element {

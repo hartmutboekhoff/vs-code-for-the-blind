@@ -52,7 +52,7 @@ class CustomEditorBase {
     return this.#panel;
   }
   get view() {
-    return this.#panel.webView;
+    return this.#panel.webview;
   }
   set disposable(obj) {
     return this.#disposables.push(obj);

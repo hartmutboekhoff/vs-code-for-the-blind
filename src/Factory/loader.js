@@ -145,14 +145,12 @@ async function loadModule(path, name, relPath='') {
 		let filepath = buildPath(path, name);
 		console.info(`Loading file ${filepath}.`);
 		
-		let module = ModuleCache[filepath];
-		if( module != undefined )
-			return module;
+		const cached = ModuleCache[filepath];
+		if( cached != undefined )
+			return cached;
 
-		module = await require(filepath);
-		console.log('original-module:',module);
+		const module = await require(filepath);
 		const wrapped = new ModuleWrapper(name, path, relPath, true, module);
-		console.log('wrapped-module:',module);
 		ModuleCache[filepath] = wrapped;
 		return wrapped;
 	}
@@ -188,7 +186,7 @@ function getFunction(module) {
   function isFunction(f) {
     return typeof f == 'function';
   }
-console.log('getfunction module',module);
+
 	if( isFunction(module) )
 	  return { info: 'module', function: module };
 	else if( isFunction(module.default) )
@@ -223,7 +221,6 @@ async function loadModules(relativepath, extensions, recursive) {
 async function loadCommands(context,rootDir,rootNS) {
   const commandModules = await loadModules(rootDir,'*.js',true);
 
-console.log('loading-errors',commandModules.errors);
   commandModules.loaded.forEach(m=>{
     const key = m.$getKey(rootNS);
 
@@ -232,10 +229,10 @@ console.log('loading-errors',commandModules.errors);
       return;
     }
 
-    const func = getFunction(module);
+    const func = getFunction(m);
     if( func == undefined ) {
       console.error(`Could not find function for command "${key}" in module "${m.$relativePath}".`);
-      console.log(module);
+      console.log(m);
       return;
     }
 
