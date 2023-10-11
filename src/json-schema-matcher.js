@@ -1,5 +1,7 @@
 const DEFAULT_BASE_URI = 'https://schema.funkemedien.de';
+const MATCH_NON_OBJECTS = true;
 const THROW_IMPLEMENTATION_MISSING = true;
+
 function IMPLEMENTATION_MISSING(result) {
   if( THROW_IMPLEMENTATION_MISSING )
     throw 'Implementation missing';
@@ -369,7 +371,7 @@ class JsonSchemaMatcher {
     },schema);
   }
   #addMatch(schema, json, schemaPath, jsonPath, valid) {
-    if( typeof json == 'object' )
+    if( MATCH_NON_OBJECTS || typeof json == 'object' ) // arrays are also objects
       this.#matches.push(new Match(this.#resolveSubSchema(schema), json, schemaPath, jsonPath, valid));
   }
   #validate(schema, json, schemaPath, jsonPath) {
@@ -406,8 +408,15 @@ class JsonSchemaMatcher {
   get matches() {
     return this.#matches;
   }
-  findAllMatches(obj) {
-    return this.#matches.filter(m=>m.data === obj);
+  findAllMatches(search) {
+    switch( typeof search ) {
+      case 'object':
+        return this.#matches.filter(m=>m.data === search);
+      case 'string':
+        return this.#matches.filter(m=>m.jsonPath === search);
+      default:
+        return undefined; 
+    }
   }
 }
 

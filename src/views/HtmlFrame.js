@@ -1,5 +1,3 @@
-const vscode = require('vscode');
-
 class Element {
 	#children;
 	#name;

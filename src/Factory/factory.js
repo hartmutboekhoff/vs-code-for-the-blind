@@ -60,7 +60,7 @@ class Selectors {
   constructor(categories, selectorArgs) {
     this.#categories = categories;
     
-    let selectros;
+    let selectors;
   	if( selectorArgs.length == 0 )
   		throw 'Invalid selector \'undefined\'.';
   	else if( selectorArgs.length > 1 )
@@ -104,6 +104,7 @@ class Selectors {
 class Factory {
   #status = 'new';
   #modules = [];
+  #errors = [];
 	#categories;
 	#modCache = new Cache();
 	#setCache = new Cache();
@@ -115,9 +116,8 @@ class Factory {
     this.#loadModules().then(()=>this.#status = 'ready');
 		this.#initCategories(categories);
 	}
-	#loadModules() {
+	async #loadModules() {
 	  this.#status = 'loading modules';
-	  const promises = ;
 	  const loaded = await Promise.allSettled(this.directories.map(d=>loadModules(d,'*.js',false)))
 	    .then(results=>{
 	      return results.reduce((acc,r)=>{
@@ -131,14 +131,14 @@ class Factory {
 	      },{errors:[],modules:[]});
 	    });
     this.#modules = Array.from(new Set(loaded.modules));
-    this.#errros = loaded.errors;
+    this.#errors = loaded.errors;
     console.log(this.#modules.length+' modules were successfully loaded.');
     if( this.#errors.length > 0 )
       console.warn('Some modules could not be loaded:', this.#errors);
 	}
   #initCategories(categories) {
   	let prio = 0;
-  	this.#categories = categories.map((c,ix)=>{
+  	this.#categories = categories.map(c=>{
   		prio = c.priority ?? prio + 1;
   		return new Category(c.name, prio, c.required);
   	});
@@ -167,7 +167,7 @@ class Factory {
   			++match[c.prioIndex];
   	  else if( Array.isArray(sel) 
   	           && modSel.constructor.name == 'RegExp' 
-  	           && reduce((acc,s)=>acc||modSel.test(s),false) )
+  	           && sel.reduce((acc,s)=>acc||modSel.test(s),false) )
   	    ++match[c.prioIndex];
   	  else if( Array.isArray(sel) 
   	           && sel.reduce((acc,s)=>acc||s==modSel,false) )
@@ -188,10 +188,10 @@ class Factory {
   	}
   	return matches;
   }  
-  #findAllMatches(sselectors) {
+  #findAllMatches(selectors) {
   	const matches = [];
    	for( const m of this.#modules )
-   		if( Array.isArray(m.selectros) )
+   		if( Array.isArray(m.selectors) )
   			matches.push(...this.#findModuleMatches(m, selectors));
 
   	return matches;
@@ -216,18 +216,18 @@ class Factory {
   		}
   	}
   	// all matches refer to the same module
-  	return mathces[0].module;
+  	return matches[0].module;
   }  
   #findMatchSet(sselectors) {
-    const matches = findAllMatches(sselectors);
+    const matches = this.#findAllMatches(sselectors);
     return [...new Set(matches.map(m=>m.module))];
   }  
   
-	get(selectors) {
+	get(...selectors) {
 	  if( this.#status != 'ready' ) 
 	    throw 'Factory is not yet loaded!';
 	    
-		const selectorObj = new Selectors(this.#categories, arguments);
+		const selectorObj = new Selectors(this.#categories, selectors);
 		const cached = this.#modCache.get(selectorObj.cacheKey);
 
 		if( cached != undefined ) return cached.data;
@@ -249,8 +249,8 @@ class Factory {
 			throw e;		
 		}
 	} 
-	getAll(selectors) {
-		const selectorObj = new Selectors(this.#categories, arguments);
+	getAll(...selectors) {
+		const selectorObj = new Selectors(this.#categories, selectors);
 		const cached = this.#setCache.get(selectorObj.cacheKey);
 
 		if( cached != undefined ) return cached.data;

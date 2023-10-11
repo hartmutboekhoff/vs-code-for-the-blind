@@ -1,5 +1,6 @@
 const vscode = require('vscode');
 const fs = require('fs');
+const GenericCustomEditorProvider = require('./GenericCustomEditorProvider');
 
 const RootDir = __dirname + '\\..';
 
@@ -22,17 +23,27 @@ class ModuleWrapper {
 
     return new Proxy(loaded? moduleOrError : {}, this);
   }
-	get(target,prop,reciever) {
-		if( prop.startsWith('$') && (prop in this || prop.slice(1) in this) ) {
-			const value = this[prop.slice(1)] ?? this[prop];
-			return value instanceof Function
-				? (...args)=>value.apply(this,args)
-				: value;
-		}
-		const value = target[prop];
-		return value instanceof Function
-						? (...args)=>value.apply(target,args)
-						: value;
+	get(target,property,receiver) {
+	  const fromWrapper = prop=>{
+	    const value = this[prop];
+	    return value instanceof Function
+              ? (...args)=>value.apply(this,args)
+              : value;
+	  }
+	  const fromTarget = prop=>{
+	    const value = target[prop];
+	    return value instanceof Function
+	            ? (...args)=>value.apply(target,args)
+	            : value;
+	  }
+	  
+	  if( property.startsWith('$') ) {
+	    if( property.slice(1) in this )
+	      return fromWrapper(property.slice(1));
+	    if( property in this )
+	      return fromWrapper(property);
+	  }
+	  return fromTarget(property);
 	}
 
   get name() { return this.#name; }
@@ -139,7 +150,11 @@ async function loadModule(path, name, relPath='') {
 			return module;
 
 		module = await require(filepath);
-		return ModuleCache[filepath] = ModuleWrapper(name, path, relPath, true, module);
+		console.log('original-module:',module);
+		const wrapped = new ModuleWrapper(name, path, relPath, true, module);
+		console.log('wrapped-module:',module);
+		ModuleCache[filepath] = wrapped;
+		return wrapped;
 	}
 	catch(e) {
 		console.error(e);
@@ -154,6 +169,34 @@ function verifyContribution(context, type, key) {
   }[type];
   
   return context.extension.packageJSON.contributes[type]?.find?.(cmp) != undefined;
+}
+function getClassObject(module) {
+  function isClass(c) {
+    return typeof c == 'function' && /^\s*class\s+/.test(c.toString());
+  }
+  
+	if( isClass(module) )
+	  return { info: 'module', classObject: module };
+	else if( isClass(module.default) )
+	  return { info: 'module.default', classObject: module.default };
+	else if( isClass( module[module.$plainName]) )
+	  return { info: `module["${module.$plainName}"]`, classObject: module[module.$plainName] };
+	else
+	  return undefined;
+}
+function getFunction(module) {
+  function isFunction(f) {
+    return typeof f == 'function';
+  }
+console.log('getfunction module',module);
+	if( isFunction(module) )
+	  return { info: 'module', function: module };
+	else if( isFunction(module.default) )
+	  return { info: 'module.default', function: module.default };
+	else if( isFunction( module[module.$plainName]) )
+	  return { info: `module["${module.$plainName}"]`, function: module[module.$plainName] };
+	else
+	  return undefined;
 }
 
 async function loadModules(relativepath, extensions, recursive) {
@@ -180,6 +223,7 @@ async function loadModules(relativepath, extensions, recursive) {
 async function loadCommands(context,rootDir,rootNS) {
   const commandModules = await loadModules(rootDir,'*.js',true);
 
+console.log('loading-errors',commandModules.errors);
   commandModules.loaded.forEach(m=>{
     const key = m.$getKey(rootNS);
 
@@ -188,72 +232,39 @@ async function loadCommands(context,rootDir,rootNS) {
       return;
     }
 
-    let f, msg;
-    if( typeof m == 'function' ) {
-      f = m;
-      msg = 'module';
-    }
-    else if( typeof m.default == 'function' ) {
-      f = m.default;
-      msg = 'module.default';
-    }
-    else if( typeof me[m.$plainName] == 'function' ) {
-      f = m[m.$plainName];
-      msg = `module["${m.$plainName}"]`;
-    }
-    else {
+    const func = getFunction(module);
+    if( func == undefined ) {
       console.error(`Could not find function for command "${key}" in module "${m.$relativePath}".`);
+      console.log(module);
       return;
     }
 
-	  context.subscriptions.push(vscode.commands.registerCommand(key, f));
-    console.log(`Registered command "${key}" from ${msg}`);
+	  context.subscriptions.push(vscode.commands.registerCommand(key, func.function));
+    console.log(`Registered command "${key}" from ${func.info}`);
   });
 }
 
 async function loadCustomEditors(context, rootDir, rootNS) {
-  function isClass(c) {
-    return typeof c == 'function' && /^\s*class\s+/.test(c.toString());
-  }
 
   const editorModules = await loadModules(rootDir,'*.js',false);
   editorModules.loaded.forEach(m=>{
-    let key = m.getKey(rootNS);
-    if( key.endsWith('Provider') )
-      key = key.slice(0,-8);
+    let key = m.$getKey(rootNS);
 
     if( !verifyContribution(context, 'customEditors', key) ) {
       console.warn(`Module "${m.$relativePath}" does not match a registered custom-editor. Expected key: "${key}"`);
       return;
     }
 
-		let provider, msg;
-		if( isClass(m) ) {
-		  msg = 'module';
-		  const cls = m;
-		  provider = new cls(context);
-		} 
-		else if( isClass(m.default) ) {
-		  msg = 'module.default';
-		  const cls = m.default;
-		  provider = new cls(context);
-		}
-		else if( isClass( m[m.$plainName]) ) {
-		  msg = `module["${m.$plainName}"]`;
-		  const cls = m[m.$plainName];
-		  provider = new cls(context);
-		}
-		else if( typeof m.getProvider == 'function' ) {
-		  msg = 'module.getProvider()';
-		  provider = m.getProvider(context);
-		}
-		else {
+		const cls = getClassObject(m);
+		if( cls == undefined ) {
       console.error(`Could not find entry-point for custom-editor "${key}" in module "${m.$relativePath}".`);
 		  return;
+		  
 		}
 
+    const provider = new GenericCustomEditorProvider(context, cls.classObject);
     context.subscriptions.push(vscode.window.registerCustomEditorProvider(key, provider));
-    console.log(`Registered custom-editor "${key}" from ${msg}`);
+    console.log(`Registered custom-editor "${key}" from ${cls.info}`);
   });
 }
 
