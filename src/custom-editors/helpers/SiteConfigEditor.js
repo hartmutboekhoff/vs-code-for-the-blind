@@ -1,6 +1,7 @@
 const vscode = require('vscode');
-const CustomEditorBase = require('../CustomEditorBase');
-const { HtmlFrame, Element, PlainText } = require('../views/HtmlFrame');
+const CustomEditorBase = require('../../CustomEditorBase');
+const { HtmlFrame, Element, PlainText } = require('../../views/HtmlFrame');
+
 
 const factoryOptions = {
   name: 'MenuEditorViews',

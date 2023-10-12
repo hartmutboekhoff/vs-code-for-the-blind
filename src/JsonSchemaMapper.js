@@ -119,7 +119,7 @@ class JsonSchemaPath {
   }
 }
 
-class Match {
+class SchemaObjectMatch {
   //#schema; #data; 
   //#schemaPath; #jsonPath;
   
@@ -132,7 +132,7 @@ class Match {
   }
 }
 
-class JsonSchemaMatcher {
+class JsonSchemaObjectMapper {
   #schema; #data;
   #matches = [];
   #validators = {
@@ -353,7 +353,7 @@ class JsonSchemaMatcher {
     this.#schema = schemaObject;
     this.#data = dataObject;
     
-    this.#startMatching();
+    this.#startMapping();
   }
   
   #resolveSubSchema(schema) {
@@ -372,7 +372,7 @@ class JsonSchemaMatcher {
   }
   #addMatch(schema, json, schemaPath, jsonPath, valid) {
     if( MATCH_NON_OBJECTS || typeof json == 'object' ) // arrays are also objects
-      this.#matches.push(new Match(this.#resolveSubSchema(schema), json, schemaPath, jsonPath, valid));
+      this.#matches.push(new SchemaObjectMatch(this.#resolveSubSchema(schema), json, schemaPath, jsonPath, valid));
   }
   #validate(schema, json, schemaPath, jsonPath) {
     //console.log(...arguments);
@@ -399,21 +399,23 @@ class JsonSchemaMatcher {
       })
       .reduce((acc,v)=>acc||v, false);
   }  
-  #startMatching() {
+  #startMapping() {
     const schemaPath = new JsonSchemaPath();
     const valid = this.#validate(this.#schema, this.#data, schemaPath.clone(), '');
     this.#addMatch(this.#schema, this.#data, schemaPath, '', valid)
   }
   
-  get matches() {
+  get mapped() {
     return this.#matches;
   }
-  findAllMatches(search) {
+  findAll(search) {
     switch( typeof search ) {
       case 'object':
         return this.#matches.filter(m=>m.data === search);
       case 'string':
         return this.#matches.filter(m=>m.jsonPath === search);
+      case 'function':
+      	return this.#matches.filter(search);
       default:
         return undefined; 
     }
@@ -421,7 +423,7 @@ class JsonSchemaMatcher {
 }
 
 try {
-module.exports = JsonSchemaMatcher;
+	module.exports = JsonSchemaObjectMapper;
 }
 catch(e) {
   // ignore, this is only for dev-testing

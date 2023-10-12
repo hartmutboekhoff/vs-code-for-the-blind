@@ -1,0 +1,24 @@
+{
+	"factories": [
+		{
+			"name": "test1",
+			"categories": [
+				{ "name": "c" },
+				{ "name": "d" }
+			],
+			"moduleDirectories": [
+				"./views"
+			]
+		},
+		{
+			"name": "second_factory",
+			"categories": [
+				{ "name": "a"},
+				{ "name": "b"}
+			],
+			"moduleDirectories": [
+				"./views"
+			]
+		}
+	]
+}

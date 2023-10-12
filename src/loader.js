@@ -2,7 +2,7 @@ const vscode = require('vscode');
 const fs = require('fs');
 const GenericCustomEditorProvider = require('./GenericCustomEditorProvider');
 
-const RootDir = __dirname + '\\..';
+const RootDir = __dirname;
 
 const ModuleCache = {};
 
@@ -136,8 +136,25 @@ function collectFiles(basepath, pattern, recursive) {
 } 
 
 async function loadRessourceFile(relativepath, encoding='utf8') {
-  const path = buildPath(RootDir,relativepath);
-  return await fs.readFile(path, {encoding});
+	return new Promise((resolve,reject)=>{
+  	const path = buildPath(RootDir,relativepath);
+  	fs.readFile(path, {encoding},(error,data)=>{
+  		if( error != undefined ) reject(error);
+  		resolve(data);
+  	} );
+		
+	});
+}
+async function loadJsonData(relativepath) {
+	const text = await loadRessourceFile(relativepath);
+	if( text == undefined || text.trim() == '' ) 
+		return {};
+	try {
+		return JSON.parse(text);
+	}
+	catch {
+		throw new Error('Could not get json-ata. Content is not valid json');
+	}
 }
 
 async function loadModule(path, name, relPath='') {
@@ -270,4 +287,5 @@ module.exports = {
   loadCommands,
   loadCustomEditors,
   loadRessourceFile,
+	loadJsonData,
 };

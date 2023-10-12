@@ -1,4 +1,4 @@
-const {loadModules} = require('./loader.js');
+const {loadModules, loadJsonData} = require('./loader');
 
 function compareMatch(a,b) {
 	for( let i = 0 ; i < a.match.length ; i++ ) {
@@ -101,8 +101,81 @@ class Selectors {
   }     
 }
 
+/*
+class AsyncStatus {
+	#obj; 
+	#promise; #status;
+	#waitpromise; #waitresolve; #waitreject;
+	
+	constructor(obj) {
+		this.#obj = obj;
+	}
+	get status() {
+		if( this.#status != undefined ) return this.#status;
+		if( this.#promise == undefined ) return 'new';
+
+		const temp = {};
+		return Promise.race([this.#promise,Promise.resolve(temp)])
+			.then(r=>r===temp?'pending':this.#status='fullfilled')
+			.catch(r=>this.#status='rejected');
+	}
+	get #wait() {
+		return this.#waitpromise ??= new Promise((resolve,reject)=>{
+			this.#waitresolve = resolve;
+			this.#waitreject = reject;
+		});
+	}
+	get promise() {
+		return this.#promise;
+	}
+	set promise(value) {
+		if( this.#promise == undefined ) {
+			this.#promise = value;
+			this.#promise.then(()=>this.#waitresolve())
+			this.#promise.catch(e=>this.#waitreject(e));
+		}
+	}
+
+	resolve() {
+		if( this.promise == undefined )
+			this.promise = Promise.resolve();
+	}
+	reject(reason) {
+		if( this.promise == undefined )
+			this.promise = Promise.reject(reason);
+	}
+	onFinish(callback) {
+		if( this.promise != undefined ) {
+			this.promise.then(()=>callback(this.#obj));
+			this.promise.catch(e=>callback(this.#obj,e));
+		}
+		else {
+			this.#wait.then(()=>callback(this.#obj));
+			this.#wait.catch(e=>callback(this.#obj,e));
+		}
+	}
+	onSuccess(callback) {
+		if( this.promise != undefined ) {
+			this.promise.then(()=>callback(this.#obj));
+		}
+		else {
+			this.#wait.then(()=>callback(this.#obj));
+		}
+	}
+	onError(callback) {
+		if( this.promise != undefined ) {
+			this.promise.catch(e=>callback(this.#obj,e));
+		}
+		else {
+			this.#wait.catch(e=>callback(this.#obj,e));
+		}
+	}
+}
+*/
+
 class Factory {
   #status = 'new';
+  
   #modules = [];
   #errors = [];
 	#categories;
@@ -121,13 +194,14 @@ class Factory {
 	  const loaded = await Promise.allSettled(this.directories.map(d=>loadModules(d,'*.js',false)))
 	    .then(results=>{
 	      return results.reduce((acc,r)=>{
-	        if( r.status=='fullfiled' ) {
+	        if( r.status=='fulfilled' ) {
 	          acc.modules.push(...r.value.loaded);
 	          acc.errors.push(...r.value.errors);
 	        }
 	        else {
-	          acc.errors.push(r.reason);
+	          acc.errors.push(r);
 	        }
+	        return acc;
 	      },{errors:[],modules:[]});
 	    });
     this.#modules = Array.from(new Set(loaded.modules));
@@ -262,4 +336,18 @@ class Factory {
 	
 }
 
-module.exports = Factory;
+class FactoryLoader {
+	#config; #factories;
+	
+	constructor(configPath) {
+		this.#initialize(configPath ?? '../config/factory-config.json');
+	}
+	async #initialize(configPath) {
+		this.#config = await loadJsonData(configPath);
+		this.#factories = this.#config.factories
+			.map(({name,moduleDirectories,categories})=>new Factory(name,moduleDirectories,categories))
+			.reduce((acc,f)=>(acc[f.name]=f, acc), this);
+	}
+}
+
+module.exports = new FactoryLoader();
