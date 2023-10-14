@@ -3,27 +3,6 @@ const CustomEditorBase = require('../../CustomEditorBase');
 const { HtmlFrame, Element, PlainText } = require('../../views/HtmlFrame');
 
 
-const factoryOptions = {
-  name: 'MenuEditorViews',
-  directories: ['/views/menu-editor'],
-  categories: [
-    {
-      name: 'view-type',
-      // priority: 0,
-      // required: true,
-    },    
-    {
-      name: 'schema-path',
-      // priority: 0,
-      // required: true,
-    },    
-    {
-      name: 'data-type',
-      // priority: 0,
-      // required: true,
-    },
-  ],
-}
 
 class MenuEditor extends CustomEditorBase {
 

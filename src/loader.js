@@ -37,13 +37,24 @@ class ModuleWrapper {
 	            : value;
 	  }
 	  
-	  if( property.startsWith('$') ) {
-	    if( property.slice(1) in this )
-	      return fromWrapper(property.slice(1));
-	    if( property in this )
-	      return fromWrapper(property);
-	  }
-	  return fromTarget(property);
+	  if( !property.startsWith('$') )
+	    return fromTarget(property);
+    else if( property.slice(1) in this )
+      return fromWrapper(property.slice(1));
+    else if( property in this )
+      return fromWrapper(property);
+    else
+      return fromTarget(property);
+	}
+	set(target,property,value) {
+	  if( !property.startsWith('$') )
+	    target[property] = value;
+	  else if( property.slice(1) in this )
+	    this[property.slice(1)] = value;
+	  else if( property in this )
+	    this[property] = value;
+	  else
+      target[property] = value;
 	}
 
   get name() { return this.#name; }

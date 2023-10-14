@@ -11,10 +11,16 @@
 			]
 		},
 		{
-			"name": "second_factory",
+			"name": "MenuEditorViews",
 			"categories": [
-				{ "name": "a"},
-				{ "name": "b"}
+				{ "name": "schemaPath" },
+				{ "name": "jsonPath" },
+				{ "name": "dataType" },
+			  { "name": "EditorType", 
+			    "required": true, 
+			    "default":"MenuEditor" ,
+			    "priority": 100
+			  }
 			],
 			"moduleDirectories": [
 				"./views"
