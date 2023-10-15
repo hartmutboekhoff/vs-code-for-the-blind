@@ -70,52 +70,40 @@ class JsonSchemaPath {
   constructor(copy) {
     this.paths = copy==undefined? ['#'] : [...copy.paths];
   }
-  
   clone() {
     return new JsonSchemaPath(this);
   }
   
   addSubschema(ref) {
-    if( !this.paths.includes(ref) )
-      this.paths.push(ref);
-    return this;
+    ref = ref.replaceAll('/','.');
+    if( this.paths.includes(ref) )
+      return this;
+    const c = this.clone();
+    c.paths.push(ref);
+    return c;
   }
-  appendIndex(n) {
-    this.paths = this.paths.map(p=>`${p}[${n}]`);
-    return this;
+
+  append(...args) {
+    const appendStr = args.map(a=>{
+        return Number.isInteger(a)
+                ? `[${a}]`
+                : typeof a == 'object' && a.constructor.name == 'RegExp'
+                ? `["${a.source.replaceAll('\\','\\\\').replaceAll('"','\\"')}"]`
+                : isValidIdentifier(a)
+                ? `.${a}`
+                : `["${a.replaceAll('\\','\\\\').replaceAll('"','\\"')}"]`;
+      }).join('');
+
+    const c = this.clone();
+    for( let i = 0 ; i < c.paths.length ; i++ )
+      c.paths[i] += appendStr;
+    return c;
   }
-  appendProperty(k) {
-    if( isValidIdentifier(k) )
-      this.paths = this.paths.map(p=>`${p}/${k}`);
-    else
-      this.paths = this.paths.map(p=>`${p}["${k.replace('\\','\\\\').replace('"','\\"')}"]`);
-    return this;
-  }
-  appendPatternProperty(rx) {
-    if( typeof rx == 'object' && rx.constructor.name == 'RegExp' )
-      this.paths = this.paths.map(p=>`${p}[/${rx.source}/]`);
-    else
-      this.paths = this.paths.map(p=>`${p}[/${rx}/]`);
-    return this;
-  }
-  appendAnyOf(n) {
-    this.paths = this.paths.map(p=>`${p}@anyOf[${n}]`);
-    return this;
-  }
-  appendAllOf(n) {
-    this.paths = this.paths.map(p=>`${p}@allOf[${n}]`);
-    return this;
-  }
-  appendOneOf(n) {
-    this.paths = this.paths.map(p=>`${p}@oneOf[${n}]`);
-    return this;
-  }
-  appendGenericAccessor() {
-    this.paths = this.paths.map(p=>`${p}[*]`);
-    return this;
-  }
-  appendAdditionalProperty() {
-    return this.appendGenericAccessor();
+  appendUnmatched() {
+    const c = this.clone();
+    for( let i = 0 ; i < c.paths.length ; i++ )
+      c.paths[i] += '[?]';
+    return c;
   }
 }
 
@@ -128,7 +116,13 @@ class SchemaObjectMatch {
     this.data = data;
     this.schemaPath = schemaPath;
     this.jsonPath = jsonPath;
-    this.valid = valid;
+    this.status = valid == true
+                    ? 'valid' 
+                    : valid == false
+                    ? 'failed'
+                    : valid == undefined
+                    ? 'unmatched'
+                    : valid;
   }
 }
 
@@ -167,115 +161,116 @@ class JsonSchemaObjectMapper {
       'maximum': (data,limit)=>data<=limit,
       'exclusiveMaximum': (data,limit)=>data<limit,
     },
-    'object': {
-      '@name': 'object',
-      'type': data=>typeof data == 'object',
-      'properties': (data, properties, schema, schemaPath, jsonPath)=>{
-        let result = true;
-        for( const p in properties ) {
-          if( p in data ) {
-            const schemaPath2 = schemaPath.clone().appendProperty(p);
-            const jsonPath2 = buildJsonPath(jsonPath, p);
-            const valid = this.#validate(properties[p], data[p], schemaPath2, jsonPath2);
-            this.#addMatch(properties[p], data[p], schemaPath2, jsonPath2, valid);
-            result &&= valid;
-          }
-        }
-        return result;
-      },
-      'patternProperties': (data, properties, schema, schemaPath,  jsonPath)=>{
-        let result = true;
-        for( const p in properties ) {
-          const subSchema = properties[p];
-          const rx = new RegExp(p);
-          const subSchemaPath = schemaPath.clone().appendPatternProperty(rx);
-          for( const k in data ) {
-            if( rx.test(k) ) {
-              const jsonPath2 = buildJsonPath(jsonPath, k);
-              const valid = this.#validate(subSchema, data[k], subSchemaPath, jsonPath2);
-              this.#addMatch(subSchema, data[k], subSchemaPath, jsonPath2, valid);
+    'object': [ // validators are grouped to provide prioritized validation
+      { // prio 0
+        '@name': 'object (prio 0)',
+        'type': data=>typeof data == 'object',
+        'properties': (data, properties, schema, schemaPath, jsonPath, unmatchedProperties)=>{
+          let result = true;
+          for( const p in properties ) {
+            if( p in data ) {
+              const subSchemaPath = schemaPath.append('properties', p);
+              const jsonPath2 = buildJsonPath(jsonPath, p);
+              const valid = this.#validate(properties[p], data[p], subSchemaPath, jsonPath2);
+              this.#addMatch(properties[p], data[p], subSchemaPath, jsonPath2, valid);
               result &&= valid;
+              unmatchedProperties.delete(p);
             }
-          } 
-        }
-        return result;
+          }
+          return result;
+        },
+        'patternProperties': (data, properties, schema, schemaPath,  jsonPath, unmatchedProperties)=>{
+          let result = true;
+          for( const p in properties ) {
+            const subSchema = properties[p];
+            const rx = new RegExp(p);
+            const subSchemaPath = schemaPath.append('patternProperties', rx);
+            for( const k in data ) {
+              if( rx.test(k) ) {
+                const jsonPath2 = buildJsonPath(jsonPath, k);
+                const valid = this.#validate(subSchema, data[k], subSchemaPath, jsonPath2);
+                this.#addMatch(subSchema, data[k], subSchemaPath, jsonPath2, valid);
+                result &&= valid;
+                unmatchedProperties.delete(k);
+              }
+            } 
+          }
+          return result;
+        },
+        'required': (data,required)=>required.reduce((acc,r)=>acc&&r in data,true),
+        'propertyNames': (data,{pattern})=>{
+          const rx = new RegExp(pattern);
+          return Object.keys(data).map(k=>rx.test(k)).reduce((acc,t)=>acc&&=t,true);
+        },
+        'minProperties': (data,limit)=>Object.keys(data).length>=limit,
+        'maxProperties': (data,limit)=>Object.keys(data).length<=limit,
+        'definitions': ()=>true,
       },
-      'required': (data,required)=>required.reduce((acc,r)=>acc&&r in data,true),
-      'additionalProperties': (data, additionalProperties, schema, schemaPath, jsonPath)=>{
-        let additionals = Object.keys(data);
-
-        if( schema.properties != undefined )
-          additionals = additionals.filter(a=>!(a in schema.properties));
-
-        if( additionals.length == 0 ) return true;
-
-        if( schema.patternProeprties != undefined ) {
-          const rxs = Object.keys(schema.patternProeprties).map(k=>new RegExp(k));
-          additionals = additionals.filter(a=>!rxs.reduce((acc,rx)=>acc||rx.test(a)));
-        }
-        
-        if( additionals.length == 0 ) return true;
-        if( additionalProperties == false ) return false;
-        
-        const schemaPath2 = schemaPath.clone().appendAdditionalProperty();
-        let aggValid = true;
-        for( const a of additionals ) {
-          const jsonPath2 = buildJsonPath(jsonPath, a);
-          const valid = this.#validate(additionalProperties, data[a], schemaPath2, jsonPath2);
-          this.#addMatch(additionalProperties, data[a], schemaPath2, jsonPath2, valid);
-          aggValid &&= valid;
-        }
-        return aggValid;
-      },
-      'unevaluatedProperties': (data,allow,schema)=>IMPLEMENTATION_MISSING(true),
-      'propertyNames': (data,{pattern})=>{
-        const rx = new RegExp(pattern);
-        return Object.keys(data).map(k=>rx.test(k)).reduce((acc,t)=>acc&&=t,true);
-      },
-      'minProperties': (data,limit)=>Object.keys(data).length>=limit,
-      'maxProperties': (data,limit)=>Object.keys(data).length<=limit,
-      'definitions': ()=>true,
-    },
+      { // prio 1
+        '@name': 'object (prio 1)',
+        'additionalProperties': (data, additionalProperties, schema, schemaPath, jsonPath, unmatchedProperties)=>{
+          if( additionalProperties == true || unmatchedProperties.size == 0 ) return true; // works because this validator has prio 2
+          if( additionalProperties == false ) return false;
+          
+          const subSchemaPath = schemaPath.append('additionalProperties');
+          let aggValid = true;
+          const additionals = [...unmatchedProperties];
+          for( const a of additionals ) {
+            const jsonPath2 = buildJsonPath(jsonPath, a);
+            const valid = this.#validate(additionalProperties, data[a], subSchemaPath, jsonPath2);
+            this.#addMatch(additionalProperties, data[a], subSchemaPath, jsonPath2, valid);
+            if( valid ) 
+              unmatchedProperties.delete(a);
+            aggValid &&= valid;
+          }
+          return aggValid;
+        },
+        'unevaluatedProperties': (data,allow,schema)=>IMPLEMENTATION_MISSING(true),
+      }
+    ],
     'array': {
       '@name': 'array',
       'type': data=>Array.isArray(data),
-      '__items': (data, itemSchema, skip, schema, schemaPath, jsonPath)=>{
+      '__items': (data, itemSchema, skip, schema, schemaPath, jsonPath, unmatchedProperties)=>{
         skip ??= 0;
         if( data.length <= skip ) return true;
         if( itemSchema == false ) return false;
-        const itemSchemaPath = schemaPath.clone().appendGenericAccessor();
+        const subSchemaPath = schemaPath.append('items');
         let result = true;
         for( let i = skip ; i < data.length ; i++ ) {
           const jsonPath2 = buildJsonPath(jsonPath, i);
-          const valid = this.#validate(itemSchema, data[i], itemSchemaPath, jsonPath2);
-          this.#addMatch(itemSchema, data[i], itemSchemaPath, jsonPath2, valid);
+          const valid = this.#validate(itemSchema, data[i], subSchemaPath, jsonPath2);
+          this.#addMatch(itemSchema, data[i], subSchemaPath, jsonPath2, valid);
+          unmatchedProperties.delete(`${i}`);
           result &&= valid;
         }
         return result;
       },
-      'items': (data, itemSchema, schema, schemaPath, jsonPath)=>{
+      'items': (data, itemSchema, schema, schemaPath, jsonPath, unmatchedProperties)=>{
         if( schema.prefixItems != undefined ) return true; // validation is performed by prefixSchema validator
-        return this.#validators.array.__items(data, itemSchema, 0, schema, schemaPath, jsonPath);
+        return this.#validators.array.__items(data, itemSchema, 0, schema, schemaPath, jsonPath, unmatchedProperties);
       },
-      'prefixItems': (data, prefixItems, schema, schemaPath, jsonPath)=>{
+      'prefixItems': (data, prefixItems, schema, schemaPath, jsonPath, unmatchedProperties)=>{
         let aggValid = true;
         for( let i = 0 ; i < prefixItems.length ; i++ ) {
-          const schemaPath2 = schemaPath.clone().appendIndex(i);
+          const subSchemaPath = schemaPath.append('prefixItems', i);
           const jsonPath2 = buildJsonPath(jsonPath, i);
-          const valid = this.#validate(prefixItems[i], data[i], schemaPath2, jsonPath2);
-          this.#addMatch(prefixItems[i], data[i], schemaPath2, jsonPath2, valid);
+          const valid = this.#validate(prefixItems[i], data[i], subSchemaPath, jsonPath2);
+          this.#addMatch(prefixItems[i], data[i], subSchemaPath, jsonPath2, valid);
+          unmatchedProperties.delete(`${i}`);
           aggValid &&= valid;
         }
-        return this.#validators.array.__items(data, schema.items, prefixItems.length, schema, schemaPath, jsonPath) && aggValid;
+        return this.#validators.array.__items(data, schema.items, prefixItems.length, schema, schemaPath, jsonPath, unmatchedProperties) && aggValid;
       },
       'contains': (data,contains,schema,schemaPath,jsonPath)=>{
         const min = schema.minContains ?? 1;
         const max = schema.maxContains ?? Infinity;
-        const schemaPath2 = schemaPath.clone().appendGenericAccessor();
+        const subSchemaPath = schemaPath.append('contains');
         let count = 0;
         for( let i = 0 ; i < data.length ; i++ ) {
           const jsonPath2 = buildJsonPath(jsonPath, i);
-          if( this.#validate(contains, data[i], schemaPath2, jsonPath) ) {
+          if( this.#validate(contains, data[i], subSchemaPath, jsonPath) ) {
+            unmatchedProperties.delete(`${i}`);
             if( ++count >= min && max == Infinity ) return true;
             if( count > max ) return false;
           }
@@ -357,6 +352,7 @@ class JsonSchemaObjectMapper {
   }
   
   #resolveSubSchema(schema) {
+    if( schema == undefined ) return undefined;
     const path = schema['$ref'];
     if( path == undefined )
       return schema;
@@ -374,10 +370,29 @@ class JsonSchemaObjectMapper {
     if( MATCH_NON_OBJECTS || typeof json == 'object' ) // arrays are also objects
       this.#matches.push(new SchemaObjectMatch(this.#resolveSubSchema(schema), json, schemaPath, jsonPath, valid));
   }
+  #runTypeValidators(typeValidators, schema, json, schemaPath, jsonPath, unmatchedProperties) {
+    const definedValidators = [];
+    if( !Array.isArray(typeValidators) )
+      typeValidators = [typeValidators];
+    else
+      typeValidators.forEach(tv=>definedValidators.push(...Object.keys(tv)));
+
+    let valid = true;
+    for( const tv of typeValidators ) {
+      for( const k in schema ) {
+        const validator = tv[k] ?? (definedValidators.includes(k) || this.#validatorFallbacks[k]);
+        if( typeof validator == 'function' )
+          valid &&= validator(json, schema[k], schema, schemaPath, jsonPath, unmatchedProperties)
+        else if( validator != true )
+          NOT_SUPPORTED(`"${k}"`,schemaPath);
+      } 
+    }
+    return valid;   
+  }
   #validate(schema, json, schemaPath, jsonPath) {
     //console.log(...arguments);
     if( schema['$ref'] != undefined ) {
-      schemaPath.addSubschema(schema['$ref']);
+      schemaPath = schemaPath.addSubschema(schema['$ref']);
       schema = this.#resolveSubSchema(schema);
     }
           
@@ -385,19 +400,20 @@ class JsonSchemaObjectMapper {
                              ? schema.type.map(t=>this.#validators[t])
                              : [this.#validators[schema.type]];
 
-    return typeValidators
-      .map(tv=>{
-        let valid = true;
-        for( const k in schema ) {
-          const validator = tv[k] ?? this.#validatorFallbacks[k];
-          if( typeof validator == 'function' )
-            valid = validator(json, schema[k], schema, schemaPath, jsonPath) && valid;
-          else if( validator != true )
-            NOT_SUPPORTED(`"${k}"`,schemaPath);
-        }
-        return valid;
-      })
+    const unmatchedProperties = typeof json != 'object'? new Set() : new Set(Object.keys(json));
+
+    const valid = typeValidators
+      .map(tv=>this.#runTypeValidators(tv, schema, json, schemaPath, jsonPath, unmatchedProperties))
       .reduce((acc,v)=>acc||v, false);
+      
+    if( unmatchedProperties.size > 0 ) {
+      const subSchemaPath = schemaPath.appendUnmatched();
+      for( const u of unmatchedProperties ) {
+        this.#addMatch(undefined, json[u], subSchemaPath, buildJsonPath(jsonPath,u), 'unmatched');
+      }
+      //return valid && unmatchedProperties.size == 0;
+    }
+    return valid;
   }  
   #startMapping() {
     const schemaPath = new JsonSchemaPath();
@@ -426,5 +442,7 @@ try {
 	module.exports = JsonSchemaObjectMapper;
 }
 catch(e) {
-  // ignore, this is only for dev-testing
+  console.log('JsonSchemaObjectMapper is loaded');
+  // ignore, this is only happens while testing inside browser
 }
+
