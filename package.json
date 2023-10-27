@@ -17,6 +17,10 @@
       {
         "command": "SparkSiteConfig.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "SparkSiteConfig.FactoryDiagnostics",
+        "title": "Factory Diagnostics"
       }
     ],
     "customEditors": [

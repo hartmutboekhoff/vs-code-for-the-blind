@@ -3,18 +3,17 @@ class Category {
     this.name = name;
     this.priority = prio;
     this.required = required || false;
-    this.defaultValue = 
+    this.defaultValue = defaultValue;
   }
 }
 class Categories extends Array {
   constructor(categories) {
-    let prio = 0;
-    for( let i = categories.length ; --i >= 0 ; ) {
+    super();
+    for( let i = 0 ; i < categories.length ; i++ ) {
       const c = categories[i];
-      prio = c.priority ?? prio + 1;
-      this.unshift(new Category(c.name, prio, c.required, c.default));
+      this.push(new Category(c.name, c.priority ?? -i, c.required, c.default));
     }
-    const byPriority = = [...this].sort((a,b)=>b.priority - a.priority);
+    const byPriority = [...this].sort((a,b)=>b.priority - a.priority);
     byPriority[0].matchIndex = 0;
     for( let i = 1 ; i < byPriority.length ; i++ ) {
       byPriority[i].matchIndex = byPriority[i-1].priority == byPriority[i].priority
@@ -25,7 +24,7 @@ class Categories extends Array {
   
 }
 
-class CategorySelectorMatch {
+class SelectorMatch {
   #value; #matchIndex; #valuePriority;
   
   constructor(index, value, priority) {
@@ -35,7 +34,7 @@ class CategorySelectorMatch {
       this.#valuePriority = 1;
     }
     else if( typeof index == 'object' ) {
-      this.#matchIndex = index.#imatchIdex;
+      this.#matchIndex = index.#matchIndex;
       this.#value = index.#value;
       this.#valuePriority = index.#valuePriority;
     }
@@ -65,54 +64,57 @@ class CategorySelectorMatch {
     return this.#valuePriority;
   }
   
-  merge(otehr) {
-    if( other == undefined ) return this;
-    if( Object.isFrozen(this) ) return (new CategorySelectorMatch(this)).merge(other);
-    
-    it( this.#matchIndex != other.#mathcIndex ) 
+  aggregate(other) {
+    if( this.#matchIndex != other.#matchIndex ) 
       this.#matchIndex = undefined;
 
-    this.#valuePriority = (this.value == true? this.valuePriority : 0) 
-                          + (other.value == true? other.valuePriority : 0);
+    this.#valuePriority = (this.#value == true? this.#valuePriority : 0) 
+                          + (other.#value == true? other.#valuePriority : 0);
 
-    this.#value = this.value == other.value 
-                    ? this.value
-                    : this.value == undefined
-                    ? other.value
-                    : other.value == undefined
-                    ? this.value == true
-                    : this.value || other.value;
+    this.#value = this.#value == other.#value 
+                    ? this.#value
+                    : this.#value == undefined
+                    ? other.#value
+                    : other.#value == undefined
+                    ? this.#value
+                    : this.#value || other.#value;
     
     return this;
   }
+  toAggregate(other) {
+    return (new SelectorMatch(this)).aggregate(other);
+  }
 }
 
-class ModuleSelectorMatch extends Array {
-  #aggregate;
+class ModuleMatch extends Array {
+  #aggregatedValue = new SelectorMatch();
   
-  constructor(module, matches) {
-    //super();
+  constructor(module, selectorMatches) {
+    super();
     this.module = module;
+    this.aggregated = this.#aggregatedValue;
     
-    this.#aggregate = new CategorySelectorMatch();
-    for( m of matches ) {
-      this[m.matchIndex] = this[m.matchIndex]==undefined? new CategorySelectorMatch(m) : this[m.matchIndex].merge(m);
-      this.aggregate.merge(m);
+    for( const m of selectorMatches ) {
+      this.#aggregatedValue.aggregate(m);
+      if( this[m.matchIndex] == undefined )
+        this[m.matchIndex] = new SelectorMatch(m);
+      else
+        this[m.matchIndex].aggregate(m);
     }
   }
   
   get ignored() {
-    return this.##aggregate.ignored;
+    return this.#aggregatedValue.ignored;
   }
   get matched() {
-    return this.##aggregate.matched;
+    return this.#aggregatedValue.matched;
   }
   get failed() {
-    return this.##aggregate.failed;
+    return this.#aggregatedValue.failaggregatedValueed;
   }
 
   static compare(a,b) {
-    if( a.length <> b.length ) throw 'mist';
+    if( a.length != b.length ) throw 'mist';
     for( let i = 0 ; i < a.length ; i++ ) {
       if( a[i].ignored && b[i].ignored ) continue;
       if( a[i].ignored ) return b[i].matched? 1 : -1;
@@ -122,6 +124,7 @@ class ModuleSelectorMatch extends Array {
       if( b[i].failed ) return -1;
       if( a[i].priority != b[i].priority ) return b[i].priority - a[i].priority;
     }
+    return 0;
   }
 }
 
@@ -131,11 +134,14 @@ class ModuleSelectorMatch extends Array {
 *
 */
 class ModuleCategorySelector { 
-  #category; //#valuePriority; 
-  #value; #compare; #required;
+  #category; 
+  #value; #priority; #required;
+  #compare; 
   
-  constructor(category, value, priority) {
-    if( typeof value == 'string' 
+  constructor(category, value) {
+    this.#category = category;
+    if( value == undefined 
+        || typeof value == 'string' 
         || (typeof value == 'object' && value.constructor.name == 'RegExp') ) {
       this.#value = value;
       this.#priority = 0;
@@ -147,9 +153,9 @@ class ModuleCategorySelector {
       this.#required = !!value.required;
     }
     
-    this.MATCH = Object.freeze(new CategorySelectorMatch(category.matchIndex, true, priority));
-    this.NOMATCH = Object.freeze(new CategorySelectorMatch(category.matchIndex, false));
-    this.IGNORED = Object.freeze(mew CategorySelectorMatch(category.matchIndex));
+    this.MATCH = Object.freeze(new SelectorMatch(category.matchIndex, true, this.#priority));
+    this.NOMATCH = Object.freeze(new SelectorMatch(category.matchIndex, false));
+    this.IGNORED = Object.freeze(new SelectorMatch(category.matchIndex));
 
     this.#compare = this.#value == undefined
                       ? this.#compareNull
@@ -157,27 +163,31 @@ class ModuleCategorySelector {
                       ? this.#compareRegExp
                       : this.#comparePrimitive;
   }
+  get category() {return this.#category;}
+  get value() {return this.#value;}
+  get priority() {return this.#priority;}
+  get required() {return this.#required;}
   
   #compareRegExp(selectorValue) {
     return selectorValue == undefined
-            ? (this.#required? NOMATCH : IGNORED)
+            ? (this.#required? this.NOMATCH : this.IGNORED)
             : this.#value.test(selectorValue)
-            ? this.#MATCH
-            : NOMATCH;
+            ? this.MATCH
+            : this.NOMATCH;
   }
   #comparePrimitive(selectorValue) {
     return selectorValue == undefined
-            ? (this.#required? NOMATCH : IGNORED)
+            ? (this.#required? this.NOMATCH : this.IGNORED)
             : this.#value == selectorValue
-            ? this.#MATCH
-            : NOMATCH;
+            ? this.MATCH
+            : this.NOMATCH;
   }
   #compareNull(selectorValue) {
     return selectorValue == undefined
-            ? this.#MATCH 
+            ? this.MATCH 
             : this.#required
-            ? NOMATCH 
-            : IGNORED;
+            ? this.NOMATCH 
+            : this.IGNORED;
   }
 
   /**
@@ -185,7 +195,7 @@ class ModuleCategorySelector {
   *     
   *   @param selectorValue  The value that is to be cpmpared.
   *
-  *   @return A CategorySelectorMatch object
+  *   @return A SelectorMatch object
   */
   match(selectorValue) {
     if( !Array.isArray(selectorValue) )
@@ -204,9 +214,12 @@ class ModuleCategorySelector {
 }
 
 class ModuleSelector extends Array {
+  #module;
+  
   constructor(module, categories, modSelectorSet) {
+    super();
     this.module = module;
-    
+
     categories.forEach((c,ix)=>{
       const catSel = modSelectorSet[c.name];
       this[ix] = new ModuleCategorySelector(c, catSel);
@@ -214,13 +227,23 @@ class ModuleSelector extends Array {
   }
 
   match(searchselector) {
-    return new ModuleSelectorMatch(this.module, this.map((mcs,ix)=>mcs.match(searchselector[ix])));
+    const r = this._match(searchselector);
+    console.log('match',searchselector,this,r);
+    return r;
+  }
+  _match(searchselector) {
+    return new ModuleMatch(
+      this.module, 
+      [...this].map((mcs,ix)=>mcs.match(searchselector[ix])))
+    ;
+  }
+  get _module() {
+    return this.#module;
   }
 }
 class ModuleSelectors extends Array {
   constructor(module, categories) {
-    this.#module = module;
-    this.#categories = categories;
+    super();
     
     for( const ms of module.selectors ?? [] ) {
       this.push(new ModuleSelector(module,categories,ms));
@@ -228,16 +251,18 @@ class ModuleSelectors extends Array {
   }
   
   getMatches(searchselector) {
-    return this.map(modSel=>modSel.match(searchselector)).filter(m=>matched);
+    return [...this]
+      .map(modsel=>modsel.match(searchselector))
+      .filter(match=> match.matched );
   }
 }
-
 
 class SearchSelector extends Array {
   #categories; #cachekey;
   
   constructor(categories, ...selectorValues) {
-    this.#categories = categoires;
+    super();
+    this.#categories = categories;
     if( typeof selectorValues[0] == 'object' && !Array.isArray(selectorValues[0]) )
       // an object with category-name:value tuples
       categories.forEach((c,ix)=>this[c.name] = this[ix] = c.name in selectorValues[0]? selectorValues[0][c.name] : c.defaultValue);
@@ -246,13 +271,23 @@ class SearchSelector extends Array {
   }
 
   get cacheKey() {
+    function escape(s) {
+      return s.toString().replace('\\','\\\\').replace('"','\\"');
+    }
+    function valueToString(v) {
+      return v == undefined
+    		      ? '<NULL>'
+    		      : typeof v == 'string'
+    		      ? `"${escape(v)}"`
+    		      : Array.isArray(v)
+    		      ? '['+v.reduce((acc,s)=>`${acc}"${escape(s)}",`,'')+']'
+    		      : `{"${escape(v.toString())}"}`
+
+    }
     if( this.#cachekey == undefined )
     	this.#cachekey = this.#categories.reduce((acc,c,ix)=>{
-    		let v = this[ix] != undefined
-    		          ? '"'+this[ix].replace('\\','\\\\').replace('"','\\"')+'"'
-    		          : '<NULL>';
-    		return `${acc}[@${c.name}:${v}]`;
-    	});
+    		return `${acc}[@${c.name}:${valueToString(this[ix])}]`;
+    	},'');
   	return this.#cachekey;
   } 
 }
@@ -261,8 +296,8 @@ class SearchSelector extends Array {
 module.exports = {
   Category,  
   Categories, 
-  CategorySelectorMatch,
-  ModuleSelectorMatch,
+  SelectorMatch,
+  ModuleMatch,
   ModuleCategorySelector,
   ModuleSelector,
   ModuleSelectors,

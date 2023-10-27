@@ -8,7 +8,7 @@ class GenericCustomEditorProvider {
 
 	async resolveCustomTextEditor(document, webviewPanel, token) {
     const editor = new this.#editorClass(this.#context, document, webviewPanel, token);
-    editor.initialize();
+    editor.initialize?.();
   }
 }
 

@@ -1,5 +1,7 @@
 const {loadModules, loadJsonData} = require('./loader');
-const {Categories, ModuleSelectors, ModuleSelectorMatch} = require('./selectors');
+const {Categories, ModuleSelectors, ModuleSelectorMatch, SearchSelector} = require('./selectors');
+
+const factoryDiagnostics = {};
 
 class Cache {
 	#cache = {};
@@ -33,98 +35,44 @@ class Cache {
 */
 }
 
-/*
-class AsyncStatus {
-	#obj; 
-	#promise; #status;
-	#waitpromise; #waitresolve; #waitreject;
-	
-	constructor(obj) {
-		this.#obj = obj;
-	}
-	get status() {
-		if( this.#status != undefined ) return this.#status;
-		if( this.#promise == undefined ) return 'new';
-
-		const temp = {};
-		return Promise.race([this.#promise,Promise.resolve(temp)])
-			.then(r=>r===temp?'pending':this.#status='fullfilled')
-			.catch(r=>this.#status='rejected');
-	}
-	get #wait() {
-		return this.#waitpromise ??= new Promise((resolve,reject)=>{
-			this.#waitresolve = resolve;
-			this.#waitreject = reject;
-		});
-	}
-	get promise() {
-		return this.#promise;
-	}
-	set promise(value) {
-		if( this.#promise == undefined ) {
-			this.#promise = value;
-			this.#promise.then(()=>this.#waitresolve())
-			this.#promise.catch(e=>this.#waitreject(e));
-		}
-	}
-
-	resolve() {
-		if( this.promise == undefined )
-			this.promise = Promise.resolve();
-	}
-	reject(reason) {
-		if( this.promise == undefined )
-			this.promise = Promise.reject(reason);
-	}
-	onFinish(callback) {
-		if( this.promise != undefined ) {
-			this.promise.then(()=>callback(this.#obj));
-			this.promise.catch(e=>callback(this.#obj,e));
-		}
-		else {
-			this.#wait.then(()=>callback(this.#obj));
-			this.#wait.catch(e=>callback(this.#obj,e));
-		}
-	}
-	onSuccess(callback) {
-		if( this.promise != undefined ) {
-			this.promise.then(()=>callback(this.#obj));
-		}
-		else {
-			this.#wait.then(()=>callback(this.#obj));
-		}
-	}
-	onError(callback) {
-		if( this.promise != undefined ) {
-			this.promise.catch(e=>callback(this.#obj,e));
-		}
-		else {
-			this.#wait.catch(e=>callback(this.#obj,e));
-		}
-	}
-}
-*/
-
 class Factory {
   #status = 'new';
   #directories;
   #modules = [];
   #errors = [];
 	#categories;
+	#interface;
 	#modCache = new Cache();
 	#setCache = new Cache();
+	#diagnostics = {
+	  getStatus: ()=>this.#status,
+	  getErrors: ()=>this.#errors,
+    getModuleInfos: ()=>this.#modules.map(m=>({
+        name:m.$plainName,
+        loaded: m.$loaded,
+        path: m.$path,
+        selectors: m.$selectors,
+        error: m.$error,
+      })),
+	  getCategories: ()=>this.#categories,
+	  getModuleCache: ()=>this.#modCache,
+	  getSetCache: ()=>this.#setCache,
+	}
 
-	constructor(name, directories, categories) {
+	constructor(name, directories, categories, interfaceConfig) {
 		this.name = name;
 		this.#directories = ( directories == undefined || directories.length == 0 )? [`./${name}`] : directories;
 
 		this.#categories = new Categories(categories);
+		this.#interface = interfaceConfig;
     this.#loadModules().then(()=>this.#status = 'ready');
+    
+    factoryDiagnostics[this.name] = this.#diagnostics;
 	}
 	
 	async #loadModules() {
 	  this.#status = 'loading modules';
-	  const loaded = await Promise.allSettled(this.directories.map(d=>loadModules(d,'*.js',false)))
+	  const loaded = await Promise.allSettled(this.#directories.map(d=>loadModules(d,'*.js',false)))
 	    .then(results=>{
 	      return results.reduce((acc,r)=>{
 	        if( r.status=='fulfilled' ) {
@@ -138,12 +86,29 @@ class Factory {
 	      },{errors:[],modules:[]});
 	    });
     this.#modules = Array.from(new Set(loaded.modules));
-    this.#modules.forEach(m=>m.$selectors = new ModuleSelectors(m, this.#categories));
+    this.#modules.forEach(m=>{
+      m.$selectors = new ModuleSelectors(m, this.#categories);
+      m.$interface = this.#createModuleInterface(m);
+console.log('interface',m.$interface);
+    });
     this.#errors = loaded.errors;
     console.log(this.#modules.length+' modules were successfully loaded.');
     if( this.#errors.length > 0 )
       console.warn('Some modules could not be loaded:', this.#errors);
 	}
+  #createModuleInterface(module) {
+console.log('createinterface',module,module.view);    
+    if( this.#interface == undefined || this.#interface.length == 0 )
+      return module;
+    if( this.#interface.length == 1 && this.#interface[0].isDefault == true )
+      return module[this.#interface[0].name];
+    return this.#interface.reduce((acc,p)=>{
+      acc[p.name] = module[p.name];
+      if( p.isDefault == true )
+        acc['default'] = module[p.name];
+      return acc;
+    },{});
+  }
 
   #findAllMatches(selectorObj) {
   	const matches = [];
@@ -164,7 +129,7 @@ class Factory {
   	for( let i = 1 ; i < matches.length ; i++ ) {
   		if( ModuleSelectorMatch.compare(matches[0], matches[i]) != 0 )
   			return matches[0].module; // this is the best match
-  		if( matches[0].module != matches[i].modle ){
+  		if( matches[0].module != matches[i].getModle() ){
   			console.log(0,i,matches[0].module, matches[i].module);
   			console.log(matches[0].module === matches[i].module);
   			console.log(matches[0].module == matches[i].module);
@@ -193,11 +158,10 @@ class Factory {
 			if( matchedModule == undefined )
 				console.warn(`Factory.${this.name}: no match found for selectors ${selectorObj.cacheKey}.`);
 			else
-				console.debug(`Factory.${this.name}: match for selectors ${selectorObj.cacheKey} found module "${matchedModule.name}"`);
+				console.debug(`Factory.${this.name}: match for selectors ${selectorObj.cacheKey} found module "${matchedModule.$name}"`);
 				
-			this.#modCache.put(selectorObj.cacheKey, matchedModule);
-
-			return matchedModule;
+			this.#modCache.put(selectorObj.cacheKey, matchedModule?.$interface);
+			return matchedModule?.$interface;
 		}
 		catch(e) {
 			if( e == 'Ambiguous modules' )
@@ -214,7 +178,7 @@ class Factory {
 
 		if( cached != undefined ) return cached.data;
 
-    const matchedSet = this.#findMatchSet(selectorObj);
+    const matchedSet = this.#findMatchSet(selectorObj).map(m=>m.$interface);
     this.#setCache.put(selectorObj.cacheKey, matchedSet);
     return matchedSet;
 	}
@@ -222,17 +186,42 @@ class Factory {
 }
 
 class FactoryLoader {
-	#config; #factories;
+	#config; 
+	#factories;
 	
 	constructor(configPath) {
+	  console.log('Start loading factories.');
 		this.#initialize(configPath ?? '../config/factory-config.json');
 	}
+	
+	$getDiagnosticData=()=>{
+	  const factories = {};
+	  for( const fd in factoryDiagnostics ) {
+	    const diag = factoryDiagnostics[fd];
+	    factories[fd] = {
+	      status: diag.getStatus(),
+    	  errors: diag.getErrors(),
+        modules: diag.getModuleInfos(),
+    	  categories: diag.getCategories(),
+    	  moduleCache: diag.getModuleCache(),
+    	  setCache: diag.getSetCache(),
+	    }
+	  }
+	  
+	  return {
+  	  config: this.#config,
+  	  factories,
+  	};
+	}
+	
 	async #initialize(configPath) {
 		this.#config = await loadJsonData(configPath);
+		console.log('Factories loaded.');
 		this.#factories = this.#config.factories
-			.map(({name,moduleDirectories,categories})=>new Factory(name,moduleDirectories,categories))
-			.reduce((acc,f)=>(acc[f.name]=f, acc), this);
+			.map(cfg=>new Factory(cfg.name, cfg.moduleDirectories, cfg.categories, cfg.interface))
+			.forEach(f=>this[f.name]=f);
 	}
+	
 }
 
 module.exports = new FactoryLoader();

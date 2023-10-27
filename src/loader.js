@@ -27,13 +27,21 @@ class ModuleWrapper {
 	  const fromWrapper = prop=>{
 	    const value = this[prop];
 	    return value instanceof Function
-              ? (...args)=>value.apply(this,args)
+              //? (...args)=>value.apply(this,args)
+	            ? new Proxy(value,{
+	                apply:(func,thisArg,argumentList)=>Reflect.apply(func,this,argumentList),
+	                construct:(func,argumentList)=>Reflect.construct(func,argumentList)
+	            })
               : value;
 	  }
 	  const fromTarget = prop=>{
 	    const value = target[prop];
 	    return value instanceof Function
-	            ? (...args)=>value.apply(target,args)
+	            //? (...args)=>value.apply(target,args)
+	            ? new Proxy(value,{
+	                apply:(func,thisArg,argumentList)=>Reflect.apply(func,target,argumentList),
+	                construct:(func,argumentList)=>Reflect.construct(func,argumentList)
+	            })
 	            : value;
 	  }
 	  
@@ -53,8 +61,11 @@ class ModuleWrapper {
 	    this[property.slice(1)] = value;
 	  else if( property in this )
 	    this[property] = value;
-	  else
+	  else if( property in target )
       target[property] = value;
+    else
+	    this[property] = value;
+    return true;
 	}
 
   get name() { return this.#name; }
@@ -264,7 +275,7 @@ async function loadCommands(context,rootDir,rootNS) {
       return;
     }
 
-	  context.subscriptions.push(vscode.commands.registerCommand(key, func.function));
+	  context.subscriptions.push(vscode.commands.registerCommand(key, ()=>func.function(context)));
     console.log(`Registered command "${key}" from ${func.info}`);
   });
 }
@@ -284,12 +295,12 @@ async function loadCustomEditors(context, rootDir, rootNS) {
 		if( cls == undefined ) {
       console.error(`Could not find entry-point for custom-editor "${key}" in module "${m.$relativePath}".`);
 		  return;
-		  
 		}
 
     const provider = new GenericCustomEditorProvider(context, cls.classObject);
     context.subscriptions.push(vscode.window.registerCustomEditorProvider(key, provider));
     console.log(`Registered custom-editor "${key}" from ${cls.info}`);
+  
   });
 }
 

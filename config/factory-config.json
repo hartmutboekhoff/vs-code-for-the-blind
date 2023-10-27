@@ -1,21 +1,11 @@
 {
 	"factories": [
 		{
-			"name": "test1",
-			"categories": [
-				{ "name": "c" },
-				{ "name": "d" }
-			],
-			"moduleDirectories": [
-				"./views"
-			]
-		},
-		{
 			"name": "MenuEditorViews",
 			"categories": [
-				{ "name": "schemaPath" },
-				{ "name": "jsonPath" },
-				{ "name": "dataType" },
+				{ "name": "SchemaPath" },
+				{ "name": "SchemaType" },
+				{ "name": "DataType" },
 			  { "name": "EditorType", 
 			    "required": true, 
 			    "default":"MenuEditor" ,
@@ -24,6 +14,12 @@
 			],
 			"moduleDirectories": [
 				"./views"
+			],
+			"interface": [
+			  {
+			    "name": "view",
+			    "isDefault": true
+			  }
 			]
 		}
 	]

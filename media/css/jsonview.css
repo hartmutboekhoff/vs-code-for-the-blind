@@ -1,0 +1,86 @@
+body {
+  background-color: #ddd;
+  color: blue;
+  font-size: 1em;
+  width: 100vw;
+  height: 100vh;
+  overflow: scroll;
+}
+h1 {
+  font-size: 2em;
+}
+pre {
+  display:inline-block;
+  border: 1px solid black;
+  border-radius: 4px;
+  padding: .3em .7em;
+  margin: .1em 3em;
+}
+span.typename {
+  color: #660;
+  margin-left: 1em;
+}
+span.array-size {
+  color: #006;
+  margin-left: .2em;
+}
+.error {
+  background-color: #800;
+  color: white;
+  font-weight: bold;
+}
+.warning {
+  background-color: #ff0;
+}
+
+ol, ul {
+  list-style:none;
+  padding-left:0;
+  margin-left: 25px;
+}
+
+li {
+  margin-left: 25px;
+  min-height: 1.5em;
+}
+
+li:has(ol),
+li:has(ul) {
+  cursor: pointer;
+  margin-left: 0;
+}
+li:has(ol):before,
+li:has(ul):before {
+  content: "-";
+  display: inline-block;
+  _border: 1px solid black;
+  _border-radius: 4px;
+  background-color: #ccc;;
+  height: 15px;;
+  width: 15px;
+  margin-right: 5px;
+  text-align:center;
+  line-height: 10px;
+  vertical-align: middle;
+  font-weight: bold;
+}
+li.collapsed:has(ol):before,
+li.collapsed:has(ul):before {
+  content: "+"
+}
+
+li.collapsed>ol,
+li.collapsed>ul {
+  display:none;
+}
+
+
+.hint {
+  color: grey;
+  font-style: italic;
+  margin-left: 2em;
+  display:none;
+}
+li.collapsed > .hint {
+  display:inline;
+}

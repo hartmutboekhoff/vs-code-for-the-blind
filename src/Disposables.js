@@ -2,19 +2,19 @@ class Disposables {
   #disposables = [];
   
   dispose() {
-    let d = this.#disposables.shift();
-    while( d != undefined ) {
-      d.dispose();
+    let d;
+    while( this.#disposables.length > 0 ) {
       d = this.#disposables.shift();
+      if( typeof d?.dispose == 'function' )
+        d.dispose();
     }
   }
-  push(d) {
-    if( d != undefined && typeof d.dispose == 'function' )
-      this.#disposables.push(d);
+  push(...d) {
+    this.#disposables.push(...d);
     return d;
   }
-  add(d) {
-    return this.push(d);
+  add(...d) {
+    return this.push(...d);
   }
 }
 

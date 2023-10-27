@@ -1,6 +1,6 @@
 const vscode = require('vscode');
 const Disposables = require('./Disposables');
-const {camelCase,resolveJsonHierarchy} = require('./utility');
+const {camelCase  ,resolveJsonHierarchy} = require('./utility');
 
 
 class CustomEditorBase {
@@ -12,18 +12,39 @@ class CustomEditorBase {
     this.#document = document;
     this.#panel = webviewPanel;
     this.#token = token;
-    
     this.#panel.webview.options = {
 			enableScripts: true,
-		};    
+		};
+		
+		this.#panel.onDidDispose(()=>this.#onDispose());
+
+    this.addDisposable(
+      vscode.workspace.onDidChangeTextDocument(ev=>{
+  			if( ev.document.uri.toString() === this.#document.uri.toString() )
+  				this.onDocumentChanged(ev);
+		  }),
+  		this.view.onDidReceiveMessage(ev=>{
+  		  return this.onDidReceiveMessage(ev);
+  		})
+		);  
+  }
+  initialize() {
+		this.#renderHtml()
   }
 
   get context() {
     return this.#context;
   }
+  get panel() {
+    return this.#panel;
+  }
+  get view() {
+    return this.#panel.webview;
+  }
   get document() {
     return this.#document;
   }
+  
   get json() {
 		const text = this.#document.getText();
 		if (text.trim().length === 0)
@@ -48,16 +69,6 @@ class CustomEditorBase {
 			throw new Error('Could not serialize object. Content is not valid json');
     }
   }
-  get panel() {
-    return this.#panel;
-  }
-  get view() {
-    return this.#panel.webview;
-  }
-  set disposable(obj) {
-    return this.#disposables.push(obj);
-  }
-  
   replaceJson(path, newValue) {
     const json = this.json;
     const nodes = resolveJsonHierarchy(path,json);
@@ -75,9 +86,20 @@ class CustomEditorBase {
   }
   onDispose() {
   }
+  addDisposable(...objects) {
+    return this.#disposables.push(...objects);
+  }
   
-  async renderHtml() {
-    this.#panel.webview.html = 'html content';
+  async #renderHtml() {
+    try {
+      this.renderHtml();
+    }
+    catch(e) {
+      console.error(e);
+    }
+  }
+  renderHtml() {
+    this.view.html = 'html content goes here';
   }
   async postMessage(type, msg) {
     if( typeof type == 'object' )
@@ -86,31 +108,22 @@ class CustomEditorBase {
       this.#panel.webview.postMessage(Object.assign({},msg,{type}));
   }
   async onDocumentChanged(ev) {
+    this.#renderHtml();
     //this.postMessage({type: 'update', text: this.#document.getText()});
   }
+  async onDidReceiveMessage(ev) {
+	  if( ev.type != undefined ) {
+	    const handlerName = `on${camelCase(ev.type)}Message`;
+	    if( typeof this[handlerName] == 'function' )
+	      return this[handlerName](ev);
+	  }
+	  return this.onMessage(ev);
+    
+  }  
   async onMessage(ev) {
     
   }
   
-  initialize() {
-    this.renderHtml();
-    
-    this.disposable = vscode.workspace.onDidChangeTextDocument(ev=>{
-			if( ev.document.uri.toString() === this.#document.uri.toString() )
-				this.onDocumentChanged(ev);
-		});  
-		  
-		this.#panel.webview.onDidReceiveMessage(ev=>{
-		  if( ev.type != undefined ) {
-		    const handler = `on${camelCase(ev.type)}Message`;
-		    if( typeof this[handler] == 'function' )
-		      return this[handler](ev);
-		  }
-		  return this.onMessage(ev);
-		});		
-
-		this.#panel.onDidDispose(()=>this.#onDispose());
-  }
 } 
 
 module.exports = CustomEditorBase;

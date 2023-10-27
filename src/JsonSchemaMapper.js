@@ -1,3 +1,5 @@
+const {isValidIdentifier, buildJsonPath} = require('./utility');
+
 const DEFAULT_BASE_URI = 'https://schema.funkemedien.de';
 const MATCH_NON_OBJECTS = true;
 const THROW_IMPLEMENTATION_MISSING = true;
@@ -10,19 +12,6 @@ function IMPLEMENTATION_MISSING(result) {
 function NOT_SUPPORTED(feature, context) {
     throw `${feature} is not supported${context==''? '' : ' in '+context}.`;
 } 
-
-function isValidIdentifier(s) {
-  const validIdentifier = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
-  return validIdentifier.test(s);
-}
-function buildJsonPath(base, key) {
-  if( isValidIdentifier(key) )
-    return base==''? key : `${base}.${key}`;
-  else if( Number.isInteger(+key) )
-    return `${base}[${key}]`;
-  else
-    return `${base}["${key.replace('\\','\\\\').replace('"','\\"')}"]`;
-}
 
 /*
 function resolveSchemaPath(path,schema) {
@@ -262,14 +251,14 @@ class JsonSchemaObjectMapper {
         }
         return this.#validators.array.__items(data, schema.items, prefixItems.length, schema, schemaPath, jsonPath, unmatchedProperties) && aggValid;
       },
-      'contains': (data,contains,schema,schemaPath,jsonPath)=>{
+      'contains': (data,contains,schema,schemaPath,jsonPath, unmatchedProperties)=>{
         const min = schema.minContains ?? 1;
         const max = schema.maxContains ?? Infinity;
         const subSchemaPath = schemaPath.append('contains');
         let count = 0;
         for( let i = 0 ; i < data.length ; i++ ) {
           const jsonPath2 = buildJsonPath(jsonPath, i);
-          if( this.#validate(contains, data[i], subSchemaPath, jsonPath) ) {
+          if( this.#validate(contains, data[i], subSchemaPath, jsonPath2) ) {
             unmatchedProperties.delete(`${i}`);
             if( ++count >= min && max == Infinity ) return true;
             if( count > max ) return false;
@@ -433,7 +422,7 @@ class JsonSchemaObjectMapper {
       case 'function':
       	return this.#matches.filter(search);
       default:
-        return undefined; 
+        return []; 
     }
   }
 }
