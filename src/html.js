@@ -14,9 +14,9 @@ class ChildrenList extends Array {
     this.#parent = parent;
   } 
   
-  push(element) { super.push(element); }
-  append(element) { super.push(element); }
-  unshift(element) { super.unshift(element); }
+  push(...elements) { super.push(...elements); }
+  append(...elements) { super.push(...elements); }
+  unshift(...elements) { super.unshift(...elements); }
   insertBefore(element,before) { 
     const index = super.indexOf(before);
     if( index >= 0 ) super.splice(index,0,element);
@@ -72,7 +72,6 @@ class Attributes {
             break;
         }
       }
-      result += ` ${a}="${this[a]}"`;
     }
     return result;
   }
@@ -114,6 +113,7 @@ class TokenList {
   }
 }
 class Element {
+  static #debugMode = true;
 	#children; #attributes;
 	#name;
 	
@@ -136,6 +136,9 @@ class Element {
 	get attributes() {
 	  return this.#attributes ??= new Attributes();
 	}
+	set attributes(v) {
+    Object.assign(this.#attributes, v);
+	}
 	
 	get className() {
 	  return this.#attributes?.['class'] ?? '';
@@ -147,6 +150,9 @@ class Element {
 	  return new TokenList(this);
 	}
 	
+	hasAttributes() {
+	  return this.#attributes != undefined && this.#attributes.length > 0;
+	}
   #renderChildren() {
     //console.log(this.#children);
     return (this.#children?.toString()) ?? '';
@@ -155,15 +161,19 @@ class Element {
 	  try {
   		if( this.name.trim() == '' )
   			return this.#renderChildren();
-  		else if( this.#attributes != undefined )
-  			return `<${this.#name}${this.#attributes.toString()}>\n${this.#renderChildren()}\n</${this.name}>`;
-  		else
-  			return `<${this.#name}>\n${this.#renderChildren()}\n</${this.name}>`;
+  		
+  		const attr = !this.#attributes? '' : this.#attributes.toString();
+  		const debug = (Element.DebugMode && this.constructor.name != 'Element')? ` title="${this.constructor.name}" dtat-element-type="${this.constructor.name}"` : '';
+  		const alt = (Element.DebugMode && this.constructor.name != 'Element' && (this.#attributes == undefined || !('alt' in this.#attributes)))? ` alt="${this.constructor.name}"` : '';
+			return `<${this.#name}${attr}${debug}${alt}>\n${this.#renderChildren()}\n</${this.name}>`;
     }
     catch(e) {
       return e.toString();
     }
 	}
+	
+	static get DebugMode() {return Element.#debugMode;}
+	static set DebugMode(v) {Element.#debugMode = v==true;}
 }
 class PlainText extends Element {
 	constructor(text='') {
@@ -176,6 +186,21 @@ class PlainText extends Element {
 	toString() {
 		return this.text;
 	}
+}
+
+class EmptyElement extends Element {
+  constructor(name, attributes) {
+    super(name, attributes);
+  }
+  toString() {
+		const attr = !this.hasAttributes? '' : this.attributes.toString();
+    return `<${this.name}${attr}/>`;
+  }
+}
+class BR extends EmptyElement {
+  constructor() {
+    super('br');
+  }
 }
 
 class Head {
@@ -220,7 +245,7 @@ class HtmlFrame {
 	constructor(title) {
 		this.#head = new Head(this);
 		this.#body = new Body(this);
-		this.#head.title = title;
+		this.#head.title = title ?? '';
 		
 		this.#initNonce();
 	}
@@ -253,5 +278,7 @@ class HtmlFrame {
 module.exports = {
   Element,
   PlainText, 
+  EmptyElement,
+  BR,
   HtmlFrame 
 }

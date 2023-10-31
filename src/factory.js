@@ -1,5 +1,5 @@
 const {loadModules, loadJsonData} = require('./loader');
-const {Categories, ModuleSelectors, ModuleSelectorMatch, SearchSelector} = require('./selectors');
+const {Categories, ModuleSelectors, ModuleMatch, SearchSelector} = require('./selectors');
 
 const factoryDiagnostics = {};
 
@@ -10,30 +10,31 @@ class Cache {
 		
 	put(key,data) {
 		this.#cache[key] = {data}; // this way we can distinguish undefined keys from undefined values
-	};
+	}
 	get(key) {
 		return this.#cache[key];
 	}
 	clear() {
 		this.#cache = {};
 	}
-/*	
-	debugInfo() {
-		let dbg = [];
+	
+	getDiagnosticData() {
+		let diagnostics = [];
 		for( let k in this.#cache ) {
-			dbg.push({
+			diagnostics.push({
 				key:k,
-				module: this.#cache[k].data == undefined? 
-				          '<none>' :
-				          !Array.isArray(this.#cache[k].data)? 
-				            this.#cache[k].data.name :
-				            '['+this.#cache[k].data.map(d=>d.name).join()+']',
+				match: this.#cache[k].data == undefined
+				          ? '<none>' 
+				          : !Array.isArray(this.#cache[k].data)
+				          ? this.#cache[k].data.$plainName 
+				          : '['+this.#cache[k].data.map(d=>d.$plainName).join()+']',
 			});
 		}
-		return dbg;
+		return diagnostics;
 	}
-*/
 }
+
+let logcounter = 10;
 
 class Factory {
   #status = 'new';
@@ -55,8 +56,8 @@ class Factory {
         error: m.$error,
       })),
 	  getCategories: ()=>this.#categories,
-	  getModuleCache: ()=>this.#modCache,
-	  getSetCache: ()=>this.#setCache,
+	  getModuleCache: ()=>this.#modCache.getDiagnosticData(),
+	  getSetCache: ()=>this.#setCache.getDiagnosticData(),
 	}
 
 	constructor(name, directories, categories, interfaceConfig) {
@@ -89,7 +90,6 @@ class Factory {
     this.#modules.forEach(m=>{
       m.$selectors = new ModuleSelectors(m, this.#categories);
       m.$interface = this.#createModuleInterface(m);
-console.log('interface',m.$interface);
     });
     this.#errors = loaded.errors;
     console.log(this.#modules.length+' modules were successfully loaded.');
@@ -97,7 +97,6 @@ console.log('interface',m.$interface);
       console.warn('Some modules could not be loaded:', this.#errors);
 	}
   #createModuleInterface(module) {
-console.log('createinterface',module,module.view);    
     if( this.#interface == undefined || this.#interface.length == 0 )
       return module;
     if( this.#interface.length == 1 && this.#interface[0].isDefault == true )
@@ -112,9 +111,9 @@ console.log('createinterface',module,module.view);
 
   #findAllMatches(selectorObj) {
   	const matches = [];
-   	for( const m of this.#modules )
+   	for( const m of this.#modules ) {
   	  matches.push(...m.$selectors.getMatches(selectorObj));
-
+  	}
   	return matches;
   } 
   #findBestMatch(selectorObj) {
@@ -123,11 +122,11 @@ console.log('createinterface',module,module.view);
   	if( matches.length == 0 ) return undefined;
   	if( matches.length == 1 ) return matches[0].module;
 
-  	matches.sort(ModuleSelectorMatch.compare);
+  	matches.sort(ModuleMatch.compare);
 
   	// Ambiguities are OK, as long as ambiguous matches refer to the same module
   	for( let i = 1 ; i < matches.length ; i++ ) {
-  		if( ModuleSelectorMatch.compare(matches[0], matches[i]) != 0 )
+  		if( ModuleMatch.compare(matches[0], matches[i]) != 0 )
   			return matches[0].module; // this is the best match
   		if( matches[0].module != matches[i].getModle() ){
   			console.log(0,i,matches[0].module, matches[i].module);
@@ -151,16 +150,16 @@ console.log('createinterface',module,module.view);
 		const selectorObj = new SearchSelector(this.#categories, ...selectors);
 		const cached = this.#modCache.get(selectorObj.cacheKey);
 
-		if( cached != undefined ) return cached.data;
+		if( cached != undefined ) return cached.data?.$interface;
 
 		try {
 			const matchedModule = this.#findBestMatch(selectorObj);
 			if( matchedModule == undefined )
 				console.warn(`Factory.${this.name}: no match found for selectors ${selectorObj.cacheKey}.`);
-			else
-				console.debug(`Factory.${this.name}: match for selectors ${selectorObj.cacheKey} found module "${matchedModule.$name}"`);
+			//else
+			//	console.debug(`Factory.${this.name}: match for selectors ${selectorObj.cacheKey} found module "${matchedModule.$name}"`);
 				
-			this.#modCache.put(selectorObj.cacheKey, matchedModule?.$interface);
+			this.#modCache.put(selectorObj.cacheKey, matchedModule);
 			return matchedModule?.$interface;
 		}
 		catch(e) {
@@ -176,11 +175,11 @@ console.log('createinterface',module,module.view);
 		const selectorObj = new SearchSelector(this.#categories, ...selectors);
 		const cached = this.#setCache.get(selectorObj.cacheKey);
 
-		if( cached != undefined ) return cached.data;
+		if( cached != undefined ) return cached.data.map(m=>m.$interface);
 
-    const matchedSet = this.#findMatchSet(selectorObj).map(m=>m.$interface);
+    const matchedSet = this.#findMatchSet(selectorObj);
     this.#setCache.put(selectorObj.cacheKey, matchedSet);
-    return matchedSet;
+    return matchedSet.map(m=>m.$interface);
 	}
 	
 }

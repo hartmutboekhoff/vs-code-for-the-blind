@@ -65,11 +65,8 @@ class JsonSchemaPath {
   
   addSubschema(ref) {
     ref = ref.replaceAll('/','.');
-    if( this.paths.includes(ref) )
-      return this;
-    const c = this.clone();
-    c.paths.push(ref);
-    return c;
+    if( !this.paths.includes(ref) )
+      this.paths.push(ref);
   }
 
   append(...args) {
@@ -381,7 +378,7 @@ class JsonSchemaObjectMapper {
   #validate(schema, json, schemaPath, jsonPath) {
     //console.log(...arguments);
     if( schema['$ref'] != undefined ) {
-      schemaPath = schemaPath.addSubschema(schema['$ref']);
+      schemaPath.addSubschema(schema['$ref']);
       schema = this.#resolveSubSchema(schema);
     }
           

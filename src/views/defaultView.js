@@ -1,18 +1,20 @@
 const {Element} = require('../html');
 
-class View extends Element {
-  constructor(obj, schema, path, depth) {
-    super('p');
-    this.children.append(new Element('span',depth));
-    this.children.append(new Element('pre',path));
+class DefaultView extends Element {
+  constructor(obj, schema, key, path, depth) {
+    super('fieldset');
+    this.children.append(new Element('legend', key+' - '+path));
+    
+    const value = new Element('pre',JSON.stringify(obj,undefined,2).slice(0,100));
+    this.children.append(value);
   }
   
-  get allowSubElements() {
-    return undefined;
+  get preventSubElements() {
+    return false;
   }
 }
 
-exports.view = View;
+exports.view = DefaultView;
 exports.selectors = [
   {
     SchemaPath: undefined,

@@ -11,7 +11,14 @@ class MenuEditor extends SiteConfigEditor {
 	  super(context, document, webviewPanel, 'MenuEditorViews', '../config/navigation-schema.json', token)
   }
 
-	_renderHtml() {
+  initHtml(html) {
+    super.initHtml(html);
+	  html.head.title = 'MenüEditor - '+this.document.fileName;
+		html.head.styleSheets.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','css', 'MenuEditor.css')));
+		html.head.scripts.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','js', 'MenuEditor.js')));
+  }
+
+/*	renderHtml() {
 		const html = new HtmlFrame('Test Nummer 2');
 		
 		html.head.styleSheets.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','css', 'jsonview.css')));
@@ -24,7 +31,7 @@ class MenuEditor extends SiteConfigEditor {
 
 		this.view.html = html.toString();
 	}
-
+*/
 }
 
 module.exports = MenuEditor;

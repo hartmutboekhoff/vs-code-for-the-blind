@@ -77,12 +77,20 @@ class SelectorMatch {
                     ? other.#value
                     : other.#value == undefined
                     ? this.#value
-                    : this.#value || other.#value;
+                    : this.#value && other.#value;
     
     return this;
   }
   toAggregate(other) {
     return (new SelectorMatch(this)).aggregate(other);
+  }
+  
+  toString() {
+    return this.#value == true
+            ? 'MATCH['+this.#valuePriority+']'
+            : this.#value == false
+            ? 'NOMATCH'
+            : 'IGNORED';
   }
 }
 
@@ -113,6 +121,9 @@ class ModuleMatch extends Array {
     return this.#aggregatedValue.failaggregatedValueed;
   }
 
+  toString() {
+    return this.module.$plainName+'='+this.#aggregatedValue.toString()+':{'+[...this].map(s=>s.toString()).join(',')+'}';
+  }
   static compare(a,b) {
     if( a.length != b.length ) throw 'mist';
     for( let i = 0 ; i < a.length ; i++ ) {
@@ -167,7 +178,7 @@ class ModuleCategorySelector {
   get value() {return this.#value;}
   get priority() {return this.#priority;}
   get required() {return this.#required;}
-  
+
   #compareRegExp(selectorValue) {
     return selectorValue == undefined
             ? (this.#required? this.NOMATCH : this.IGNORED)
@@ -211,6 +222,12 @@ class ModuleCategorySelector {
       }
     return result;
   }
+  _compare(selectorValue) {
+    const res = this.#compare(selectorValue);
+    console.log('comparing', this.#category.name, ': ', this.#value, '==?', selectorValue, ', Result:', res);
+    
+    return res;
+  }
 }
 
 class ModuleSelector extends Array {
@@ -227,18 +244,17 @@ class ModuleSelector extends Array {
   }
 
   match(searchselector) {
-    const r = this._match(searchselector);
-    console.log('match',searchselector,this,r);
-    return r;
-  }
-  _match(searchselector) {
     return new ModuleMatch(
       this.module, 
       [...this].map((mcs,ix)=>mcs.match(searchselector[ix])))
     ;
   }
-  get _module() {
+  get __module() {
     return this.#module;
+  }
+  
+  toString() {
+    return '['+[...this].map(cs=>cs.value).join(',')+']';
   }
 }
 class ModuleSelectors extends Array {
@@ -253,7 +269,7 @@ class ModuleSelectors extends Array {
   getMatches(searchselector) {
     return [...this]
       .map(modsel=>modsel.match(searchselector))
-      .filter(match=> match.matched );
+      .filter(match=>match.matched );
   }
 }
 
@@ -280,7 +296,7 @@ class SearchSelector extends Array {
     		      : typeof v == 'string'
     		      ? `"${escape(v)}"`
     		      : Array.isArray(v)
-    		      ? '['+v.reduce((acc,s)=>`${acc}"${escape(s)}",`,'')+']'
+    		      ? '['+v.map(s=>`"${escape(s)}"`).join(',')+']'
     		      : `{"${escape(v.toString())}"}`
 
     }
@@ -290,6 +306,10 @@ class SearchSelector extends Array {
     	},'');
   	return this.#cachekey;
   } 
+  
+  toString() {
+    return [...this.#categories].map(c=>`${this[c.name]}`).join(',');
+  }
 }
 
 
