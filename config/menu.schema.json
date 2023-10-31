@@ -1,0 +1,86 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "definitions": {
+        "navItem": {
+            "description": "A menu can have entries or submenus. This is recursive.",
+            "type": "object",
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "internal",
+                        "external",
+                        "no-link"
+                    ]
+                },
+                "subMenu": {
+                    "$ref": "#/definitions/navArray"
+                }
+            },
+            "required": [
+                "label",
+                "type"
+            ]
+        },
+        "navArray": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/navItem"
+            }
+        }
+    },
+    "properties": {
+        "metaNav": {
+            "$ref": "#/definitions/navArray"
+        },
+        "mainNav": {
+            "$ref": "#/definitions/navArray"
+        },
+        "mainNavThemes": {
+            "$ref": "#/definitions/navArray"
+        },
+        "abo": {
+            "$ref": "#/definitions/navItem"
+        },
+        "plusContent": {
+            "type": "object",
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "internal",
+                        "external"
+                    ]
+                },
+                "plusIcon": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "label",
+                "path",
+                "type",
+                "plusIcon"
+            ]
+        },
+        "footerNav": {
+            "$ref": "#/definitions/navArray"
+        },
+        "legalNav": {
+            "$ref": "#/definitions/navArray"
+        }
+    }
+}

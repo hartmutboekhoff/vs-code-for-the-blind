@@ -8,7 +8,8 @@ const { RootValue } = require('../htmlDataElements');
 class MenuEditor extends SiteConfigEditor {
 
 	constructor(context, document, webviewPanel, token) {
-	  super(context, document, webviewPanel, 'MenuEditorViews', '../config/navigation-schema.json', token)
+	  //super(context, document, webviewPanel, 'MenuEditorViews', '../config/navigation-schema.json', token);
+	  super(context, document, webviewPanel, 'MenuEditorViews', '../config/menu.schema.json', token);
   }
 
   initHtml(html) {

@@ -2,7 +2,7 @@ const {Element} = require('../html');
 const {TextInputLine, DropdownInputLine} = require('../htmlFormFields');
 
 class MenuItem extends Element {
-  constructor(obj, schema, key, path, depth) {
+  constructor(obj, schema, key, path, status) {
     super('fieldset',{class:'menu-item'});
     this.children.append(new Element('legend', key+' - '+path));
 
@@ -18,14 +18,16 @@ class MenuItem extends Element {
 
 exports.view = MenuItem;
 exports.selectors = [
+/*
   {
-    SchemaPath: '#.definitions.MenuItem',
+    SchemaPath: '#.definitions.navArray',
     SchemaType: undefined,
     DataType: undefined,
     EditorType: "MenuEditor"
   },
+*/  
   {
-    SchemaPath: '#.definitions.Navigation',
+    SchemaPath: '#.definitions.navItem',
     SchemaType: undefined,
     DataType: undefined,
     EditorType: "MenuEditor"

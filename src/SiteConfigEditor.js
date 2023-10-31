@@ -32,6 +32,8 @@ class HtmlBuilder extends Traversion {
   }
   
   onValue(obj, key, path, depth) {
+if( path == 'legalNav')    
+  console.log('legalNav:', obj, key, path, depth);
     const match = this.mapper.findAll(path);
     if( match.length == 0 ) {
       this.#insert(new UnmappedValue(obj, undefined, key, path, 'unmatched'));

@@ -46,7 +46,7 @@ class Traversion {
       this.onValue(obj, key, path, this.#stack.length-1);
     }
     catch(e) {
-      console.debug('Exception user-code while traversing object-tree.', e)
+      console.debug('Exception user-code while traversing object-tree.', 'onValue', path, e)
     }
   }
   #onRecursion(obj, key, path) {
@@ -54,7 +54,7 @@ class Traversion {
       this.onRecursion(obj, key, path, this.#stack.length-1);
     }
     catch(e) {
-      console.debug('Exception user-code while traversing object-tree.', e)
+      console.debug('Exception user-code while traversing object-tree.', 'onRecursion', path, e)
     }
   }
   #beforeNesting(obj, key, path) {
@@ -63,7 +63,7 @@ class Traversion {
       nested = this.beforeNesting(obj, key, path, this.#stack.length-1);
     }
     catch(e) {
-      console.debug('Exception user-code while traversing object-tree.', e)
+      console.debug('Exception user-code while traversing object-tree.', 'beforeNesting', path, e)
     }
     
     return nested ?? obj;
@@ -73,7 +73,7 @@ class Traversion {
       this.afterNesting(obj, key, path, this.#stack.length-1, aborted);
     }
     catch(e) {
-      console.debug('Exception user-code while traversing object-tree.', e)
+      console.debug('Exception user-code while traversing object-tree.', 'afterNesting', path, e)
     }
   }
   #onNoNesting(obj, key, path) {
@@ -81,7 +81,7 @@ class Traversion {
       this.onNoNesting(obj, key, path, this.#stack.length-1);
     }
     catch(e) {
-      console.debug('Exception user-code while traversing object-tree.', e)
+      console.debug('Exception user-code while traversing object-tree.', 'onNoNesting', path, e)
     }
   }
   #onAbortNesting(obj, key, path, processedKeys, abortedKeys) {
@@ -89,7 +89,7 @@ class Traversion {
       this.onAbortNesting(obj, key, path, this.#stack.length-1, processedKeys, abortedKeys);
     }
     catch(e) {
-      console.debug('Exception user-code while traversing object-tree.', e)
+      console.debug('Exception user-code while traversing object-tree.', 'onAbortNesting', path, e)
     }
   }
 
