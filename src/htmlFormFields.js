@@ -50,10 +50,20 @@ class DropdownInputLine extends Element {
   }
 }
 
+class Legend extends Element {
+  constructor(title, subtitle, attributes) {
+    super('legend', title, attributes);
+    this.children.append(new Element('span', subtitle, {
+      class: 'description',
+    }));
+  }
+}
+
 module.exports = {
   TextInput,
   Label,
   Description,
   TextInputLine,
   DropdownInputLine,
+  Legend,
 }

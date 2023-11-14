@@ -5,10 +5,10 @@ const { HtmlFrame } = require('../html');
 const { RootValue } = require('../htmlDataElements');
 
 
-class MenuEditor extends SiteConfigEditor {
+class PageConfigEditor extends SiteConfigEditor {
 
 	constructor(context, document, webviewPanel, token) {
-	  super(context, document, webviewPanel, 'MenuEditorViews', '../config/schema/menu.schema.json', token);
+	  super(context, document, webviewPanel, 'PageConfigEditorViews', '../config/schema/any-page.schema.json', token);
   }
 
   initHtml(html) {
@@ -19,4 +19,4 @@ class MenuEditor extends SiteConfigEditor {
   }
 }
 
-module.exports = MenuEditor;
+module.exports = PageConfigEditor;

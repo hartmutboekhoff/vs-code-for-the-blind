@@ -1,7 +1,8 @@
 const {isValidIdentifier, buildJsonPath} = require('./utility');
 
 const DEFAULT_BASE_URI = 'https://schema.funkemedien.de';
-const MATCH_NON_OBJECTS = true;
+const MAP_NON_OBJECTS = true;
+const MAP_SUBCONDITIONS = 'none'; // 'failed' | 'all' | 'none'
 const THROW_IMPLEMENTATION_MISSING = true;
 
 function IMPLEMENTATION_MISSING(result) {
@@ -9,8 +10,8 @@ function IMPLEMENTATION_MISSING(result) {
     throw 'Implementation missing';
   return result;
 }
-function NOT_SUPPORTED(feature, context) {
-    throw `${feature} is not supported${context==''? '' : ' in '+context}.`;
+function NOT_SUPPORTED(feature, ...context) {
+    throw `${feature} is not supported${context.length == 0? '' : ' in '+context.map(c=>c.toString()).join(' - ')}.`;
 } 
 
 /*
@@ -113,9 +114,71 @@ class SchemaObjectMatch {
 }
 
 class JsonSchemaObjectMapper {
+  #options;
   #schema; #data;
-  #matches = [];
+  #matches = []; #pauseMappingCount = 0;
   #validators = {
+    $: { 
+      '@name': 'subschemas without type-node',
+      'const': (data, constant)=>data==constant,
+      'if': (data, condition, schema, schemaPath, jsonPath, unmatchedProperties)=>{
+        this.#pauseMapping();
+        const subschema = this.#validate(condition, data, schemaPath.append('if'), jsonPath)
+                ? 'then' 
+                : 'else';
+
+        const valid = schema[subschema] != undefined 
+                        ? this.#validate(schema[subschema], data, schemaPath.append(subschema), jsonPath)
+                        : true;
+        this.#addSubCondition(schema[subschema], data, schemaPath.append(subschema), jsonPath, valid);
+        this.#resumeMapping();
+        return valid;
+      },
+      'then': (data,condition,schema)=>schema.if != undefined,
+      'else': (data,condition,schema)=>schema.if != undefined && schema.then != undefined,
+      'not': (data, test, schema, schemaPath, jsonPath, unmatchedProperties)=>{
+        this.#pauseMapping();
+        const valid = !this.#validate(test, data, schemaPath.append('not'), jsonPath);
+        this.#addSubCondition(test, data, schemaPath.append('not'), jsonPath, valid);
+        this.#resumeMapping();
+        return valid;
+      },
+      'anyOf': (data, anyOf, schema, schemaPath, jsonPath, unmatchedProperties)=>{
+        this.#pauseMapping();
+        let valid = true;
+        for( let i = 0 ; i < anyOf.length ; i++ ) {
+          valid = this.#validate(anyOf[i], data, schemaPath.append('anyOf', i), jsonPath);
+          if( valid ) break;
+        }
+        this.#addSubCondition(anyOf, data, schemaPath.append('anyOf'), jsonPath, false);
+        this.#resumeMapping();
+        return valid;
+      },
+      'allOf': (data, allOf, schema, schemaPath, jsonPath, unmatchedProperties)=>{
+        this.#pauseMapping();
+        let valid = true;
+        for( let i = 0 ; i < allOf.length ; i++ ) {
+          valid = this.#validate(allOf[i], data, schemaPath.append('allOf', i), jsonPath);
+          if( !valid ) break;
+        }
+        this.#addSubCondition(allOf, data, schemaPath.append('allOf'), jsonPath), valid;
+        this.#resumeMapping();
+        return valid;
+      },
+      'oneOf': (data, oneOf, schema, schemaPath, jsonPath, unmatchedProperties)=>{
+        this.#pauseMapping();
+        let counter = 0;
+        for( let i = 0 ; i < oneOf.length ; i++ ) {
+          if( this.#validate(oneOf[i], data, schemaPath.append('oneOf', i), jsonPath) )
+            ++counter;
+          if( counter > 1 ) break;
+        }
+        this.#addSubCondition(oneOf, data, schemaPath.append('oneOf'), jsonPath, counter != 1);
+        this.#resumeMapping();
+        return counter == 1;
+      },
+      'required': (data,required)=>required.reduce((acc,r)=>acc&&r in data,true),
+    },
     'any': {
       '@name': 'any',
       'type': ()=>true,
@@ -124,6 +187,7 @@ class JsonSchemaObjectMapper {
       '@name': 'string',
       'type': data=>typeof data == 'string',
       'enum': (data,enums)=>enums.includes(data),
+      'const': (data, constant)=>data==constant,
       'minLength': (data,len)=>data.length>=len,
       'maxLength': (data,len)=>data.length<=len,
       'pattern': (data,pattern)=>new RegExp(pattern).test(data),
@@ -132,6 +196,7 @@ class JsonSchemaObjectMapper {
     'number': {
       '@name': 'number',
       'type': data=>typeof data == 'number',
+      'const': (data, constant)=>data==constant,
       'multipleOf': (data,multiple)=>data%multiple==0,
       'minimum': (data,limit)=>data>=limit,
       'exclusiveMinimum': (data,limit)=>data>limit,
@@ -141,6 +206,7 @@ class JsonSchemaObjectMapper {
     'integer': {
       '@name': 'integer',
       'type': data=>Number.isInteger(data),
+      'const': (data, constant)=>data==constant,
       'multipleOf': (data,multiple)=>data%multiple==0,
       'minimum': (data,limit)=>data>=limit,
       'exclusiveMinimum': (data,limit)=>data>limit,
@@ -183,7 +249,7 @@ class JsonSchemaObjectMapper {
           }
           return result;
         },
-        'required': (data,required)=>required.reduce((acc,r)=>acc&&r in data,true),
+        'required': (...args)=>this.#validators.$.required(...args),
         'propertyNames': (data,{pattern})=>{
           const rx = new RegExp(pattern);
           return Object.keys(data).map(k=>rx.test(k)).reduce((acc,t)=>acc&&=t,true);
@@ -191,6 +257,13 @@ class JsonSchemaObjectMapper {
         'minProperties': (data,limit)=>Object.keys(data).length>=limit,
         'maxProperties': (data,limit)=>Object.keys(data).length<=limit,
         'definitions': ()=>true,
+        'if': (...args)=>this.#validators.$.if(...args),
+        'then': (...args)=>this.#validators.$.then(...args),
+        'else': (...args)=>this.#validators.$.else(...args),
+        'not': (...args)=>this.#validators.$.not(...args),
+        'anyOf': (...args)=>this.#validators.$.anyOf(...args),
+        'allOf': (...args)=>this.#validators.$.allOf(...args),
+        'oneOf': (...args)=>this.#validators.$.oneOf(...args),
       },
       { // prio 1
         '@name': 'object (prio 1)',
@@ -272,6 +345,7 @@ class JsonSchemaObjectMapper {
     'boolean': {
       '@name': 'boolean',
       'type': data=>typeof data == 'boolean',
+      'const': (data, constant)=>data==constant,
     },
     'null': {
       '@name': 'null',
@@ -330,7 +404,8 @@ class JsonSchemaObjectMapper {
     '$recursiveRef': false,
   };
 
-  constructor(schemaObject,dataObject) {
+  constructor(schemaObject,dataObject, options) {
+    this.#options = Object.assign({mapNonObjects: MAP_NON_OBJECTS, mapSubConditions: MAP_SUBCONDITIONS}, options);
     this.#schema = schemaObject;
     this.#data = dataObject;
     
@@ -352,8 +427,19 @@ class JsonSchemaObjectMapper {
       return acc == undefined || s == '.'? acc : (acc[s] ?? acc.properties?.[s]);
     },schema);
   }
+  #pauseMapping() {
+    ++this.#pauseMappingCount;
+  }
+  #resumeMapping() {
+    if( --this.#pauseMappingCount < 0 ) this.#pauseMappingCount = 0;
+  }
   #addMatch(schema, json, schemaPath, jsonPath, valid) {
-    if( MATCH_NON_OBJECTS || typeof json == 'object' ) // arrays are also objects
+    if( !this.#pauseMappingCount 
+        && ( this.#options.mapNonObjects || typeof json == 'object' ) ) // arrays are also objects
+      this.#matches.push(new SchemaObjectMatch(this.#resolveSubSchema(schema), json, schemaPath, jsonPath, valid));
+  }
+  #addSubCondition(schema, json, schemaPath, jsonPath, valid) {
+    if( this.#options.mapSubConditions == 'all' || (valid == false && this.#options.mapSubConditions == 'failed') )
       this.#matches.push(new SchemaObjectMatch(this.#resolveSubSchema(schema), json, schemaPath, jsonPath, valid));
   }
   #runTypeValidators(typeValidators, schema, json, schemaPath, jsonPath, unmatchedProperties) {
@@ -370,7 +456,7 @@ class JsonSchemaObjectMapper {
         if( typeof validator == 'function' )
           valid &&= validator(json, schema[k], schema, schemaPath, jsonPath, unmatchedProperties)
         else if( validator != true )
-          NOT_SUPPORTED(`"${k}"`,schemaPath);
+      NOT_SUPPORTED(`"${k}"`, tv['@name'], schemaPath.paths);
       } 
     }
     return valid;   
@@ -384,7 +470,7 @@ class JsonSchemaObjectMapper {
           
     const typeValidators = Array.isArray(schema.type)
                              ? schema.type.map(t=>this.#validators[t])
-                             : [this.#validators[schema.type]];
+                             : [this.#validators[schema.type ?? '$']];
 
     const unmatchedProperties = typeof json != 'object'? new Set() : new Set(Object.keys(json));
 
@@ -424,11 +510,4 @@ class JsonSchemaObjectMapper {
   }
 }
 
-try {
-	module.exports = JsonSchemaObjectMapper;
-}
-catch(e) {
-  console.log('JsonSchemaObjectMapper is loaded');
-  // ignore, this is only happens while testing inside browser
-}
-
+module.exports = JsonSchemaObjectMapper;

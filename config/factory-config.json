@@ -7,13 +7,37 @@
 				{ "name": "SchemaType" },
 				{ "name": "DataType" },
 			  { "name": "EditorType", 
-			    "required": true, 
+			    "required": false, 
 			    "default":"MenuEditor" ,
 			    "priority": 100
 			  }
 			],
 			"moduleDirectories": [
-				"./views"
+				"./views",
+				"./views/MenuEditor"
+			],
+			"interface": [
+			  {
+			    "name": "view",
+			    "isDefault": true
+			  }
+			]
+		},
+		{
+			"name": "PageConfigEditorViews",
+			"categories": [
+				{ "name": "SchemaPath" },
+				{ "name": "SchemaType" },
+				{ "name": "DataType" },
+			  { "name": "EditorType", 
+			    "required": false, 
+			    "default":"PageConfigEditor" ,
+			    "priority": 100
+			  }
+			],
+			"moduleDirectories": [
+				"./views",
+				"./views/PageConfigEditor"
 			],
 			"interface": [
 			  {

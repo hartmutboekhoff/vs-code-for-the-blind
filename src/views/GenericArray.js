@@ -1,8 +1,9 @@
-const {Element} = require('../html');
+//const {Element} = require('../html');
+const {ValueGroupWrapper} = require('./helpers/dataElementViews');
 
-class GenericArray extends Element {
+class GenericArray extends ValueGroupWrapper {
   constructor(obj, schema, key, path, status) {
-    super();
+    super(schema, key, path, {class:'array generic match-'+status});
   }
   
   get preventSubElements() {
@@ -16,6 +17,12 @@ exports.selectors = [
     SchemaPath: undefined,
     SchemaType: 'array',
     DataType: undefined,
-    EditorType: "MenuEditor"
+    EditorType: undefined
+  },
+  {
+    SchemaPath: undefined,
+    SchemaType: 'object',
+    DataType: undefined,
+    EditorType: undefined
   }
 ];

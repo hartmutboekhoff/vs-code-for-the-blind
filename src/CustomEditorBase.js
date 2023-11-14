@@ -1,11 +1,12 @@
 const vscode = require('vscode');
 const Disposables = require('./Disposables');
 const {camelCase  ,resolveJsonHierarchy} = require('./utility');
-
+const {diff:diffJson} = require('./jsonDiff');
 
 class CustomEditorBase {
   #context; #document; #panel; #token;
   #disposables = new Disposables();
+  #json = {valid:false};
   
   constructor(context, document, webviewPanel, token) {
     this.#context = context;
@@ -25,7 +26,7 @@ class CustomEditorBase {
 		  }),
   		this.view.onDidReceiveMessage(ev=>{
   		  return this.onDidReceiveMessage(ev);
-  		})
+  		}, undefined, this.context.subscriptions)
 		);  
   }
   initialize() {
@@ -46,27 +47,38 @@ class CustomEditorBase {
   }
   
   get json() {
-		const text = this.#document.getText();
-		if (text.trim().length === 0)
-			return {};
-
-		try {
-			return JSON.parse(text);
-		} catch {
-			throw new Error('Could not get json-ata. Content is not valid json');
-		}
+    if( this.#json.valid ) return this.#json.data;
+    this.#json = this.#getJson();
+    if( this.#json.valid == false && this.#json.error != undefined )
+      throw this.#json.error;
+    return this.#json.data;
   }
   set json(value) {
+    const old = this.#getJson();
+    const differences = diffJson(old.valid? old.data : {}, value);
+    console.log('diff: ', differences);
     try {
-      const text = JSON.stringify(value, null, 2);
+      const text = JSON.stringify(value, null, 4);
   		const edit = new vscode.WorkspaceEdit();
   		edit.replace(this.#document.uri,
-      			       new vscode.Range(0, 0, Infinity, 0),
-  			           text);
+      			       new vscode.Range(new vscode.Position(0,0), new vscode.Position(this.document.lineCount, 0)), 
+      			       text);
   		vscode.workspace.applyEdit(edit);
     }
-    catch {
+    catch(e) {
+      console.error(e);
 			throw new Error('Could not serialize object. Content is not valid json');
+    }
+  }
+  #getJson() {
+	  const text = this.#document.getText();
+	  if (text.trim().length === 0)
+		  return {valid:true,data:{}};
+
+	  try {
+			return {valid:true, data:JSON.parse(text)};
+		} catch(e) {
+		  return {valid:false, error:'Could not get json-ata. Content is not valid json. '+e};
     }
   }
   replaceJson(path, newValue) {
@@ -121,7 +133,7 @@ class CustomEditorBase {
     
   }  
   async onMessage(ev) {
-    
+    console.log('some unspecified message', ev);
   }
   
 } 

@@ -1,0 +1,53 @@
+legend {
+  
+}
+fieldset.collapsed > * {
+  display:none;
+}
+fieldset.collapsed > legend {
+  display: block;
+}
+fieldset > legend > span.collapse-button {
+  display:inline-block;
+  height: 15px;
+  width:15px;
+  background-color: #aaa;
+  vertical-align: bottom;
+}
+fieldset > legend > span.collapse-button:before {
+  content:"-";
+  font-weight: bold;
+  vertical-align:top;
+  line-height: .5em;
+  margin: 0 4px;
+}
+fieldset.collapsed > legend > span.collapse-button:before {
+  content:"+";
+  margin: 0 2px;
+}
+
+legend .description {
+  font-style: italic;
+  color: #666;
+}
+legend .description:before {
+  content: ' - ';
+}
+
+.generic {
+  border: 3px dotted #f80;
+}
+
+.unspecified-map table td {
+  vertical-align: top;
+}
+
+.match-failed {
+  outline: 2px solid red;
+}
+.match-unmatched {
+  outline: 2px solid #fc0;
+}
+.match-valid {
+  
+}

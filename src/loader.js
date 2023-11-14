@@ -195,7 +195,7 @@ async function loadModule(path, name, relPath='') {
 	}
 	catch(e) {
 		console.error(e);
-		return ModuleWrapper(name, path, relPath, false, e);
+		return new ModuleWrapper(name, path, relPath, false, e);
 	}
 }	
 

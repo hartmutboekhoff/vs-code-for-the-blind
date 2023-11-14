@@ -16,6 +16,6 @@ exports.selectors = [
     SchemaPath: '#',
     SchemaType: undefined,
     DataType: undefined,
-    EditorType: "MenuEditor"
+    EditorType: undefined
   }
 ];

@@ -1,5 +1,5 @@
-const {Element} = require('../html');
-const {TextInputLine, DropdownInputLine} = require('../htmlFormFields');
+const {Element} = require('../../html');
+const {TextInputLine, DropdownInputLine} = require('../../htmlFormFields');
 
 class MenuItem extends Element {
   constructor(obj, schema, key, path, status) {

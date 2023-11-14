@@ -3,9 +3,19 @@
     document.querySelectorAll('li:has(ol),li:has(ul)')
       .forEach(e=>{
         e.addEventListener('click',ev=>{
-          if( !ev.ctrlKey ) return;
           if( ev.target.closest('ul,ol') != e.closest('ul,ol') ) return;
-          e.classList.toggle('collapsed');
+
+          if( !ev.ctrlKey ) {
+            e.classList.toggle('collapsed');
+          }
+          else {
+            const children = ev.target.closest('li').querySelectorAll('li:has(ol),li:has(ul)');
+            if( children.length == 0 ) return;
+            if( children[0].classList.contains('collapsed') )
+              children.forEach(c=>c.classList.remove('collapsed'));
+            else
+              children.forEach(c=>c.classList.add('collapsed'));
+          }
           ev.stopPropagation();
           ev.preventDefault();
         })

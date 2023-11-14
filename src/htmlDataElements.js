@@ -55,7 +55,7 @@ class DataElement extends Element {
 
     this.options = options;
     this.classList.add('data-element');
-    this.children.push(new Element('span', name, {'class':'label'}));
+    this.children.append(new Element('span', name, {'class':'label'}));
   }  
 }
 class PrimitiveValue extends DataElement {
@@ -71,14 +71,14 @@ class UndefinedValue extends DataElement {
   constructor(name, options) {
     super(name, options);
     this.classList.add('undefined');
-    this.children.push(new pre('undefined',{'class':'undefined'}));
+    this.children.append(new pre('undefined',{'class':'undefined'}));
   }
 }
 class ObjectValue extends DataElement {
   constructor(name, value, options) {
     super(name, options);
     this.classList.add('object');
-    this.children.push(new TypeName(value));
+    this.children.append(new TypeName(value));
 
     if( options?.maxDepth <= 0 ) {
       this.children.append(new MaxDepthExceeded());
@@ -103,7 +103,7 @@ class ArrayValue extends DataElement {
   constructor(name, value, options) {
     super(name, options);
     this.classList.add('array');
-    this.children.push(new TypeName(value));
+    this.children.append(new TypeName(value));
 
     if( options?.maxDepth <= 0 ) {
       this.children.append(new MaxDepthExceeded());
@@ -112,7 +112,7 @@ class ArrayValue extends DataElement {
 
     if( value.length > 0 ) {
       const ol = new Element('ol',{class:'data-element array', start:0});
-      ;
+      
       for( const n in value ) {
         if( options.excludeKeys?.includes(n) )
           continue;
@@ -120,9 +120,9 @@ class ArrayValue extends DataElement {
         const childValue = value[n];
         const outputName = Number.isInteger(+n)? `[${n}]` : n;
         const child = createDataValueElement(outputName, childValue, options);
-        const hint = childValue.name ?? childValue.label ?? childValue.title ?? childValue.id ?? childValue.key ?? (typeof childValue.value != 'object'? childValue.value : undefined);
+        const hint = childValue.name ?? childValue.label ?? childValue.title ?? childValue.id ?? childValue.key ?? childValue.type ?? (typeof childValue.value != 'object'? childValue.value : undefined);
         if( hint != undefined )
-          child.children.insertAt(new Hint(hint),2);
+          child.children.insertAt(2, new Hint(hint));
         ol.children.append(child);
       }
       this.children.append(ol);

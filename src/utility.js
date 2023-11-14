@@ -14,7 +14,7 @@ function generateNonce() {
 const JsonPathSplitRx = /(?<!\[)(?<=\.|^)([a-zA-Z_$][a-zA-Z0-9_$]*)(?=[\.\[]|$)(?!\])|\[(\d+)\]|\["(.*?)(?<!\\)"\]|\['(.*?)(?<!\\)'\]/g;
 
 function resolveJsonHierarchy(path,obj) {
-  const hierarchy = [];
+  const hierarchy = [{key:'',data:obj}];
   let data = obj;
   for( const k of path.matchAll(JsonPathSplitRx) ) {
     const key = k[1] ?? k[2] ?? k[3] ?? k[4];
@@ -51,7 +51,8 @@ function buildJsonPath(path, ...keys) {
 
 function getAllPropertyNames(obj) {
   const names = new Set();
-  while( obj != Object.prototype ) {
+  const [isArray,stopper] = Array.isArray(obj)? [true,Array.prototype] : [false,Object.prototype];
+  while( obj != stopper ) {
     const pds = Object.getOwnPropertyDescriptors(obj);
     for( const n in pds ) {
       const pd = pds[n];
@@ -60,6 +61,7 @@ function getAllPropertyNames(obj) {
     }
     obj = Object.getPrototypeOf(obj);
   }
+  if( isArray ) names.delete('length');
   return  [...names]; 
 }
 /**

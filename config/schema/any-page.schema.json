@@ -1,0 +1,240 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Schema for every config object in every publication's `/pages`-folder",
+  "type": "object",
+  "properties": {
+    "meta": {
+      "$ref": "#/definitions/UnspecifiedMap"
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/PageConfigComponent"
+      }
+    },
+    "viewGroups": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/PageConfigViewGroup"
+      }
+    }
+  },
+  "definitions": {
+    "ContentConfig": {
+      "type": "object",
+      "properties": {
+        "targetProperty": {
+          "type": "string"
+        },
+        "minCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maxCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sort": {
+          "type": "string",
+          "enum": [
+            "publishdate_desc",
+            "modifieddate_desc"
+          ]
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ContentConfigSource"
+          }
+        },
+        "resolveAllSourcesBeforeSort": {
+          "type": "boolean"
+        },
+        "deduplicationId": {
+          "type": "string"
+        }
+      }
+    },
+    "ContentConfigSource": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "publication",
+            "section",
+            "group",
+            "mostread",
+            "list",
+            "theme",
+            "author",
+            "related"
+          ]
+        },
+        "params": {
+          "$ref": "#/definitions/UnspecifiedMap"
+        },
+        "count": {
+          "type": "integer"
+        },
+        "sort": {
+          "type": "string"
+        },
+        "filter": {
+          "type": "string"
+        },
+        "filters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ContentConfigFilter"
+          }
+        },
+        "maxAgeInMonths": {},
+        "fromDate": {}
+      },
+      "if": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "const": "section"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "maxAgeInMonths": {
+            "type": "integer",
+            "description": "only for type=section!",
+            "minimum": 1
+          },
+          "fromDate": {
+            "type": "string",
+            "description": "only for type=section! format yyyy-MM-dd"
+          }
+        }
+      },
+      "else": {
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "maxAgeInMonths"
+              ]
+            },
+            {
+              "required": [
+                "fromDate"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "ContentConfigFilter": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "default",
+            "nonLive",
+            "premium",
+            "onlyPaid",
+            "free",
+            "onlyFree",
+            "nonTest",
+            "noTest",
+            "noIndex",
+            "hasTeaserImage",
+            "nothing",
+            "timePeriod",
+            "hasPlayout"
+          ]
+        },
+        "params": {
+          "$ref": "#/definitions/UnspecifiedMap"
+        }
+      }
+    },
+    "PageConfigViewGroup": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "ALL_OR_NOTHING",
+            "FIRST_WITH_CONTENT"
+          ]
+        }
+      }
+    },
+    "PageConfigComponent": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/UnspecifiedMap"
+        },
+        "hideWithoutContent": {
+          "type": "boolean"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "viewGroupId": {
+          "type": "string"
+        },
+        "feedFormat": {
+          "type": "string",
+          "examples": [
+            "RSS"
+          ]
+        },
+        "feedConfigName": {
+          "type": "string",
+          "description": "Name of the feed, will be used for generation. Only for feeds!"
+        },
+        "$contentConfig": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ContentConfig"
+          }
+        },
+        "$contentContext": {
+        },
+        "$componentIterator": {
+          "$ref": "#/definitions/PageConfigComponentIterator"
+        }
+      }
+    },
+    "PageConfigComponentIterator": {
+      "type": "object",
+      "properties": {
+        "each": {
+          "type": "string"
+        },
+        "eachCondition": {
+          "type": "string"
+        },
+        "component": {
+          "$ref": "#/definitions/PageConfigComponent"
+        }
+      }
+    },
+    "UnspecifiedMap": {
+      "type": "object"
+    }
+  }
+}

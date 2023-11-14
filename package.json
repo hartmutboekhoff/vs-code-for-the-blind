@@ -24,17 +24,34 @@
       }
     ],
     "customEditors": [
-			{
-				"viewType": "SparkSiteConfig.MenuEditor",
-				"displayName": "Menü Editor",
-				"selector": [
-					{
-						"filenamePattern": "**/menu/*.json"
-					}
-				]
-			}
-		]
-    
+      {
+        "viewType": "SparkSiteConfig.MenuEditor",
+        "displayName": "Menü Editor",
+        "selector": [
+          {
+            "filenamePattern": "**/menu/*.json"
+          }
+        ]
+      },
+      {
+        "viewType": "SparkSiteConfig.PageConfigEditor",
+        "displayName": "Page-Config Editor",
+        "selector": [
+          {
+            "filenamePattern": "**/pages/escenic/*.json"
+          }
+        ]
+      },
+      {
+        "viewType": "SparkSiteConfig.JsonView",
+        "displayName": "JSON Viewer",
+        "selector": [
+          {
+            "filenamePattern": "*.json"
+          }
+        ]
+      }
+    ]
   },
   "scripts": {
     "lint": "eslint .",
@@ -42,13 +59,16 @@
     "test": "node ./test/runTest.js"
   },
   "devDependencies": {
-    "@types/vscode": "^1.82.0",
     "@types/mocha": "^10.0.1",
     "@types/node": "16.x",
+    "@types/vscode": "^1.82.0",
+    "@vscode/test-electron": "^2.3.4",
     "eslint": "^8.47.0",
     "glob": "^10.3.3",
     "mocha": "^10.2.0",
-    "typescript": "^5.1.6",
-    "@vscode/test-electron": "^2.3.4"
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "deep-diff": "^1.0.2"
   }
 }

@@ -15,20 +15,33 @@ class ChildrenList extends Array {
   } 
   
   push(...elements) { super.push(...elements); }
-  append(...elements) { super.push(...elements); }
+  append(...elements) { 
+    super.push(...elements); 
+    return elements.length == 0? undefined : elements.length == 1? elements[0] : elements;
+  }
   unshift(...elements) { super.unshift(...elements); }
-  insertBefore(element,before) { 
+  insertBefore(before, ...elements) { 
     const index = super.indexOf(before);
-    if( index >= 0 ) super.splice(index,0,element);
+    if( index < 0 ) return undefined;
+    super.splice(index,0,...elements);
+    return elements.length == 0? undefined : elements.length == 1? elements[0] : elements;
   }
-  insertAfter(element,after) {
+  insertAfter(after, ...elements) {
     const index = super.indexOf(after);
-    if( index >= 0 ) super.splice(index+1,0,element);
+    if( index < 0 ) return undefined;
+    super.splice(index+1,0, ...elements);
+    return elements.length == 0? undefined : elements.length == 1? elements[0] : elements;
   }
-  insertAt(element,index) { super.splice(index,0,element); }
-  remove(element) {
-    const index = super.indexOf(element);
-    if( index >= 0 ) this.removeAt(index);
+  insertAt(index, ...elements) { 
+    super.splice(index,0, ...elements); 
+    return elements.length == 0? undefined : elements.length == 1? elements[0] : elements;
+  }
+  remove(...elements) {
+    elements.forEach(e=>{
+      const index = super.indexOf(e);
+      if( index >= 0 ) 
+        this.removeAt(index);
+    });
   }
   removeAt(index) { super.splice(index,1); }
   
@@ -68,7 +81,7 @@ class Attributes {
             result = `${result} ${a}="${htmlEncode(v)}"`;
             break;            
           case 'boolean':
-            result = v==true? `${result} ${a}` : `${result} ${a}="${v}"`;
+            if( v ) result = `${result} ${a}`;
             break;
         }
       }
@@ -123,7 +136,7 @@ class Element {
 		  [attributes, textContent] = [textContent, attributes]; //swap
 
 		if( textContent != undefined )
-		  this.children.push(new PlainText(textContent))
+		  this.children.append(new PlainText(textContent))
 		if( attributes != undefined )
 		  Object.assign(this.attributes, attributes)
 	}
@@ -192,15 +205,37 @@ class EmptyElement extends Element {
   constructor(name, attributes) {
     super(name, attributes);
   }
+	get children() {
+		return [];
+	}
   toString() {
-		const attr = !this.hasAttributes? '' : this.attributes.toString();
-    return `<${this.name}${attr}/>`;
+    return `<${this.name}${this.hasAttributes.toString()}/>`;
   }
 }
 class BR extends EmptyElement {
   constructor() {
     super('br');
   }
+}
+
+class Textarea extends Element {
+  constructor(value, attributes) {
+    super('textarea', attributes);
+    this.value = value;
+  }
+
+  get children() {
+    return [];
+  }  
+	toString() {
+	  try {
+  		const debug = Element.DebugMode? ` title="${this.constructor.name}" dtat-element-type="${this.constructor.name}"` : '';
+			return `<textarea${this.attributes.toString()}${debug}>${this.value}</textarea>`;
+    }
+    catch(e) {
+      return e.toString();
+    }
+	}  
 }
 
 class Head {
@@ -280,5 +315,6 @@ module.exports = {
   PlainText, 
   EmptyElement,
   BR,
+  Textarea,
   HtmlFrame 
 }

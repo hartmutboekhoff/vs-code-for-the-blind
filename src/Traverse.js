@@ -43,7 +43,7 @@ class Traversion {
   
   #onValue(obj, key, path) {
     try {
-      this.onValue(obj, key, path, this.#stack.length-1);
+      return this.onValue(obj, key, path, this.#stack.length-1);
     }
     catch(e) {
       console.debug('Exception user-code while traversing object-tree.', 'onValue', path, e)
@@ -94,7 +94,7 @@ class Traversion {
   }
 
   #traverseValue(obj,key,path) {
-    if( this.#stack.includes(obj) ) {
+    if( obj != undefined && this.#stack.includes(obj) ) {
       this.#onRecursion(obj, key, path);
     }
     else {
@@ -102,12 +102,13 @@ class Traversion {
       
       this.#resetNestingPrevention();
       
+      const originalObj = obj;
       if( this.parentFirst )
-        this.#onValue(obj, key, path)
+        obj = this.#onValue(obj, key, path) ?? obj;
 
       if( this.#maxDepth >= this.#stack.length 
           && typeof obj == 'object' ) {
-        this.#traverseNested(obj, key, path);
+        this.#traverseNested(obj, key, path, obj !== originalObj);
       }
       else {
         this.#onNoNesting(obj, key, path);
@@ -119,7 +120,7 @@ class Traversion {
       this.#stack.pop();
     }
   }
-  #traverseNested(obj, key, path) {
+  #traverseNested(obj, key, path, objIsReplaced) {
     function filterExcludedKeys(keys,exclude) {
       if( exclude == undefined ) return keys;
       
@@ -141,8 +142,10 @@ class Traversion {
     
     let nestingKeys = this.#allowedKeys != undefined
                         ? this.#allowedKeys.slice()
-                        : Array.isArray(obj)
-                        ? getAllPropertyNames(obj).filter(n=>n!='length')
+                        : objIsReplaced
+                        ? Object.keys(obj)
+                        //: Array.isArray(obj)
+                        //? getAllPropertyNames(obj).filter(n=>n!='length')
                         : getAllPropertyNames(obj);
 
     nestingKeys = filterExcludedKeys(nestingKeys, this.#excludeNestingKeys);
@@ -190,12 +193,12 @@ class Traversion {
   }
   #traverseNestedObject(obj, key, path, nestingKeys) {
     for( let i = 0 ; i < nestingKeys.length ; i++ ) {
-      const k = nestingKeys[i];
       if( this.#abort > 0 ) {
         --this.#abort;
         this.#onAbortNesting(obj, key, path, nestingKeys.slice(0,i), nestingKeys.slice(i));
         return true;
       }
+      const k = nestingKeys[i];
       if( k in obj ) {
         this.#traverseValue(obj[k], k, buildJsonPath(path,k))
       }
