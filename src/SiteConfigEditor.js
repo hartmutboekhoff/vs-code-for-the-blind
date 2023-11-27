@@ -86,9 +86,12 @@ class HtmlBuilder extends Traversion {
       if( match.length > 1 ) console.warn('Found multiple matches for "'+path+'"');
       
       match.forEach(m=>{
-        const ViewClass = this.factory.get(m.schemaPath.paths, m.schema?.type, Array.isArray(obj)? 'array' : typeof obj);
-        if( ViewClass != undefined ) {
-          const view = new ViewClass(obj,m.schema,key,path,m.status);
+        const view = this.factory
+          .get(m.schemaPath.paths, m.schema?.type, Array.isArray(obj)? 'array' : typeof obj)
+          ?.getView(obj,m.schema,key,path,m.status);
+        
+        if( view != undefined ) {
+          //view.attributes['view-path'] = path; 
           this.#insert(view);
           this.#setInsertPosition(view, path);
           if( view.preventSubElements == true ) 
@@ -113,6 +116,7 @@ class HtmlBuilder extends Traversion {
 class SiteConfigEditor extends CustomEditorBase {
   #factoryName; #factory; 
   #schemaPath; #schema;  #mapper;
+  #cancelChangeMessage = false;
 
 	constructor(context, document, webviewPanel, factoryName, schemaPath, token) {
 	  super(context, document, webviewPanel, token)
@@ -139,7 +143,12 @@ class SiteConfigEditor extends CustomEditorBase {
 		html.head.scripts.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','js', 'jsonview.js')));
 		html.head.scripts.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','js', 'editor.js')));
   }
+  renderFailScreen() {
+    return '<h1>Oops!</h1><div>Something went terribly wrong.</div>'
+  }
   renderHtml() {
+    if( this.#factory == undefined ) return this.renderFailScreen();
+console.log('rendering', this.json['/2wochen-lp/'], this.json['/2wochen-lp/d']);    
     const builder = new HtmlBuilder(this.#mapper, this.#factory, {maxDepth:7});
     this.initHtml(builder.html);
     builder.start(this.json);
@@ -147,8 +156,33 @@ class SiteConfigEditor extends CustomEditorBase {
   }
 
   onValueChangedMessage(message) {
-console.log('value-changed', message);
+    if( message.viewPath != undefined ) {
+      const schemaMatch = this.#mapper.findAll(message.viewPath);
+      if( schemaMatch.length == 1 ) {
+        const obj = this.resolveJson(message.viewPath);
+        const setValue = this.#factory.get(schemaMatch[0].schemaPath.paths, schemaMatch[0].schema?.type, Array.isArray(obj)? 'array' : typeof obj)?.setValue;
+        if( typeof setValue == 'function' ) {
+          const relativePath = message.path.slice(message.viewPath.length).replace(/^\.+/,'');
+console.log('beforechange', this.json['/2wochen-lp/']);
+          const newValue = setValue(obj, relativePath, message.value)
+console.log('setter called', newValue, newValue['/2wochen-lp/'], newValue['/2wochen-lp/d']);
+          
+          this.replaceJson(message.viewPath, newValue);
+console.log('afterchange', this.json['/2wochen-lp/'], this.json['/2wochen-lp/d']);
+          this.#createSchemaMapping();
+console.log('aftermappingcreate');
+          return;
+        }
+      }
+    }
     this.replaceJson(message.path, message.value);
+    this.#cancelChangeMessage = true;
+  }
+  async onDocumentChanged(ev) {
+    if( !this.#cancelChangeMessage ) {
+      super.onDocumentChanged(ev);
+      this.#cancelChangeMessage = false;
+    }
   }
 
 }

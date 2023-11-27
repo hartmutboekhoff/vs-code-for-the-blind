@@ -14,8 +14,8 @@ class PageConfigEditor extends SiteConfigEditor {
   initHtml(html) {
     super.initHtml(html);
 	  html.head.title = 'MenüEditor - '+this.document.fileName;
-		html.head.styleSheets.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','css', 'MenuEditor.css')));
-		html.head.scripts.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','js', 'MenuEditor.js')));
+		html.head.styleSheets.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','css', 'PageConfigEditor.css')));
+		html.head.scripts.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','js', 'PageConfigEditor.js')));
   }
 }
 

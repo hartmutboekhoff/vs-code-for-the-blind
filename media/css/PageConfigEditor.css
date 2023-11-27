@@ -1,0 +1,14 @@
+.view-group p {
+  float: left;
+  margin: .2em 0;
+}
+
+.view-group p label {
+  margin-right: .5em;
+}
+.view-group p input[type="text"] {
+  margin-right: 2em;
+}
+.view-group span.radio-button {
+  margin-right: 1em;
+}

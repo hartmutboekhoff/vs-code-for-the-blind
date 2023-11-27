@@ -7,6 +7,7 @@ class CustomEditorBase {
   #context; #document; #panel; #token;
   #disposables = new Disposables();
   #json = {valid:false};
+  //#differences = [];
   
   constructor(context, document, webviewPanel, token) {
     this.#context = context;
@@ -54,10 +55,11 @@ class CustomEditorBase {
     return this.#json.data;
   }
   set json(value) {
-    const old = this.#getJson();
-    const differences = diffJson(old.valid? old.data : {}, value);
-    console.log('diff: ', differences);
+    //const old = this.#getJson();
+    //this.#differences.push(...diffJson(old.valid? old.data : {}, value));
+
     try {
+      this.#json = {valid:false};
       const text = JSON.stringify(value, null, 4);
   		const edit = new vscode.WorkspaceEdit();
   		edit.replace(this.#document.uri,
@@ -83,12 +85,23 @@ class CustomEditorBase {
   }
   replaceJson(path, newValue) {
     const json = this.json;
-    const nodes = resolveJsonHierarchy(path,json);
-    const last = nodes.length - 1;
-    if( nodes[last-1].data != undefined ) {
-      nodes[last-1].data[nodes[last].key] = newValue;
-      this.json = json;
+    const nodesCascade = resolveJsonHierarchy(path,json);
+    const valueIx = nodesCascade.length-1;
+    if( valueIx == 0 ) {
+      this.json = newValue;
     }
+    else {
+      const parentData = nodesCascade[valueIx-1].data;
+      if( parentData != undefined ) {
+        const valueKey = nodesCascade[valueIx].key;
+        parentData[valueKey] = newValue;
+        this.json = json;
+      }
+    }
+  }
+  resolveJson(path, up=0) {
+    const nodes = resolveJsonHierarchy(path, this.json);
+    return JSON.parse(JSON.stringify(nodes[nodes.length-1-up]?.data));
   }
 
   #onDispose() {
@@ -120,7 +133,12 @@ class CustomEditorBase {
       this.#panel.webview.postMessage(Object.assign({},msg,{type}));
   }
   async onDocumentChanged(ev) {
-    this.#renderHtml();
+    //if( this.#differences.length > 0 ) {
+    //  this.postMessage('document-changed', {differences:this.#differences});
+    //  this.#differences = [];
+    //}
+    if( ev.contentChanges.length > 0 )
+      this.#renderHtml();
     //this.postMessage({type: 'update', text: this.#document.getText()});
   }
   async onDidReceiveMessage(ev) {
@@ -130,7 +148,6 @@ class CustomEditorBase {
 	      return this[handlerName](ev);
 	  }
 	  return this.onMessage(ev);
-    
   }  
   async onMessage(ev) {
     console.log('some unspecified message', ev);

@@ -43,6 +43,15 @@
         ]
       },
       {
+        "viewType": "SparkSiteConfig.RedirectsEditor",
+        "displayName": "Redirects Editor",
+        "selector": [
+          {
+            "filenamePattern": "redirects.json"
+          }
+        ]
+      },
+      {
         "viewType": "SparkSiteConfig.JsonView",
         "displayName": "JSON Viewer",
         "selector": [

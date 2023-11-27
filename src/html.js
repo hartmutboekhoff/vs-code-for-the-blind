@@ -1,6 +1,9 @@
 function htmlEncode(text) {
-  // ToDo: implement html-encoding
-  return text;
+  switch(typeof text) {
+    case 'undefined': return '';
+    case 'string': return text.replaceAll('"','&quot;');
+    default: return text.toString().replaceAll('"','&quot;');
+  }
 }
 function isValidAttributeName(n) {
   return /^[a-zA-Z_][a-zA-Z-_]*$/.test(n);
@@ -51,25 +54,10 @@ class ChildrenList extends Array {
 }
 
 class Attributes {
-/*
-  constructor() {
-    return new (class {
-      constructor(attr) {
-        return new Proxy(attr,this);
-      }
-      get(target, property, receiver) {
-        return target[property];
-      }
-      set(target, property, value) {
-        assertAttributeName(property);
-        if( value == undefined )
-          delete target[property];
-        else
-          target[property] = htmlEncode(value.toString());
-      }
-    })(this);
+  constructor(attr) {
+    Object.assign(this,attr);
   }
-*/
+
   toString() {
     let result = '';
     for( const a in this ) {
@@ -125,6 +113,24 @@ class TokenList {
     return [...this.#tokens].join(' ');
   }
 }
+class Dataset {
+  constructor(element) {
+    return new Proxy(element, this);
+  }
+
+  #toAttributeName(cc) {
+    return 'data-' + cc.replaceAll(/[A-Z]/g,m=>'-'+m.toLowerCase());
+  }
+  
+  get(target,prop,receiver) {
+    return target.attributes[this.#toAttributeName(prop)];
+  }
+  set(target,prop,value) {
+    target.attributes[this.#toAttributeName(prop)] = value;
+    return true;
+  }
+}
+
 class Element {
   static #debugMode = true;
 	#children; #attributes;
@@ -150,7 +156,7 @@ class Element {
 	  return this.#attributes ??= new Attributes();
 	}
 	set attributes(v) {
-    Object.assign(this.#attributes, v);
+    Object.assign(this.attributes, v);
 	}
 	
 	get className() {
@@ -161,6 +167,9 @@ class Element {
 	}
 	get classList() {
 	  return new TokenList(this);
+	}
+	get dataset() {
+	  return new Dataset(this);
 	}
 	
 	hasAttributes() {
@@ -209,7 +218,7 @@ class EmptyElement extends Element {
 		return [];
 	}
   toString() {
-    return `<${this.name}${this.hasAttributes.toString()}/>`;
+    return `<${this.name}${this.hasAttributes()? this.attributes.toString():''}/>`;
   }
 }
 class BR extends EmptyElement {

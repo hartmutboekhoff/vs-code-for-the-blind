@@ -73,6 +73,7 @@ class ModuleWrapper {
   get relativeDirectory() { return this.#relativeDirectory; }
   get loaded() { return this.#loaded ; }
   get error() { return this.#error; }
+  set error(e) { this.#error = e; }
   
   get extension() { return this.#name.split('.').slice(-1)[0]; }
   get plainName() { return this.#name.split('.').slice(0,-1).join('.'); }
@@ -174,8 +175,9 @@ async function loadJsonData(relativepath) {
 	try {
 		return JSON.parse(text);
 	}
-	catch {
-		throw new Error('Could not get json-ata. Content is not valid json');
+	catch(e) {
+	  console.log('cannot load JSON', relativepath, e)
+		throw new Error('Could not get json-data from "' + relativepath + '". Content is not valid json');
 	}
 }
 

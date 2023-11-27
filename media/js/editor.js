@@ -5,17 +5,19 @@
   }
 
   window.addEventListener('load',()=>{
-    document.querySelectorAll('input,select').forEach(e=>{
-      if( !('customChangeHandler' in e.dataset) )
-        e.addEventListener('change',ev=>{
-          post('value-changed', {
-            path: ev.target.name, 
-            value: ev.target.type == 'checkbox'
-                    ? ev.target.checked
-                    : ev.target.value
+    document.querySelectorAll('input,textarea,select').forEach(e=>{
+      e.addEventListener('change',ev=>{
+        const viewElement = ev.target.closest('[view-path]');
+        post('value-changed', {
+          path: ev.target.name, 
+          viewPath: viewElement?.getAttribute('view-path'),
+          value:  ev.target.type == 'checkbox'
+                  ? ev.target.checked
+                  : ev.target.value
         });
       })
     });
+/*    
     document.querySelectorAll('.unspecified-map input,.unspecified-map textarea').forEach(e=>{
       e.addEventListener('change', ev=>{
         const tbl = ev.target.closest('.unspecified-map>table');
@@ -35,10 +37,14 @@
         }
       });
     });
+*/    
     document.querySelectorAll('fieldset > legend > span.collapse-button').forEach(el=>{
       el.addEventListener('click',ev=>{
         const fs = ev.target.closest('fieldset').classList.toggle('collapsed');
       })
     });
   });
+  window.addEventListener('message',ev=>{
+    console.log('MESSAGE RECEIVED', ev);
+  })
 })();

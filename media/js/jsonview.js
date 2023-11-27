@@ -1,5 +1,8 @@
 (function() {
   window.addEventListener('load', ()=>{
+    document.querySelectorAll('li li:has(ol),li li:has(ul)')
+      .forEach(e=>e.classList.add('collapsed'));
+    
     document.querySelectorAll('li:has(ol),li:has(ul)')
       .forEach(e=>{
         e.addEventListener('click',ev=>{

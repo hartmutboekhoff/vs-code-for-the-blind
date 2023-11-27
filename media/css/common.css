@@ -29,6 +29,11 @@ fieldset.collapsed > legend > span.collapse-button:before {
 legend .description {
   font-style: italic;
   color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space:nowrap;
+  display:inline-block;
+  vertical-align: bottom;
 }
 legend .description:before {
   content: ' - ';
@@ -40,6 +45,10 @@ legend .description:before {
 
 .unspecified-map table td {
   vertical-align: top;
+}
+[view-path] {
+  outline: 3px solid lime;
+  outline-offset: 2px;
 }
 
 .match-failed {

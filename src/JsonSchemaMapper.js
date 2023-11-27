@@ -14,46 +14,6 @@ function NOT_SUPPORTED(feature, ...context) {
     throw `${feature} is not supported${context.length == 0? '' : ' in '+context.map(c=>c.toString()).join(' - ')}.`;
 } 
 
-/*
-function resolveSchemaPath(path,schema) {
-  const resolve = {
-    'object': (step,subSchema)=>step == GenericAccessor
-                                  ? subSchema.additionalProperties
-                                  : (subSchema.properties?.[step] ?? subSchema.patternProperties?.[step]),
-    'array': (step,subSchema)=>step == GenericAccessor
-                                  ? (subSchema.items || subschema.contains)
-                                  : Number.isInteger(step)
-                                  ? (subSchema.prefixedItems[step] ?? (subSchema.items || undefined))
-                                  : undefined,
-  }
-  
-  const splitRx = /^(.*?)\/|\[(\*)\]|\[(\d+)\]|(?<!\[)(?<=\/)([a-zA-Z_$][a-zA-Z0-9_$]*)(?=[\/\[]|$)(?!\])|\["(.*)(?<!\\)"\]|\[\/(.*?)(?<!\\)\/\]/g;
-  const splitPath = [...path.matchAll(splitRx)].reduce((acc,s)=>{
-    if( s[1] != undefined )
-      acc.root = s[1];
-    else
-      acc.steps.push(s[4] ?? s[5] ?? s[6] 
-                     ?? (s[2] == '*'? GenericAccessor : +s[3]));
-                     
-    return acc;
-  },{root:'',steps:[]});
-  
-  let subSchema = schema;
-  for( const step of splitPath.steps ) 
-    if( undefined == (subSchema = resolve[subSchema.type]?.(step,subSchema)) )
-      break;
-  return subSchema;
-}
-function resolveJsonPath(path,data) {
-  const splitRx = /(?<!\[)(?<=\.|^)([a-zA-Z_$][a-zA-Z0-9_$]*)(?=[\.\[]|$)(?!\])|\[(\d+)\]|\["(.*?)(?<!\\)"\]/g;
-  let nested = data;
-  for( const k of path.matchAll(splitRx) )
-    if( undefined == (nested = nested[k[1] ?? k[2] ?? k[3]]) )
-      break;
-  return nested;
-}
-*/
-
 class JsonSchemaPath {
   paths;
 
@@ -75,10 +35,10 @@ class JsonSchemaPath {
         return Number.isInteger(a)
                 ? `[${a}]`
                 : typeof a == 'object' && a.constructor.name == 'RegExp'
-                ? `["${a.source.replaceAll('\\','\\\\').replaceAll('"','\\"')}"]`
+                ? `["${a.source.replaceAll('"','\\"')}"]`
                 : isValidIdentifier(a)
                 ? `.${a}`
-                : `["${a.replaceAll('\\','\\\\').replaceAll('"','\\"')}"]`;
+                : `["${a.replaceAll('"','\\"')}"]`;
       }).join('');
 
     const c = this.clone();
@@ -454,9 +414,9 @@ class JsonSchemaObjectMapper {
       for( const k in schema ) {
         const validator = tv[k] ?? (definedValidators.includes(k) || this.#validatorFallbacks[k]);
         if( typeof validator == 'function' )
-          valid &&= validator(json, schema[k], schema, schemaPath, jsonPath, unmatchedProperties)
+          valid &&= validator(json, schema[k], schema, schemaPath, jsonPath, unmatchedProperties);
         else if( validator != true )
-      NOT_SUPPORTED(`"${k}"`, tv['@name'], schemaPath.paths);
+          NOT_SUPPORTED(`"${k}"`, tv['@name'], schemaPath.paths);
       } 
     }
     return valid;   

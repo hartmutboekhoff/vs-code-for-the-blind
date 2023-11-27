@@ -34,20 +34,26 @@ class Cache {
 	}
 }
 
-let logcounter = 10;
-
 class Factory {
   #status = 'new';
   #directories;
   #modules = [];
   #errors = [];
 	#categories;
-	#interface;
+	#interfaceDef;
 	#modCache = new Cache();
 	#setCache = new Cache();
 	#diagnostics = {
 	  getStatus: ()=>this.#status,
-	  getErrors: ()=>this.#errors,
+	  getErrors: ()=>this.#errors.map(e=>{
+  	    return e.$plainName == undefined? e : {
+          name: e.$plainName,
+          loaded: e.$loaded,
+          path: e.$path,
+          selectors: e.$selectors,
+          error: e.$error,
+  	    };
+  	  }),
     getModuleInfos: ()=>this.#modules.map(m=>({
         name:m.$plainName,
         loaded: m.$loaded,
@@ -65,7 +71,7 @@ class Factory {
 		this.#directories = ( directories == undefined || directories.length == 0 )? [`./${name}`] : directories;
 
 		this.#categories = new Categories(categories);
-		this.#interface = interfaceConfig;
+		this.#interfaceDef = interfaceConfig;
     this.#loadModules().then(()=>this.#status = 'ready');
     
     factoryDiagnostics[this.name] = this.#diagnostics;
@@ -86,27 +92,63 @@ class Factory {
 	        return acc;
 	      },{errors:[],modules:[]});
 	    });
-    this.#modules = Array.from(new Set(loaded.modules));
-    this.#modules.forEach(m=>{
-      m.$selectors = new ModuleSelectors(m, this.#categories);
-      m.$interface = this.#createModuleInterface(m);
-    });
+
     this.#errors = loaded.errors;
-    console.log(this.#modules.length+' modules were successfully loaded.');
+    this.#modules = Array
+      .from(new Set(loaded.modules))
+      .map(m=>{
+        try {
+          m.$selectors = new ModuleSelectors(m, this.#categories);
+          m.$interface = this.#createModuleInterface(m);
+          return m;
+        }
+        catch(e) {
+          m.$error = e;
+          this.#errors.push(m);
+          return undefined;
+        }
+      })
+      .filter(m=>m!=undefined);
+    
+    console.log(`${this.name}-Factory: ${this.#modules.length} modules were successfully loaded.`);
     if( this.#errors.length > 0 )
-      console.warn('Some modules could not be loaded:', this.#errors);
+     console.warn(`${this.name}-Factory: ${this.#errors.length} modules could not be loaded.`, this.#errors);
 	}
   #createModuleInterface(module) {
-    if( this.#interface == undefined || this.#interface.length == 0 )
+    if( this.#interfaceDef == undefined || Object.keys(this.#interfaceDef).length == 0 )
       return module;
-    if( this.#interface.length == 1 && this.#interface[0].isDefault == true )
-      return module[this.#interface[0].name];
-    return this.#interface.reduce((acc,p)=>{
-      acc[p.name] = module[p.name];
-      if( p.isDefault == true )
-        acc['default'] = module[p.name];
-      return acc;
-    },{});
+
+    const moduleInterface = {};
+    for( const k in this.#interfaceDef ) {
+      const def = this.#interfaceDef[k];
+      const propValue = module[def.name??k];
+      
+      if( def.required == true && propValue == undefined )
+        throw `Required property "${def.name??k}" does not exist in module "${module.$name}".`;
+
+      switch( def.wrapper ) {
+        case 'constructor-call':
+          if( typeof propValue != 'function'
+              || !/^(class[\s{]|function[\s(])/.test(propValue.toString()) )
+            throw `Property "${def.name??k}" must be constructable in module "${module.$name}".`;
+          moduleInterface[k] = (...args)=>new propValue(...args);
+          break;
+
+        case 'getter':
+          Object.defineProperty(moduleInterface,k,{
+            enumerable: true,
+            get: ()=>propValue.split('.').reduce((acc,n)=>acc?.[n],module)
+          })
+          break;
+                    
+        case 'none':
+        default:
+          moduleInterface[k] = propValue;
+      }
+      if( def.isDefault )
+        moduleInterface.default ??= moduleInterface[k];
+    } 
+    return Object.seal(moduleInterface);
   }
 
   #findAllMatches(selectorObj) {

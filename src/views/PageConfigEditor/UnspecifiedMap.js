@@ -1,5 +1,6 @@
 const {Element, PlainText, Textarea} = require('../../html');
 const {ValueGroupWrapper} = require('../helpers/dataElementViews');
+const {buildJsonPath,renameObjectProperty} = require('../../utility');
 
 class TableRow extends Element {
   constructor(...content) {
@@ -15,6 +16,7 @@ class TableRow extends Element {
 class UnspecifiedMap extends ValueGroupWrapper {
   constructor(obj, schema, key, path, status) {
     super(schema, key, path, {class:'unspecified-map match-'+status});
+    this.viewPath = path;
     const tbl = new Element('table',{
       id: path,
     });
@@ -23,16 +25,20 @@ class UnspecifiedMap extends ValueGroupWrapper {
     tbl.children.append(new PlainText('<thead><tr><td>Name</td><td>Wert</td></tr></thead>'));
     let i = 0;
     for( const n in obj ) {
+      const fieldName = buildJsonPath(path,n);
       const c1 = new Element('input', {
         type: 'input',
         value: n,
-        name: `${path}--name`,
+        name: `${fieldName}--name`,
         'data-custom-change-handler': 'parent',
       });
-      const c2 = new Textarea(obj[n],  {
-        cols: 30,
-        rows: 5, 
-        name: `${path}--value`,
+      
+      const text = typeof obj[n] == 'object'? JSON.stringify(obj[n],undefined,2) : obj[n];
+      let lnCount = text?.match?.(/\n/g)?.length ?? 0;
+      const c2 = new Textarea(text,  {
+        cols: 50,
+        rows: ++lnCount<3? 3 : lnCount>20? 20 : lnCount, 
+        name: `${fieldName}--value`,
         'data-custom-change-handler': 'parent',
       });
       tbl.children.append(new TableRow(c1, c2));
@@ -53,7 +59,20 @@ class UnspecifiedMap extends ValueGroupWrapper {
   }
 }
 
+function setValue(obj, relativePath, value) {
+  if( relativePath.endsWith('--name')) {
+    const oldKey = relativePath.slice(0,-6);
+    const newKey = value;
+    return renameObjectProperty(obj, oldKey, newKey);
+  }
+  else if( relativePath.endsWith('--value') ) {
+    obj[relativePath.slice(0,-7)] = value;
+  }
+  return obj;
+}
+ 
 exports.view = UnspecifiedMap;
+exports.setValue = setValue;
 exports.selectors = [
   {
     SchemaPath: '#.definitions.UnspecifiedMap',
