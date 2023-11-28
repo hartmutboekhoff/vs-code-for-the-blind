@@ -4,7 +4,7 @@
   "type": "object",
   "properties": {
     "meta": {
-      "$ref": "#/definitions/UnspecifiedMap"
+      "$ref": "#/definitions/MetaMap"
     },
     "components": {
       "type": "array",
@@ -76,7 +76,7 @@
           ]
         },
         "params": {
-          "$ref": "#/definitions/UnspecifiedMap"
+          "$ref": "#/definitions/ParamMap"
         },
         "count": {
           "type": "integer"
@@ -159,7 +159,7 @@
           ]
         },
         "params": {
-          "$ref": "#/definitions/UnspecifiedMap"
+          "$ref": "#/definitions/ParamMap"
         }
       }
     },
@@ -182,10 +182,11 @@
       "type": "object",
       "properties": {
         "type": {
-          "type": "string"
+          "type": "string",
+          "enum": ["TEASER_SLIDER","XHTML_BOX","OPENER_BOX","TOWER_BOX","EXCLUSIVE_BOX","TOPIC_BOX","BOX_HEADLINE","OPULENZ_BOX","COMPONENT_ITERATOR","VARIABLE_LIST_BOX_COM","TEXTLINK_BOX","NEWSLETTER_SIGNUP","VARIABLE_LIST_BOX_COMBO","CAROUSEL_TEASER"]
         },
         "params": {
-          "$ref": "#/definitions/UnspecifiedMap"
+          "$ref": "#/definitions/ParamMap"
         },
         "hideWithoutContent": {
           "type": "boolean"
@@ -213,6 +214,15 @@
           }
         },
         "$contentContext": {
+          "type": "object",
+          "properties": {
+            "section": {
+              "type": "object",
+              "properties": {
+                "sectionUniqueName": {}
+              }
+            }
+          }
         },
         "$componentIterator": {
           "$ref": "#/definitions/PageConfigComponentIterator"
@@ -233,8 +243,101 @@
         }
       }
     },
-    "UnspecifiedMap": {
-      "type": "object"
+    "MetaMap": {
+      "type": "object",
+      "properties": {
+        "title": { 
+          "type": "string"
+        },
+        "description": { 
+          "type": "string"
+        },
+        "url": { 
+          "type": "string"
+        },
+        "keywords": { 
+          "type": "string"
+        }
+      }
+    },
+    "ParamMap": {
+      "type": "object",
+      "properties": {
+        "allNewsLink": {},
+        "groupNames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "groupIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sectionId": {},
+        "listName": {},
+        "sectionUniqueName": {},
+        "listName": {},
+        "homeOnly": {},
+        "topicHeader": {
+          "type": "object",
+          "properties": {
+            "label": {},
+            "fullPath": {},
+            "topicTags": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "label": {},
+                  "fullPath": {}
+                }
+              }
+            }
+          }
+        },
+        "label": {
+          "type": "string"
+        },
+        "fullPath": {
+          "type": "string"
+        },
+        "center": {
+          "type": "object",
+          "properties": {
+            "title": {},
+            "variant": {}
+          }
+        },
+        "right": {
+          "type": "object",
+          "properties": {
+            "title": {},
+            "variant": {}
+          }
+        },
+        "left": {
+          "type": "object",
+          "properties": {
+            "title": {},
+            "variant": {}
+          }
+        },
+        "listName": {},
+        "variant": {},
+        "teaserType": {},
+        "title": {},
+        "pageVariant": {},
+        "articleTypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+
+      }
     }
   }
 }

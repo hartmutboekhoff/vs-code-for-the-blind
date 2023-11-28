@@ -90,7 +90,7 @@ class JsonSchemaObjectMapper {
         const valid = schema[subschema] != undefined 
                         ? this.#validate(schema[subschema], data, schemaPath.append(subschema), jsonPath)
                         : true;
-        this.#addSubCondition(schema[subschema], data, schemaPath.append(subschema), jsonPath, valid);
+        this.#addSubCondition(schema[subschema], data, schemaPath.append(subschema), jsonPath, valid, subschema);
         this.#resumeMapping();
         return valid;
       },
@@ -99,7 +99,7 @@ class JsonSchemaObjectMapper {
       'not': (data, test, schema, schemaPath, jsonPath, unmatchedProperties)=>{
         this.#pauseMapping();
         const valid = !this.#validate(test, data, schemaPath.append('not'), jsonPath);
-        this.#addSubCondition(test, data, schemaPath.append('not'), jsonPath, valid);
+        this.#addSubCondition(test, data, schemaPath.append('not'), jsonPath, valid, 'not');
         this.#resumeMapping();
         return valid;
       },
@@ -110,7 +110,7 @@ class JsonSchemaObjectMapper {
           valid = this.#validate(anyOf[i], data, schemaPath.append('anyOf', i), jsonPath);
           if( valid ) break;
         }
-        this.#addSubCondition(anyOf, data, schemaPath.append('anyOf'), jsonPath, false);
+        this.#addSubCondition(anyOf, data, schemaPath.append('anyOf'), jsonPath, valid, 'anyOf');
         this.#resumeMapping();
         return valid;
       },
@@ -121,7 +121,7 @@ class JsonSchemaObjectMapper {
           valid = this.#validate(allOf[i], data, schemaPath.append('allOf', i), jsonPath);
           if( !valid ) break;
         }
-        this.#addSubCondition(allOf, data, schemaPath.append('allOf'), jsonPath), valid;
+        this.#addSubCondition(allOf, data, schemaPath.append('allOf'), jsonPath, valid, 'allOf');
         this.#resumeMapping();
         return valid;
       },
@@ -133,7 +133,7 @@ class JsonSchemaObjectMapper {
             ++counter;
           if( counter > 1 ) break;
         }
-        this.#addSubCondition(oneOf, data, schemaPath.append('oneOf'), jsonPath, counter != 1);
+        this.#addSubCondition(oneOf, data, schemaPath.append('oneOf'), jsonPath, counter == 1, 'oneOf');
         this.#resumeMapping();
         return counter == 1;
       },
