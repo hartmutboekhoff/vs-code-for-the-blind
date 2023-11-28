@@ -59,7 +59,18 @@
             "filenamePattern": "*.json"
           }
         ]
+      },
+      {
+        "viewType": "SparkSiteConfig.GenericSchemaEditor",
+        "displayName": "Generic Schema Editor",
+        "selector": [
+          {
+            "filenamePattern": "**/pages/*.json"
+          }
+        ]
       }
+      
+
     ]
   },
   "scripts": {

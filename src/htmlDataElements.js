@@ -90,6 +90,7 @@ class ObjectValue extends DataElement {
       keys = keys.filter(k=>!options.excludeKeys.includes(k));
 
     if( keys.length > 0 ) {
+    	keys = keys.sort();
       const ul = new Element('ul',{class:'data-element object'});
       for( const k of keys ) {
         const child = createDataValueElement(k, value[k], options);

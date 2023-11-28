@@ -3,7 +3,7 @@ const {isValidIdentifier, buildJsonPath} = require('./utility');
 const DEFAULT_BASE_URI = 'https://schema.funkemedien.de';
 const MAP_NON_OBJECTS = true;
 const MAP_SUBCONDITIONS = 'none'; // 'failed' | 'all' | 'none'
-const THROW_IMPLEMENTATION_MISSING = true;
+const THROW_IMPLEMENTATION_MISSING = false;
 
 function IMPLEMENTATION_MISSING(result) {
   if( THROW_IMPLEMENTATION_MISSING )
@@ -24,6 +24,12 @@ class JsonSchemaPath {
     return new JsonSchemaPath(this);
   }
   
+  get total() {
+  	return this.paths[0];
+  }
+  get latest() {
+  	return this.paths[this.paths.length-1];
+  }
   addSubschema(ref) {
     ref = ref.replaceAll('/','.');
     if( !this.paths.includes(ref) )
@@ -325,6 +331,7 @@ class JsonSchemaObjectMapper {
     // not supported but also not an error
     'title': true,
     'description': true,
+    'default': true,
     'additionalProperties': true,
     'contains': true,
     'enum': true,
@@ -427,7 +434,7 @@ class JsonSchemaObjectMapper {
       schemaPath.addSubschema(schema['$ref']);
       schema = this.#resolveSubSchema(schema);
     }
-          
+console.log(schemaPath.latest,schemaPath.total);
     const typeValidators = Array.isArray(schema.type)
                              ? schema.type.map(t=>this.#validators[t])
                              : [this.#validators[schema.type ?? '$']];
