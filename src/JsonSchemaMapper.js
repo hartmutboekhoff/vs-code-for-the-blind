@@ -434,7 +434,7 @@ class JsonSchemaObjectMapper {
       schemaPath.addSubschema(schema['$ref']);
       schema = this.#resolveSubSchema(schema);
     }
-console.log(schemaPath.latest,schemaPath.total);
+  
     const typeValidators = Array.isArray(schema.type)
                              ? schema.type.map(t=>this.#validators[t])
                              : [this.#validators[schema.type ?? '$']];

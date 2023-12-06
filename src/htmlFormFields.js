@@ -76,6 +76,16 @@ class RadioInputLine extends Element {
   }
 }
 
+class NumericInputLine extends Element {
+  constructor(id, label, value, description, attributes) {
+    super('p', {class: attributes?.class});
+    this.label = new Element('label',  label, {for: id});
+    this.input = new Element('input', Object.assign({id, name: id, type: 'number', value}, attributes, {class:undefined}));
+    this.description = new Element('span', description, {class: 'description'});
+    
+    this.children.append(this.label, this.input, new BR(), this.description);
+  }
+}
 class Legend extends Element {
   constructor(title, subtitle, attributes) {
     super('legend', title, attributes);
@@ -92,5 +102,6 @@ module.exports = {
   TextInputLine,
   DropdownInputLine,
   RadioInputLine,
+  NumericInputLine,
   Legend,
 }

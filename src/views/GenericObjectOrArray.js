@@ -3,7 +3,7 @@ const {ValueGroupWrapper} = require('./helpers/dataElementViews');
 
 class GenericObjectOrArray extends ValueGroupWrapper {
   constructor(obj, schema, key, path, status) {
-    super(schema, key, path, {class:'array generic match-'+status});
+    super(schema, key, path, {class:(Array.isArray(obj)?'array':'object')+' generic match-'+status});
   }
   
   get preventSubElements() {

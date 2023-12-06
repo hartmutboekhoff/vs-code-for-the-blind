@@ -56,8 +56,10 @@ class Factory {
   	  }),
     getModuleInfos: ()=>this.#modules.map(m=>({
         name:m.$plainName,
+        description: m.$description,
         loaded: m.$loaded,
         path: m.$path,
+        dirIndex: m.$dirIndex,
         selectors: m.$selectors,
         error: m.$error,
       })),
@@ -81,9 +83,9 @@ class Factory {
 	  this.#status = 'loading modules';
 	  const loaded = await Promise.allSettled(this.#directories.map(d=>loadModules(d,'*.js',false)))
 	    .then(results=>{
-	      return results.reduce((acc,r)=>{
+	      return results.reduce((acc,r,ix)=>{
 	        if( r.status=='fulfilled' ) {
-	          acc.modules.push(...r.value.loaded);
+	          acc.modules.push(...r.value.loaded.map(m=>(m.$dirIndex=ix,m)));
 	          acc.errors.push(...r.value.errors);
 	        }
 	        else {
@@ -160,7 +162,6 @@ class Factory {
   } 
   #findBestMatch(selectorObj) {
   	const matches =	this.#findAllMatches(selectorObj);
-
   	if( matches.length == 0 ) return undefined;
   	if( matches.length == 1 ) return matches[0].module;
 

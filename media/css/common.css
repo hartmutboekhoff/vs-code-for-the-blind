@@ -38,7 +38,9 @@ legend .description {
 legend .description:before {
   content: ' - ';
 }
-
+legend .description:empty:before {
+  content: ''
+}
 .generic {
   border: 3px dotted #f80;
 }
@@ -59,4 +61,12 @@ legend .description:before {
 }
 .match-valid {
   
+}
+
+fieldset label {
+  width: 10%;
+  display: inline-block;
+}
+fieldset input[type="text"] {
+  width: 70%;
 }

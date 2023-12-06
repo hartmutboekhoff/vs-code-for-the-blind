@@ -157,10 +157,10 @@ class Traversion {
 
     const excludeBackup = this.#excludeNestingKeys;
 
-    const finalObj = this.#beforeNesting(obj, key, path);
+    const adjustedObj = this.#beforeNesting(obj, key, path);
 
-    if( finalObj != obj )
-      nestingKeys = filterExcludedKeys(Object.keys(finalObj), this.#excludeNestingKeys);
+    if( adjustedObj != obj )
+      nestingKeys = filterExcludedKeys(Object.keys(adjustedObj), this.#excludeNestingKeys);
     else if( this.#excludeNestingKeys != excludeBackup )
       nestingKeys = filterExcludedKeys(nestingKeys, this.#excludeNestingKeys);
 
@@ -170,11 +170,11 @@ class Traversion {
       this.#onAbortNesting(obj, key, path, [], nestingKeys);
     }
     else {
-      aborted = Array.isArray(finalObj)
-                  ? this.#traverseNestedArray(finalObj, key, path, nestingKeys)
-                  : this.#traverseNestedObject(finalObj, key, path, nestingKeys);
+      aborted = Array.isArray(adjustedObj)
+                  ? this.#traverseNestedArray(adjustedObj, key, path, nestingKeys)
+                  : this.#traverseNestedObject(adjustedObj, key, path, nestingKeys);
     }
-    this.#afterNesting(finalObj, key, path, aborted);
+    this.#afterNesting(adjustedObj, key, path, aborted);
   }
   #traverseNestedArray(obj, key, path, nestingKeys) {
     for( let i = 0 ; i < nestingKeys.length ; i++ ) {

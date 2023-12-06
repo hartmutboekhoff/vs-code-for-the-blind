@@ -17,6 +17,11 @@ class RedirectsEditor extends SiteConfigEditor {
 		html.head.styleSheets.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','css', 'RedirectsEditor.css')));
 		html.head.scripts.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','js', 'RedirectsEditor.js')));
   }
+  preprocessJSON(jsonObj) {
+    return Object.entries(jsonObj)
+      .sort(([a],[b])=>a.localeCompare(b))
+      .reduce((acc,[k,v])=>(acc[k]=v,acc),{});
+  }
 }
 
 module.exports = RedirectsEditor;

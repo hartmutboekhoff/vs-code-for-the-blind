@@ -20,6 +20,8 @@ class ModuleWrapper {
     this.#loaded = loaded;
     if( !loaded )
       this.#error = moduleOrError;
+    else if( moduleOrError.description != undefined )
+      this.description = moduleOrError.description;
 
     return new Proxy(loaded? moduleOrError : {}, this);
   }
@@ -283,7 +285,6 @@ async function loadCommands(context,rootDir,rootNS) {
 }
 
 async function loadCustomEditors(context, rootDir, rootNS) {
-
   const editorModules = await loadModules(rootDir,'*.js',false);
   editorModules.loaded.forEach(m=>{
     let key = m.$getKey(rootNS);
@@ -300,7 +301,7 @@ async function loadCustomEditors(context, rootDir, rootNS) {
 		}
 
     const provider = new GenericCustomEditorProvider(context, cls.classObject);
-    context.subscriptions.push(vscode.window.registerCustomEditorProvider(key, provider));
+    context.subscriptions.push(vscode.window.registerCustomEditorProvider(key, provider, provider.getPanelOptions()));
     console.log(`Registered custom-editor "${key}" from ${cls.info}`);
   
   });

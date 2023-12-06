@@ -1,343 +1,360 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "description": "Schema for every config object in every publication's `/pages`-folder",
-  "type": "object",
-  "properties": {
-    "meta": {
-      "$ref": "#/definitions/MetaMap"
-    },
-    "components": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/PageConfigComponent"
-      }
-    },
-    "viewGroups": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/PageConfigViewGroup"
-      }
-    }
-  },
-  "definitions": {
-    "ContentConfig": {
-      "type": "object",
-      "properties": {
-        "targetProperty": {
-          "type": "string"
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "Schema for every config object in every publication's `/pages`-folder",
+    "type": "object",
+    "properties": {
+        "meta": {
+            "$ref": "#/definitions/MetaMap",
+            "title": "Metadaten",
+            "description": "Key+Value Tupel, die verschiedene Aspekte der gesamten Seite steuern"
         },
-        "minCount": {
-          "type": "integer",
-          "minimum": 0
+        "components": {
+            "type": "array",
+            "title": "Komponenten",
+            "items": {
+                "$ref": "#/definitions/PageConfigComponent"
+            }
         },
-        "maxCount": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "sort": {
-          "type": "string",
-          "enum": [
-            "publishdate_desc",
-            "modifieddate_desc"
-          ]
-        },
-        "sources": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ContentConfigSource"
-          }
-        },
-        "resolveAllSourcesBeforeSort": {
-          "type": "boolean"
-        },
-        "deduplicationId": {
-          "type": "string"
-        }
-      }
-    },
-    "ContentConfigSource": {
-      "type": "object",
-      "required": [
-        "type"
-      ],
-      "additionalProperties": false,
-      "properties": {
-        "type": {
-          "type": "string",
-          "enum": [
-            "publication",
-            "section",
-            "group",
-            "mostread",
-            "list",
-            "theme",
-            "author",
-            "related"
-          ]
-        },
-        "params": {
-          "$ref": "#/definitions/ParamMap"
-        },
-        "count": {
-          "type": "integer"
-        },
-        "sort": {
-          "type": "string"
-        },
-        "filter": {
-          "type": "string"
-        },
-        "filters": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ContentConfigFilter"
-          }
-        },
-        "maxAgeInMonths": {},
-        "fromDate": {}
-      },
-      "if": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "const": "section"
-          }
-        },
-        "required": [
-          "type"
-        ]
-      },
-      "then": {
-        "properties": {
-          "maxAgeInMonths": {
-            "type": "integer",
-            "description": "only for type=section!",
-            "minimum": 1
-          },
-          "fromDate": {
-            "type": "string",
-            "description": "only for type=section! format yyyy-MM-dd"
-          }
-        }
-      },
-      "else": {
-        "not": {
-          "anyOf": [
-            {
-              "required": [
-                "maxAgeInMonths"
-              ]
+        "viewGroups": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/PageConfigViewGroup"
             },
-            {
-              "required": [
-                "fromDate"
-              ]
+            "title": "View Groups",
+            "description": "View Groups steuern die Sichtbarkeit abhänngiger Widgets"
+        }
+    },
+    "definitions": {
+        "ContentConfig": {
+            "type": "object",
+            "properties": {
+                "targetProperty": {
+                    "type": "string"
+                },
+                "minCount": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "maxCount": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "sort": {
+                    "type": "string",
+                    "enum": [
+                        "publishdate_desc",
+                        "modifieddate_desc"
+                    ]
+                },
+                "sources": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ContentConfigSource"
+                    }
+                },
+                "resolveAllSourcesBeforeSort": {
+                    "type": "boolean"
+                },
+                "deduplicationId": {
+                    "type": "string"
+                }
             }
-          ]
-        }
-      }
-    },
-    "ContentConfigFilter": {
-      "type": "object",
-      "properties": {
-        "type": {
-          "type": "string",
-          "enum": [
-            "default",
-            "nonLive",
-            "premium",
-            "onlyPaid",
-            "free",
-            "onlyFree",
-            "nonTest",
-            "noTest",
-            "noIndex",
-            "hasTeaserImage",
-            "nothing",
-            "timePeriod",
-            "hasPlayout"
-          ]
         },
-        "params": {
-          "$ref": "#/definitions/ParamMap"
-        }
-      }
-    },
-    "PageConfigViewGroup": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "type": {
-          "type": "string",
-          "enum": [
-            "ALL_OR_NOTHING",
-            "FIRST_WITH_CONTENT"
-          ]
-        }
-      }
-    },
-    "PageConfigComponent": {
-      "type": "object",
-      "properties": {
-        "type": {
-          "type": "string",
-          "enum": ["TEASER_SLIDER","XHTML_BOX","OPENER_BOX","TOWER_BOX","EXCLUSIVE_BOX","TOPIC_BOX","BOX_HEADLINE","OPULENZ_BOX","COMPONENT_ITERATOR","VARIABLE_LIST_BOX_COM","TEXTLINK_BOX","NEWSLETTER_SIGNUP","VARIABLE_LIST_BOX_COMBO","CAROUSEL_TEASER"]
-        },
-        "params": {
-          "$ref": "#/definitions/ParamMap"
-        },
-        "hideWithoutContent": {
-          "type": "boolean"
-        },
-        "enabled": {
-          "type": "boolean"
-        },
-        "viewGroupId": {
-          "type": "string"
-        },
-        "feedFormat": {
-          "type": "string",
-          "examples": [
-            "RSS"
-          ]
-        },
-        "feedConfigName": {
-          "type": "string",
-          "description": "Name of the feed, will be used for generation. Only for feeds!"
-        },
-        "$contentConfig": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ContentConfig"
-          }
-        },
-        "$contentContext": {
-          "type": "object",
-          "properties": {
-            "section": {
-              "type": "object",
-              "properties": {
-                "sectionUniqueName": {}
-              }
-            }
-          }
-        },
-        "$componentIterator": {
-          "$ref": "#/definitions/PageConfigComponentIterator"
-        }
-      }
-    },
-    "PageConfigComponentIterator": {
-      "type": "object",
-      "properties": {
-        "each": {
-          "type": "string"
-        },
-        "eachCondition": {
-          "type": "string"
-        },
-        "component": {
-          "$ref": "#/definitions/PageConfigComponent"
-        }
-      }
-    },
-    "MetaMap": {
-      "type": "object",
-      "properties": {
-        "title": { 
-          "type": "string"
-        },
-        "description": { 
-          "type": "string"
-        },
-        "url": { 
-          "type": "string"
-        },
-        "keywords": { 
-          "type": "string"
-        }
-      }
-    },
-    "ParamMap": {
-      "type": "object",
-      "properties": {
-        "allNewsLink": {},
-        "groupNames": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "groupIds": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "sectionId": {},
-        "listName": {},
-        "sectionUniqueName": {},
-        "listName": {},
-        "homeOnly": {},
-        "topicHeader": {
-          "type": "object",
-          "properties": {
-            "label": {},
-            "fullPath": {},
-            "topicTags": {
-              "type": "array",
-              "items": {
+        "ContentConfigSource": {
+            "type": "object",
+            "required": [
+                "type"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "publication",
+                        "section",
+                        "group",
+                        "mostread",
+                        "list",
+                        "theme",
+                        "author",
+                        "related"
+                    ]
+                },
+                "params": {
+                    "$ref": "#/definitions/ParamMap"
+                },
+                "count": {
+                    "type": "integer"
+                },
+                "sort": {
+                    "type": "string"
+                },
+                "filter": {
+                    "type": "string"
+                },
+                "filters": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ContentConfigFilter"
+                    }
+                },
+                "maxAgeInMonths": {},
+                "fromDate": {}
+            },
+            "if": {
                 "type": "object",
                 "properties": {
-                  "label": {},
-                  "fullPath": {}
+                    "type": {
+                        "const": "section"
+                    }
+                },
+                "required": [
+                    "type"
+                ]
+            },
+            "then": {
+                "properties": {
+                    "maxAgeInMonths": {
+                        "type": "integer",
+                        "description": "only for type=section!",
+                        "minimum": 1
+                    },
+                    "fromDate": {
+                        "type": "string",
+                        "description": "only for type=section! format yyyy-MM-dd"
+                    }
                 }
-              }
+            },
+            "else": {
+                "not": {
+                    "anyOf": [
+                        {
+                            "required": [
+                                "maxAgeInMonths"
+                            ]
+                        },
+                        {
+                            "required": [
+                                "fromDate"
+                            ]
+                        }
+                    ]
+                }
             }
-          }
         },
-        "label": {
-          "type": "string"
+        "ContentConfigFilter": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "default",
+                        "nonLive",
+                        "premium",
+                        "onlyPaid",
+                        "free",
+                        "onlyFree",
+                        "nonTest",
+                        "noTest",
+                        "noIndex",
+                        "hasTeaserImage",
+                        "nothing",
+                        "timePeriod",
+                        "hasPlayout"
+                    ]
+                },
+                "params": {
+                    "$ref": "#/definitions/ParamMap"
+                }
+            }
         },
-        "fullPath": {
-          "type": "string"
+        "PageConfigViewGroup": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "ALL_OR_NOTHING",
+                        "FIRST_WITH_CONTENT"
+                    ]
+                }
+            }
         },
-        "center": {
-          "type": "object",
-          "properties": {
-            "title": {},
-            "variant": {}
-          }
+        "PageConfigComponent": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "TEASER_SLIDER",
+                        "XHTML_BOX",
+                        "OPENER_BOX",
+                        "TOWER_BOX",
+                        "EXCLUSIVE_BOX",
+                        "TOPIC_BOX",
+                        "BOX_HEADLINE",
+                        "OPULENZ_BOX",
+                        "COMPONENT_ITERATOR",
+                        "VARIABLE_LIST_BOX_COM",
+                        "TEXTLINK_BOX",
+                        "NEWSLETTER_SIGNUP",
+                        "VARIABLE_LIST_BOX_COMBO",
+                        "CAROUSEL_TEASER"
+                    ]
+                },
+                "params": {
+                    "$ref": "#/definitions/ParamMap"
+                },
+                "hideWithoutContent": {
+                    "type": "boolean"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "viewGroupId": {
+                    "type": "string"
+                },
+                "feedFormat": {
+                    "type": "string",
+                    "examples": [
+                        "RSS"
+                    ]
+                },
+                "feedConfigName": {
+                    "type": "string",
+                    "description": "Name of the feed, will be used for generation. Only for feeds!"
+                },
+                "$contentConfig": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ContentConfig"
+                    }
+                },
+                "$contentContext": {
+                    "type": "object",
+                    "properties": {
+                        "section": {
+                            "type": "object",
+                            "properties": {
+                                "sectionUniqueName": {}
+                            }
+                        }
+                    }
+                },
+                "$componentIterator": {
+                    "$ref": "#/definitions/PageConfigComponentIterator"
+                }
+            }
         },
-        "right": {
-          "type": "object",
-          "properties": {
-            "title": {},
-            "variant": {}
-          }
+        "PageConfigComponentIterator": {
+            "type": "object",
+            "properties": {
+                "each": {
+                    "type": "string"
+                },
+                "eachCondition": {
+                    "type": "string"
+                },
+                "component": {
+                    "$ref": "#/definitions/PageConfigComponent"
+                }
+            }
         },
-        "left": {
-          "type": "object",
-          "properties": {
-            "title": {},
-            "variant": {}
-          }
+        "MetaMap": {
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "keywords": {
+                    "type": "string"
+                }
+            }
         },
-        "listName": {},
-        "variant": {},
-        "teaserType": {},
-        "title": {},
-        "pageVariant": {},
-        "articleTypes": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+        "ParamMap": {
+            "type": "object",
+            "properties": {
+                "allNewsLink": {},
+                "groupNames": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "groupIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "sectionId": {},
+                "listName": {},
+                "sectionUniqueName": {},
+                "homeOnly": {},
+                "topicHeader": {
+                    "type": "object",
+                    "properties": {
+                        "label": {},
+                        "fullPath": {},
+                        "topicTags": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "label": {},
+                                    "fullPath": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "label": {
+                    "type": "string"
+                },
+                "fullPath": {
+                    "type": "string"
+                },
+                "center": {
+                    "type": "object",
+                    "properties": {
+                        "title": {},
+                        "variant": {}
+                    }
+                },
+                "right": {
+                    "type": "object",
+                    "properties": {
+                        "title": {},
+                        "variant": {}
+                    }
+                },
+                "left": {
+                    "type": "object",
+                    "properties": {
+                        "title": {},
+                        "variant": {}
+                    }
+                },
+                "variant": {},
+                "teaserType": {},
+                "title": {},
+                "pageVariant": {},
+                "articleTypes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
         }
-
-      }
     }
-  }
 }

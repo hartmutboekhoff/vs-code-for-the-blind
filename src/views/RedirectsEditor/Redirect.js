@@ -1,15 +1,14 @@
 //const {Element} = require('../html');
 const {ValueGroupWrapper} = require('../helpers/dataElementViews');
-const {TextInputLine, DropdownInputLine} = require('../../htmlFormFields');
+const {TextInputLine, DropdownInputLine, NumericInputLine} = require('../../htmlFormFields');
 
 class Redirect extends ValueGroupWrapper {
   constructor(obj, schema, key, path, status) {
-    super(schema, key, obj.location.length>50?obj.location.slice(0,50)+'...':obj.location, {class:'redirect match-'+status});
+    super(schema, key, obj.location.length>50?obj.location.slice(0,50)+'...':obj.location, {class:'redirect collapsed match-'+status});
     
     this.children.append(new TextInputLine(path+'--name','Quelle', key));
     this.children.append(new TextInputLine(path+'.location','Ziel', obj.location, schema.properties.location.description,{'view-path':path}));
-    this.children.append(new TextInputLine(path+'.expiration','Gültig bis', obj.expiration, schema.properties.expiration.description,{'view-path':path}));
-    
+    this.children.append(new NumericInputLine(path+'.expiration','Gültig bis', obj.expiration, schema.properties.expiration.description,{'view-path':path}));
   }
   
   get preventSubElements() {
@@ -17,22 +16,17 @@ class Redirect extends ValueGroupWrapper {
   }
 }
 
-/*
 function setValue(obj, relativePath, value) {
-  if( relativePath.endsWith('--name')) {
-    const oldkey = relativePath.slice(0,-6);
-    const newKey = value;
-    const actualValue = obj[oldKey];
-    delete obj[oldkey];
-    obj[newkey] = actualValue;
+  switch( relativePath ) {
+    case 'expiration': 
+      value = +value;
   }
-  else if( relativePath.endsWith('--value') ) {
-    obj[relativePath.slice(0,-7)] = value;
-  }
+  obj[relativePath] = value;
+  return obj;
 }
-*/
 
 exports.view = Redirect;
+exports.setValue = setValue;
 exports.selectors = [
   {
     SchemaPath: '#.patternProperties["^\\/.*$"]',

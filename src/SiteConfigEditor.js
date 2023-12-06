@@ -129,7 +129,8 @@ class SiteConfigEditor extends CustomEditorBase {
 	  loadJsonData(this.#schemaPath)
 	    .then(json=>this.#schema=json)
 	    .then(()=>this.#createSchemaMapping())
-	    .then(()=>this.renderHtml());
+	    .then(()=>this.renderHtml())
+	    .catch(e=>this.renderFailScreen(e));
 	}
 
   #createSchemaMapping() {
@@ -143,12 +144,13 @@ class SiteConfigEditor extends CustomEditorBase {
 		html.head.scripts.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','js', 'jsonview.js')));
 		html.head.scripts.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','js', 'editor.js')));
   }
-  renderFailScreen() {
-    return '<h1>Oops!</h1><div>Something went terribly wrong.</div>'
+  renderFailScreen(e) {
+    this.view.html = '<h1>Oops!</h1><div>Something went terribly wrong.</div>'
+                     + (e==undefined? '' : '<div id="error-message">' + e.toString() + '</div>');
   }
   renderHtml() {
-    if( this.#factory == undefined ) return this.renderFailScreen();
-console.log('rendering', this.json['/2wochen-lp/'], this.json['/2wochen-lp/d']);    
+    if( this.#factory == undefined ) return this.renderFailScreen(`View-factory "${this.#factoryName}" is not loaded.`);
+
     const builder = new HtmlBuilder(this.#mapper, this.#factory, {maxDepth:7});
     this.initHtml(builder.html);
     builder.start(this.json);
@@ -160,17 +162,13 @@ console.log('rendering', this.json['/2wochen-lp/'], this.json['/2wochen-lp/d']);
       const schemaMatch = this.#mapper.findAll(message.viewPath);
       if( schemaMatch.length == 1 ) {
         const obj = this.resolveJson(message.viewPath);
-        const setValue = this.#factory.get(schemaMatch[0].schemaPath.paths, schemaMatch[0].schema?.type, Array.isArray(obj)? 'array' : typeof obj)?.setValue;
-        if( typeof setValue == 'function' ) {
+        const setValueFunction = this.#factory.get(schemaMatch[0].schemaPath.paths, schemaMatch[0].schema?.type, Array.isArray(obj)? 'array' : typeof obj)?.setValue;
+        if( typeof setValueFunction == 'function' ) {
           const relativePath = message.path.slice(message.viewPath.length).replace(/^\.+/,'');
-console.log('beforechange', this.json['/2wochen-lp/']);
-          const newValue = setValue(obj, relativePath, message.value)
-console.log('setter called', newValue, newValue['/2wochen-lp/'], newValue['/2wochen-lp/d']);
+          const newValue = setValueFunction(obj, relativePath, message.value)
           
           this.replaceJson(message.viewPath, newValue);
-console.log('afterchange', this.json['/2wochen-lp/'], this.json['/2wochen-lp/d']);
           this.#createSchemaMapping();
-console.log('aftermappingcreate');
           return;
         }
       }

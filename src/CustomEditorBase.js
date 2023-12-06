@@ -4,6 +4,15 @@ const {camelCase  ,resolveJsonHierarchy} = require('./utility');
 const {diff:diffJson} = require('./jsonDiff');
 
 class CustomEditorBase {
+  static options = {
+    supportsMultipleEditorsPerDocument: true, 
+    webviewOptions: {
+      enableFindWidget: true,
+	    retainContextWhenHidden: true,
+      enableScripts: true,
+    }
+  };
+
   #context; #document; #panel; #token;
   #disposables = new Disposables();
   #json = {valid:false};
@@ -14,9 +23,10 @@ class CustomEditorBase {
     this.#document = document;
     this.#panel = webviewPanel;
     this.#token = token;
-    this.#panel.webview.options = {
-			enableScripts: true,
-		};
+    
+    //this.#panel.options.enableFindWidget = true;
+	  //this.#panel.options.retainContextWhenHidden = true;
+    this.#panel.webview.options.enableScripts = true;
 		
 		this.#panel.onDidDispose(()=>this.#onDispose());
 
@@ -75,14 +85,16 @@ class CustomEditorBase {
   #getJson() {
 	  const text = this.#document.getText();
 	  if (text.trim().length === 0)
-		  return {valid:true,data:{}};
+		  return {valid:true,data:this.preprocessJSON({})};
 
 	  try {
-			return {valid:true, data:JSON.parse(text)};
+			return {valid:true, data:this.preprocessJSON(JSON.parse(text))};
 		} catch(e) {
 		  return {valid:false, error:'Could not get json-ata. Content is not valid json. '+e};
     }
   }
+  preprocessJSON(jsonObj) { return jsonObj; }
+  
   replaceJson(path, newValue) {
     const json = this.json;
     const nodesCascade = resolveJsonHierarchy(path,json);
@@ -152,7 +164,6 @@ class CustomEditorBase {
   async onMessage(ev) {
     console.log('some unspecified message', ev);
   }
-  
 } 
 
 module.exports = CustomEditorBase;

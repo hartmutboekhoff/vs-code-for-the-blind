@@ -8,7 +8,7 @@ const { RootValue } = require('../htmlDataElements');
 class GenericSchemaEditor extends SiteConfigEditor {
 
 	constructor(context, document, webviewPanel, token) {
-	  super(context, document, webviewPanel, 'SchemaEditorViews', '../config/schema/schema.schema.json', token);
+	  super(context, document, webviewPanel, 'GenericSchemaEditorViews', '../config/schema/schema.schema.json', token);
   }
 
   initHtml(html) {

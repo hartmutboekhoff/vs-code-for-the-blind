@@ -133,9 +133,9 @@ class ModuleMatch extends Array {
       if( a[i].failed && b[i].failed ) continue;
       if( a[i].failed ) return 1;
       if( b[i].failed ) return -1;
-      if( a[i].priority != b[i].priority ) return b[i].priority - a[i].priority;
+      if( a[i].valuePriority != b[i].valuePriority ) return b[i].valuePriority - a[i].valuePriority;
     }
-    return 0;
+    return a.directoryPriority - b.directoryPriority;
   }
 }
 
@@ -260,6 +260,7 @@ class ModuleSelector extends Array {
 class ModuleSelectors extends Array {
   constructor(module, categories) {
     super();
+    this.directoryPriority = module.$dirIndex;
     
     for( const ms of module.selectors ?? [] ) {
       this.push(new ModuleSelector(module,categories,ms));

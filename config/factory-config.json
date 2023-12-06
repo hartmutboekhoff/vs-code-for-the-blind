@@ -13,8 +13,8 @@
 			  }
 			],
 			"moduleDirectories": [
-				"./views",
-				"./views/MenuEditor"
+				"./views/MenuEditor",
+				"./views"
 			],
 			"interface": {
 			  "ViewClass": {
@@ -47,8 +47,8 @@
 			  }
 			],
 			"moduleDirectories": [
-				"./views",
-				"./views/PageConfigEditor"
+				"./views/PageConfigEditor",
+				"./views"
 			],
 			"interface": {
 			  "ViewClass": {
@@ -81,8 +81,8 @@
 			  }
 			],
 			"moduleDirectories": [
-				"./views",
-				"./views/RedirectsEditor"
+				"./views/RedirectsEditor",
+				"./views"
 			],
 			"interface": {
 			  "ViewClass": {
@@ -103,7 +103,7 @@
       }
 		},
 		{
-			"name": "GenericSchemaEditor",
+			"name": "GenericSchemaEditorViews",
 			"categories": [
 				{ "name": "SchemaPath" },
 				{ "name": "SchemaType" },
@@ -115,8 +115,8 @@
 			  }
 			],
 			"moduleDirectories": [
-				"./views",
-				"./views/GenericSchemaEditor"
+				"./views/GenericSchemaEditor",
+				"./views"
 			],
 			"interface": {
 			  "ViewClass": {
