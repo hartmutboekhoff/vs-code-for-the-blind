@@ -5,7 +5,7 @@
   }
 
   window.addEventListener('load',()=>{
-    document.querySelectorAll('input,textarea,select').forEach(e=>{
+    document.querySelectorAll('.root input,.root textarea,.root select').forEach(e=>{
       e.addEventListener('change',ev=>{
         const viewElement = ev.target.closest('[view-path]');
         post('value-changed', {
@@ -17,32 +17,20 @@
         });
       })
     });
-/*    
-    document.querySelectorAll('.unspecified-map input,.unspecified-map textarea').forEach(e=>{
-      e.addEventListener('change', ev=>{
-        const tbl = ev.target.closest('.unspecified-map>table');
-        if( tbl != undefined ) {
-          const keys = tbl.querySelectorAll(`input[name="${tbl.id}--name"]`);
-          const values = tbl.querySelectorAll(`textarea[name="${tbl.id}--value"]`);
-          if( keys.length != values.length )
-            console.warn('Number of keys does not match the number of values for "unspecified-map".', tbl.id);
-          const map = {};
-          for( let i = 0 ; i < keys.length ; i++ ) 
-            map[keys[i].value] = values[i].value;
-          
-          post('value-changed', {
-            path: tbl.id,
-            value: map,
-          });
-        }
-      });
-    });
-*/    
     document.querySelectorAll('fieldset > legend > span.collapse-button').forEach(el=>{
       el.addEventListener('click',ev=>{
         const fs = ev.target.closest('fieldset').classList.toggle('collapsed');
       })
     });
+    document.getElementById('global-filter')?.addEventListener('input',ev=>{
+      const filter = ev.target.value.toLowerCase();
+      document.querySelectorAll('.root fieldset').forEach(el=>{
+        if( filter == '' )
+          el.style.display = 'block';
+        else
+          el.style.display = el.children[0].innerText.toLowerCase().includes(filter)? 'block':'none';
+      })
+    })
   });
   window.addEventListener('message',ev=>{
     console.log('MESSAGE RECEIVED', ev);

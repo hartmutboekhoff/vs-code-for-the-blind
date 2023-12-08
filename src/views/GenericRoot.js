@@ -2,7 +2,7 @@ const {Element} = require('../html');
 
 class GenericRoot extends Element {
   constructor(obj, schema, key, path, status) {
-    super();
+    super('div',{class:'root'});
   }
   
   get preventSubElements() {

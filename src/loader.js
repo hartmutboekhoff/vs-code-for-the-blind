@@ -7,6 +7,8 @@ const RootDir = __dirname;
 const ModuleCache = {};
 
 class ModuleWrapper {
+  static #idCounter = 0;
+  #id;
   #name;
   #directory;
   #relativeDirectory;
@@ -14,6 +16,7 @@ class ModuleWrapper {
   #error;
   
   constructor(name,dir,relDir,loaded,moduleOrError) {
+    this.#id = ++ModuleWrapper.#idCounter;
     this.#name = name;
     this.#directory = dir;
     this.#relativeDirectory = relDir;
@@ -70,6 +73,7 @@ class ModuleWrapper {
     return true;
 	}
 
+  get moduleId() { return this.#id; }
   get name() { return this.#name; }
   get directory() { return this.#directory; }
   get relativeDirectory() { return this.#relativeDirectory; }

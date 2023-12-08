@@ -5,10 +5,7 @@ const {splitJsonPath, renameObjectProperty} = require('../../utility');
 
 class RedirectsRoot extends Element {
   constructor(obj, schema, key, path, status) {
-    //super(schema, key, 'Redirectsss', {class:'redirect match-'+status});
-    super('div');
-    this.attributes['view-path'] = path;
-    
+    super('div',{class:'root','view-path':path});
   }
   
   get preventSubElements() {

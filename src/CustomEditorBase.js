@@ -23,10 +23,9 @@ class CustomEditorBase {
     this.#document = document;
     this.#panel = webviewPanel;
     this.#token = token;
-    
-    //this.#panel.options.enableFindWidget = true;
-	  //this.#panel.options.retainContextWhenHidden = true;
-    this.#panel.webview.options.enableScripts = true;
+    this.#panel.webview.options = {
+      enableScripts: true
+    };
 		
 		this.#panel.onDidDispose(()=>this.#onDispose());
 

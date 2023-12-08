@@ -21,6 +21,8 @@ class FactoryDiagnostics {
 			getViewColumn(),
 			{
     		enableScripts: true,
+        enableFindWidget: true,
+  	    retainContextWhenHidden: true,
     		localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, 'media')]
     	}
 		);
@@ -48,6 +50,7 @@ class FactoryDiagnostics {
 	renderHtml() {
 		const html = new HtmlFrame('Factory Diagnostics');
 		
+    html.head.styleSheets.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','css', 'common.css')));
     html.head.styleSheets.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','css', 'jsonview.css')));
 		html.head.scripts.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','js', 'jsonview.js')));
 		html.head.styleSheets.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','css', 'FactoryDiagnostics.css')));

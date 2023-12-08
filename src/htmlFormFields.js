@@ -32,7 +32,7 @@ class TextInputLine extends Element {
   constructor(id, label, value, description, attributes) {
     super('p', {class: attributes?.class});
     this.label = new Element('label',  label, {for: id});
-    this.input = new Element('input', Object.assign({id, name: id, type: 'text', value}, attributes, {class:undefined}));
+    this.input = new Element('input', Object.assign({}, attributes, {id, name: id, type: 'text', value, class:undefined}));
     this.description = new Element('span', description, {class: 'description'});
     
     this.children.append(this.label, this.input, new BR(), this.description);
@@ -80,12 +80,25 @@ class NumericInputLine extends Element {
   constructor(id, label, value, description, attributes) {
     super('p', {class: attributes?.class});
     this.label = new Element('label',  label, {for: id});
-    this.input = new Element('input', Object.assign({id, name: id, type: 'number', value}, attributes, {class:undefined}));
+    this.input = new Element('input', Object.assign({}, attributes, {id, name: id, type: 'number', value, class:undefined}));
     this.description = new Element('span', description, {class: 'description'});
     
     this.children.append(this.label, this.input, new BR(), this.description);
   }
 }
+
+class TextareaInputLine extends Element {
+  constructor(id, label, value, description, attributes) {
+    super('p', {class: attributes?.class});
+    this.label = new Element('label',  label, {for: id});
+    this.input = new Element('textarea', value, Object.assign({rows:4, style:'vertical-allign:top; font-family:sans-serif;'}, attributes, {id, name: id, class:undefined}));
+    this.description = new Element('span', description, {class: 'description'});
+    
+    this.children.append(this.label, this.input, new BR(), this.description);
+  }
+}
+
+
 class Legend extends Element {
   constructor(title, subtitle, attributes) {
     super('legend', title, attributes);
@@ -103,5 +116,6 @@ module.exports = {
   DropdownInputLine,
   RadioInputLine,
   NumericInputLine,
+  TextareaInputLine,
   Legend,
 }

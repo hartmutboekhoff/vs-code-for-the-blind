@@ -20,14 +20,22 @@ class Cache {
 	
 	getDiagnosticData() {
 		let diagnostics = [];
-		for( let k in this.#cache ) {
+		for( const [key,value] of Object.entries(this.#cache) ) {
 			diagnostics.push({
-				key:k,
-				match: this.#cache[k].data == undefined
-				          ? '<none>' 
-				          : !Array.isArray(this.#cache[k].data)
-				          ? this.#cache[k].data.$plainName 
-				          : '['+this.#cache[k].data.map(d=>d.$plainName).join()+']',
+				key,
+				match: value.data == undefined
+				          ? '<no match>' 
+				          : !Array.isArray(value.data)
+				          ? { name: value.data.$plainName,
+				              directory: value.data.$directory,
+				              id: value.data.$moduleId
+				            }
+				          : [...value.data.map(d=>({
+  				              name:d.$plainName,
+  				              directory:d.$directory,
+  				              id: d.$moduleId
+  				             }))
+				            ]
 			});
 		}
 		return diagnostics;

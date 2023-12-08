@@ -2,6 +2,7 @@ const vscode = require('vscode');
 //const CustomEditorBase = require('../CustomEditorBase');
 const SiteConfigEditor = require('../SiteConfigEditor');
 const { HtmlFrame } = require('../html');
+const {TextInputLine} = require('../htmlFormFields');
 const { RootValue } = require('../htmlDataElements');
 
 
@@ -16,6 +17,7 @@ class RedirectsEditor extends SiteConfigEditor {
 	  html.head.title = 'RedirectsEditor - '+this.document.fileName;
 		html.head.styleSheets.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','css', 'RedirectsEditor.css')));
 		html.head.scripts.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','js', 'RedirectsEditor.js')));
+		html.body.children.append(new TextInputLine('global-filter','Filter','',undefined,{class:'search-filter'}))
   }
   preprocessJSON(jsonObj) {
     return Object.entries(jsonObj)

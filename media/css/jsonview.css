@@ -1,17 +1,3 @@
-body {
-  background-color: #ddd;
-  color: blue;
-  font-size: 1em;
-  width: 100vw;
-  height: 100vh;
-  overflow: scroll;
-}
-h1 {
-  font-size: 2em;
-}
-div, p {
-
-}
 pre {
   display:inline-block;
   border: 1px solid black;
@@ -26,14 +12,6 @@ span.typename {
 span.array-size {
   color: #006;
   margin-left: .2em;
-}
-.error {
-  background-color: #800;
-  color: white;
-  font-weight: bold;
-}
-.warning {
-  background-color: #ff0;
 }
 
 ol, ul {

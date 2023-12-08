@@ -1,3 +1,25 @@
+body {
+  background-color: #ddd;
+  color: blue;
+  font-size: 1em;
+  width: 100vw;
+  height: 100vh;
+  overflow: scroll;
+}
+h1 {
+  font-size: 2em;
+}
+
+.error {
+  background-color: #800;
+  color: white;
+  font-weight: bold;
+}
+.warning {
+  background-color: #ff0;
+}
+
+
 legend {
   
 }
@@ -59,14 +81,32 @@ legend .description:empty:before {
 .match-unmatched {
   outline: 2px solid #fc0;
 }
+.generic.match-unmatched .path {
+  color: #800;
+  font-weight: bold;
+  margin-left: .6em; 
+}
 .match-valid {
   
 }
 
 fieldset label {
-  width: 10%;
+  width: 15%;
   display: inline-block;
 }
-fieldset input[type="text"] {
+fieldset input[type="text"],
+fieldset textarea  {
   width: 70%;
+}
+
+fieldset input:focus, 
+fieldset textarea:focus, 
+fieldset select:focus {
+  background-color: #ffc;
+  padding: 2px;
+  border: 3px solid white;
+  border-radius: 2px;
+  outline: 1px solid blue;
+  box-shadow: 0 0 5px blue;
+
 }
