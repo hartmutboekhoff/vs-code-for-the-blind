@@ -1,10 +1,9 @@
-const {Element} = require('../../html');
 const {TextInputLine, DropdownInputLine} = require('../../htmlFormFields');
+const {ValueGroupWrapper} = require('../helpers/dataElementViews');
 
-class MenuItem extends Element {
+class MenuItem extends ValueGroupWrapper {
   constructor(obj, schema, key, path, status) {
-    super('fieldset',{class:'menu-item'});
-    this.children.append(new Element('legend', key+' - '+path));
+    super(schema, obj?.label ?? key, undefined, {class:'menu-item collapsed match-'+status});
 
     this.children.append(new TextInputLine(path+'.label','Titel', obj.label, schema.properties.label.description));
     this.children.append(new TextInputLine(path+'.path','Pfad', obj.path, schema.properties.path.description));

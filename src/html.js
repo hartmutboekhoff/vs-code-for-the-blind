@@ -1,3 +1,5 @@
+const INDENT_STRING = '\t';
+
 function htmlEncode(text) {
   switch(typeof text) {
     case 'undefined': return '';
@@ -9,7 +11,7 @@ function isValidAttributeName(n) {
   return /^[a-zA-Z_][a-zA-Z-_]*$/.test(n);
 }
 
-class ChildrenList extends Array {
+class ChildElements extends Array {
   #parent; 
     
   constructor(parent) {
@@ -48,8 +50,11 @@ class ChildrenList extends Array {
   }
   removeAt(index) { super.splice(index,1); }
   
+  renderHtml(indent=0) {
+    return this.map(e=>e.renderHtml(indent)).join('\n');
+  }
   toString() {
-    return this.map(e=>e.toString()).join('\n');
+    return this.renderHtml();
   }
 }
 
@@ -71,6 +76,9 @@ class Attributes {
           case 'boolean':
             if( v ) result = `${result} ${a}`;
             break;
+          case 'object':
+            if( Element.DebugMode )
+              result = `${result} ${a}="${htmlEncode(JSON.stringify(v))}"`;
         }
       }
     }
@@ -148,9 +156,11 @@ class Element {
 	}
 
 	get name() {return this.#name;}
-	set name(name) { this.#name = name; }
+	set name(name) { this.#name = name?.trim(); }
+	get id() { return this.#attributes?.['id'];	}
+	set id(v) { this.attributes['id'] = v; }
 	get children() {
-		return this.#children ??= new ChildrenList(this);
+		return this.#children ??= new ChildElements(this);
 	}
 	get attributes() {
 	  return this.#attributes ??= new Attributes();
@@ -175,24 +185,41 @@ class Element {
 	hasAttributes() {
 	  return this.#attributes != undefined && this.#attributes.length > 0;
 	}
-  #renderChildren() {
-    //console.log(this.#children);
-    return (this.#children?.toString()) ?? '';
+  
+  hasName() { return this.name != ''; }
+  renderStartTag(indent=0) {
+    return this.hasName()? `${INDENT_STRING.repeat(indent)}<${this.name}${this.renderAttributes()}>` : '';
   }
-	toString() {
-	  try {
-  		if( this.name.trim() == '' )
-  			return this.#renderChildren();
-  		
-  		const attr = !this.#attributes? '' : this.#attributes.toString();
-  		const debug = (Element.DebugMode && this.constructor.name != 'Element')? ` title="${this.constructor.name}" dtat-element-type="${this.constructor.name}"` : '';
-  		const alt = (Element.DebugMode && this.constructor.name != 'Element' && (this.#attributes == undefined || !('alt' in this.#attributes)))? ` alt="${this.constructor.name}"` : '';
-			return `<${this.#name}${attr}${debug}${alt}>\n${this.#renderChildren()}\n</${this.name}>`;
+  renderEndTag(indent=0) {
+    return this.hasName()? `${INDENT_STRING.repeat(indent)}</${this.name}>` : '';
+  }
+  renderEmptyTag(indent=0) {
+    return this.hasName()? `${INDENT_STRING.repeat(indent)}<${this.name}${this.renderAttributes()}/>` : '';
+  }
+  renderAttributes() {
+    return (this.#attributes? this.#attributes.toString() : '')
+           + ((Element.DebugMode && this.constructor.name != 'Element')? ` title="${this.constructor.name}" dtat-element-type="${this.constructor.name}"` : '');
+  }
+  renderChildren(indent=0) {
+    return (this.#children?.renderHtml(indent)) ?? '';
+  }
+  
+  renderHtml(indent=0) {
+    try {
+      if( !this.hasName() ) 
+        return this.renderChildren(indent);
+      //if( this.#children == undefined || this.#children.length == 0 ) 
+      //  return this.renderEmptyTag(indent);
+      return `${this.renderStartTag(indent)}\n${this.renderChildren(indent+1)}\n${this.renderEndTag(indent)}`;
     }
     catch(e) {
+      console.error(e);
       return e.toString();
     }
-	}
+  }
+  toString() {
+    return this.renderHtml();
+  }
 	
 	static get DebugMode() {return Element.#debugMode;}
 	static set DebugMode(v) {Element.#debugMode = v==true;}
@@ -205,8 +232,8 @@ class PlainText extends Element {
 	get children() {
 		return [];
 	}
-	toString() {
-		return this.text;
+	renderHtml(indent) {
+		return INDENT_STRING.repeat(indent)+this.text;
 	}
 }
 
@@ -217,8 +244,8 @@ class EmptyElement extends Element {
 	get children() {
 		return [];
 	}
-  toString() {
-    return `<${this.name}${this.hasAttributes()? this.attributes.toString():''}/>`;
+  renderHtml(indent) {
+    return this.renderEmptyElement(indent);
   }
 }
 class BR extends EmptyElement {
@@ -236,10 +263,9 @@ class Textarea extends Element {
   get children() {
     return [];
   }  
-	toString() {
+	renderHtml(indent) {
 	  try {
-  		const debug = Element.DebugMode? ` title="${this.constructor.name}" dtat-element-type="${this.constructor.name}"` : '';
-			return `<textarea${this.attributes.toString()}${debug}>${this.value}</textarea>`;
+	    return `${this.renderStartTag(indent)}${this.value}${this.renderEndTag(indent)}`;
     }
     catch(e) {
       return e.toString();
@@ -260,17 +286,16 @@ class Head {
 	get styleSheets() {return this.#styleSheets;}
 	get scripts() {return this.#scripts;}
 	
-	toString() {
+	renderHtml() {
 		return '<head>'
-					 + '<meta charset="UTF-8">'
+					 + '\n'+INDENT_STRING+'<meta charset="UTF-8">'
 					 //+ -- '<meta http-equiv="Content-Security-Policy" content="default-src "none"; img-src ${webview.cspSource}; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">'
-					 + '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
-					 + this.styleSheets.map(s=>`<link href="${s.toString()}" rel="stylesheet" />`).join('\n')
-					 + this.scripts.map(s=>`<script defer nonce="${this.frame.nonce}" src="${s.toString()}"></script>`).join('\n')
-					 + '<title>' + this.title
-					 + '</title></head>';
+					 + '\n'+INDENT_STRING+'<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+					 + this.styleSheets.map(s=>`${INDENT_STRING}<link href="${s.toString()}" rel="stylesheet" />`).join('\n')
+					 + this.scripts.map(s=>`${INDENT_STRING}<script defer nonce="${this.frame.nonce}" src="${s.toString()}"></script>`).join('\n')
+					 + '\n'+INDENT_STRING+'<title>' + this.title
+					 + '</title>\n</head>';
 	}
-	
 }
 class Body extends Element {
 	#frame;
@@ -311,16 +336,20 @@ class HtmlFrame {
 		this.#nonce = text;
 	}
 	
-	toString() {
+	renderHtml() {
 		return '<!DOCTYPE html><html lang="en">'
-					 + this.head.toString()
-					 + this.body.toString()
+					 + this.head.renderHtml()
+					 + this.body.renderHtml()
 					 + '</html>';
+	}
+	toString() {
+	  return this.renderHtml();
 	}
 }
 
 module.exports = {
   Element,
+  ChildElements,
   PlainText, 
   EmptyElement,
   BR,

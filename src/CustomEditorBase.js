@@ -10,6 +10,7 @@ class CustomEditorBase {
       enableFindWidget: true,
 	    retainContextWhenHidden: true,
       enableScripts: true,
+      allowModals: true,
     }
   };
 

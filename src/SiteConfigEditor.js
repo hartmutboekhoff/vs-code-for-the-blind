@@ -74,11 +74,21 @@ class HtmlBuilder extends Traversion {
   #insert(...elements) {
     this.#insertPositionStack[0].element.children.append(...elements);
   }
+  #applyDebugInfo(view, path, obj, schemaPath, schema, depth) {
+    view.classList.add('has-debug-info');
+    view.dataset.jsonPath = path;
+    view.dataset.jsonData = obj;
+    if( schemaPath != undefined ) view.dataset.schemaPath = schemaPath;
+    if( schema != undefined ) view.dataset.schema = schema;
+    view.dataset.depth = depth;
+  }
   
   onValue(obj, key, path, depth) {
     const match = this.mapper.findAll(path);
     if( match.length == 0 ) {
-      this.#insert(new UnmappedValue(obj, undefined, key, path, 'unmatched'));
+      const umv = new UnmappedValue(obj, undefined, key, path, 'unmatched');
+      this.#applyDebugInfo(umv, path, obj);
+      this.#insert(umv);
       this.preventNesting();
       return;
     }
@@ -92,6 +102,8 @@ class HtmlBuilder extends Traversion {
         
         if( view != undefined ) {
           //view.attributes['view-path'] = path; 
+          this.#applyDebugInfo(view, path, obj, m.schemaPath.latest, m.schema, depth);
+          
           this.#insert(view);
           this.#setInsertPosition(view, path);
           if( view.preventSubElements == true ) 
@@ -144,16 +156,23 @@ class SiteConfigEditor extends CustomEditorBase {
 		//html.head.scripts.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','js', 'jsonview.js')));
 		html.head.scripts.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','js', 'editor.js')));
   }
+  beforeRendering(html) {
+  }
   renderFailScreen(e) {
     this.view.html = '<h1>Oops!</h1><div>Something went terribly wrong.</div>'
-                     + (e==undefined? '' : '<div id="error-message">' + e.toString() + '</div>');
+                     + (e == undefined
+                        ? '' 
+                        : typeof e == 'string'
+                        ? `<h3 id="error-message">${e}</h3>`
+                        : `<h3 id="error-message">${e.message}</h3><div>${e.stack?.replaceAll('\n','<br/>')}</div>`);
   }
   renderHtml() {
     if( this.#factory == undefined ) return this.renderFailScreen(`View-factory "${this.#factoryName}" is not loaded.`);
 
-    const builder = new HtmlBuilder(this.#mapper, this.#factory, {maxDepth:7});
+    const builder = new HtmlBuilder(this.#mapper, this.#factory, {maxDepth:11});
     this.initHtml(builder.html);
     builder.start(this.json);
+    this.beforeRendering(builder.html);
 		this.view.html = builder.html.toString();
   }
 

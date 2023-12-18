@@ -2,13 +2,46 @@
   float: left;
   margin: .2em 0;
 }
+.view-group p:nth-child(2) {
+  width: 30%;
+}
+.view-group p:nth-child(3) {
+  width: 40%;
+  margin-left: 3em;
+}
 
-.view-group p label {
-  margin-right: .5em;
+.view-group p > label {
+  margin-right: 1.5em;
+  min-width: initial;
 }
 .view-group p input[type="text"] {
   margin-right: 2em;
 }
 .view-group span.radio-button {
   margin-right: 1em;
+  white-space: nowrap;
+}
+
+.article-type-list {
+  display: inline-block;
+  height: 10em;
+  overflow-y: scroll;
+  list-style: none;
+  vertical-align: top;
+  border: 1px solid black;
+  border-radius: 2px;
+  background-color: white;
+  padding: 4px;
+  margin-top: 0;
+}
+.article-type-list:active,
+.article-type-list:has(input:active),
+.article-type-list:focus,
+.article-type-list:has(input:focus) {
+  background-color: #ffc;
+  padding: 2px;
+  border: 3px solid white;
+  border-radius: 2px;
+  outline: 1px solid blue;
+  box-shadow: 0 0 5px blue;  
 }

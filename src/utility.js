@@ -1,16 +1,11 @@
-function camelCase(text) {
+function toCamelCase(text) {
   return text.replace(/(?:^|(\d)|[^a-zA-Z]+)([a-z])/g,(all,digit,lower)=>(digit??'')+lower.toUpperCase());
 }
-
-function generateNonce() {
-	let text = '';
-	const Possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-	for( let i = 0 ; i < 32 ; i++ )
-		text += Possible.charAt(Math.floor(Math.random() * Possible.length));
-
-	return text;
+function toNiceText(name) {
+  return name
+    .replaceAll(/([-_]+)|(?:([a-z0-9])([A-Z]))/g,(m,p1,p2,p3)=>p1!=undefined?' ':p2+' '+p3)
+    .replaceAll(/\b[A-Z]+\b/g,m=>m[0]+m.slice(1).toLowerCase());
 }
-
 
 function splitJsonPath(path) {
   const JsonPathSplitRx = /(?<!\[)(?<=\.|^)([a-zA-Z_$][a-zA-Z0-9_$]*)(?=[\.\[]|$)(?!\])|\[(\d+)\]|\["(.*?)(?<!\\)"\]|\['(.*?)(?<!\\)'\]/g;
@@ -73,8 +68,9 @@ function getAllPropertyNames(obj) {
 }
 
 module.exports = {
-  camelCase,
-  generateNonce,
+  camelCase: toCamelCase, // better use 'toCamelCase'
+  toCamelCase,
+  toNiceText,
   splitJsonPath,
   resolveJsonHierarchy,
   resolveJsonPath,

@@ -2,22 +2,25 @@ const {getAllPropertyNames, buildJsonPath} = require('./utility');
 
 class Traversion {
   #maxDepth = Infinity;
-  #allowedKeys;
+  #includedKeys;
+  #excludedKeys;
   #stack = [];
-  #preventNesting = false;
-  #excludeNestingKeys = undefined;
+  #nestingOptions;
   #abort = 0;
   
   constructor(options) {
     this.maxDepth = options?.maxDepth ?? Infinity;
-    this.allowedKeys = options?.allowedKeys;
+    this.includedKeys = options?.includedKeys ?? options?.allowedKeys;
+    this.excludedKeys = options?.excludedKeys;
     this.parentFirst = options?.parentFirst ?? true;
     this.reverse = options?.reverse ?? false;
   }
   get maxDepth() { return this.#maxDepth; }
   set maxDepth(v) { this.#maxDepth = Number.isInteger(+v)? +v : Infinity; }
-  get allowedKeys() { return this.#allowedKeys; }
-  set allowedKeys(v) { this.#allowedKeys = Array.isArray(v)? v : undefined; }
+  get includedKeys() { return this.#includedKeys; }
+  set includedKeys(v) { this.#includedKeys = Array.isArray(v)? v : undefined; }
+  get excludedKeys() { return this.#excludedKeys; }
+  set excludedKeys(v) { this.#excludedKeys = Array.isArray(v)? v : undefined; }
   
   getRoot() {
     if( this.#stack.length == 0 )
@@ -30,16 +33,52 @@ class Traversion {
     return this.#stack[this.#stack.length - n - 1];
   }
   
+  set nestedElements(options) {
+    switch( typeof option ) {
+      case 'object':
+        this.#nestingOptions = {
+          nesting:true,
+          include: options.include ?? [],
+          exclude: options.exclude ?? [],
+          require: options.required ?? [],
+        };
+        break;
+      case 'boolean':
+        this.#nestingOptions = {
+          nesting: options,
+          include: [],
+          exclude: [],
+          require: [],
+        };
+        break;
+      default:
+        this.#setDefaultNestingOptions();
+    }          
+  }
+  #setDefaultNestingOptions() {
+    this.#nestingOptions = {
+      nesting: true,
+      include: [],
+      exclude: [],
+      require: [],
+    };
+  }
   preventNesting(...keys) {
     if( keys.length == 0 )
-      this.#preventNesting = true;
+      this.#nestingOptions = {
+        nesting: false,
+        include: [],
+        exclude: [],
+        require: [],
+      };
     else
-      this.#excludeNestingKeys = (keys.length == 1 && Array.isArray(keys[0])? keys[0] : keys).slice();
+      this.#nestingOptions = {
+        nesting: true,
+        include: [],
+        exclude: (keys.length == 1 && Array.isArray(keys[0])? keys[0] : keys).slice(),
+        require: [],
+      }
   }  
-  #resetNestingPrevention() {
-    this.#preventNesting = false;
-    this.#excludeNestingKeys = undefined;
-  }
   
   #onValue(obj, key, path) {
     try {
@@ -100,14 +139,15 @@ class Traversion {
     else {
       this.#stack.push(obj);
       
-      this.#resetNestingPrevention();
+      this.#setDefaultNestingOptions();
       
       const originalObj = obj;
       if( this.parentFirst )
         obj = this.#onValue(obj, key, path) ?? obj;
 
-      if( this.#maxDepth >= this.#stack.length 
-          && typeof obj == 'object' ) {
+      if( this.#stack.length <= this.#maxDepth 
+          && typeof obj == 'object' 
+          && this.#nestingOptions.nesting != false ) {
         this.#traverseNested(obj, key, path, obj !== originalObj);
       }
       else {
@@ -121,51 +161,46 @@ class Traversion {
     }
   }
   #traverseNested(obj, key, path, objIsReplaced) {
-    function filterExcludedKeys(keys,exclude) {
-      if( exclude == undefined ) return keys;
-      
-      exclude.forEach(x=>{
-        if( typeof x == 'string' ) {
-          const ix = keys.indexOf(x);
-          if( ix >= 0 ) keys.splice(ix,1)
-        }
-        else if( typeof x == 'object' && x.constructorName == 'RegExp' )
-          keys = keys.filter(k=>!x.test(k));
-      });
-      return keys;
+    function addUniqueKeys(unique, ...keylists) {
+      for( const kl of keylists ) {
+        if( kl == undefined ) continue;
+        for( const k of kl )
+          if( !unique.includes(k) )
+            unique.push(k);
+      }
+      return unique;      
     }
-    
-    if( this.#preventNesting == true ) {
-      this.#onNoNesting(obj, key, path)
-      return;
+    function subtractKeys(unique, subtract) {
+      if( subtract == undefined ) return unique;
+      for( const s of subtract ) {
+        const ix = unique.indexOf(s);
+        if( ix >= 0 )
+          unique[ix] = undefined;
+      }
+      return unique.filter(k=>k != undefined);
     }
+    const getNestingKeys=objKeys=>{
+      const nestingKeys = addUniqueKeys(this.#nestingOptions.include.slice(), this.#nestingOptions.require, this.#includedKeys, objKeys);
+      const excludedKeys = subtractKeys(addUniqueKeys(this.#nestingOptions.exclude, this.#excludedKeys), this.#nestingOptions.require);
+      return subtractKeys(nestingKeys, excludedKeys);
+    };
     
-    let nestingKeys = this.#allowedKeys != undefined
-                        ? this.#allowedKeys.slice()
-                        : objIsReplaced
-                        ? Object.keys(obj)
-                        //: Array.isArray(obj)
-                        //? getAllPropertyNames(obj).filter(n=>n!='length')
-                        : getAllPropertyNames(obj);
-
-    nestingKeys = filterExcludedKeys(nestingKeys, this.#excludeNestingKeys);
-
+    let nestingKeys = getNestingKeys(objIsReplaced? Object.keys(obj) : getAllPropertyNames(obj));
     if( nestingKeys.length == 0 ) {
       this.#onNoNesting(obj, key, path);
       return;
     }
 
-    const excludeBackup = this.#excludeNestingKeys;
-
+    const optionsBackup = this.#nestingOptions;
     const adjustedObj = this.#beforeNesting(obj, key, path);
 
     if( adjustedObj != obj )
-      nestingKeys = filterExcludedKeys(Object.keys(adjustedObj), this.#excludeNestingKeys);
-    else if( this.#excludeNestingKeys != excludeBackup )
-      nestingKeys = filterExcludedKeys(nestingKeys, this.#excludeNestingKeys);
+      nestingKeys = getNestingKeys(Object.keys(adjustedObj));
+    else if( this.#nestingOptions != optionsBackup )
+      nestingKeys = getNestingKeys(objIsReplaced? Object.keys(adjustedObj) : getAllPropertyNames(adjustedObj));
 
     let aborted;
-    if( this.#preventNesting == true || nestingKeys.length == 0 ) {
+    if( this.#nestingOptions.nesting === false || nestingKeys.length == 0 ) {
       aborted = true;
       this.#onAbortNesting(obj, key, path, [], nestingKeys);
     }

@@ -144,6 +144,7 @@ class JsonSchemaObjectMapper {
         return counter == 1;
       },
       'required': (data,required)=>required.reduce((acc,r)=>acc&&r in data,true),
+      'pattern': (data,pattern)=>new RegExp(pattern).test(data),
     },
     'any': {
       '@name': 'any',
@@ -158,6 +159,7 @@ class JsonSchemaObjectMapper {
       'maxLength': (data,len)=>data.length<=len,
       'pattern': (data,pattern)=>new RegExp(pattern).test(data),
       'format': (data,format)=>IMPLEMENTATION_MISSING(true), // this is primarily meant for anotation. https://json-schema.org/understanding-json-schema/reference/string.html
+      'anyOf': (data, anyOf, schema, schemaPath, jsonPath, unmatchedProperties)=>this.#validators.$.anyOf(data, anyOf, schema, schemaPath, jsonPath, unmatchedProperties),
     },
     'number': {
       '@name': 'number',
@@ -332,6 +334,7 @@ class JsonSchemaObjectMapper {
     'title': true,
     'description': true,
     'default': true,
+    'examples': true,
     'additionalProperties': true,
     'contains': true,
     'enum': true,

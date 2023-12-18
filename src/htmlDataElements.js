@@ -25,6 +25,9 @@ class pre extends Element {
   constructor(content,attributes) {
     super('pre', content, attributes);
   }
+  renderHtml() {
+    return `${this.renderStartTag(0)}${this.renderChildren(0)}${this.renderEndTag(0)}`;
+  }
 }
 class TypeName extends Element {
   constructor(value, attributes) {

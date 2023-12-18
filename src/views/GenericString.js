@@ -1,4 +1,5 @@
 const {Element} = require('../html');
+const {getStringValuesList} = require('./helpers/utility.js');
 
 class GenericString extends Element {
   #obj; #schema; #key; #path;
@@ -15,18 +16,21 @@ class GenericString extends Element {
       for: path,
     }));
     
-    if( schema.enum == undefined )
+    if( schema.enum == undefined ) {
       this.children.append(this.#getTextInput());
-    else if( schema.enum.length < 5 )
-      this.children.append(...this.#getRadioButtons());
-    else
-      this.children.append(this.#getDropdown());
+    }
+    else {
+      const values = getStringValuesList(schema.enum,schema.anyOf);
+      if( values.length < 5 )
+        this.children.append(...this.#getRadioButtons(values));
+      else
+        this.children.append(this.#getDropdown(values));
+    }
     
     if( schema.description != undefined )
       this.children.append(new Element('span', schema.description, {
         class: 'description'
       }));
-
   }
   
   #getTextInput() {
@@ -41,31 +45,32 @@ class GenericString extends Element {
       title: this.#schema.description,
     });
   }
-  #getDropdown() {
+  #getDropdown(values) {
     const select = new Element('select', {
       id: this.#path,
       name: this.#path,
       title: this.#schema.description,
     });
-    this.#schema.enum.forEach(e=>{
-      select.children.append(new Element('option', e, {
-        value: e,
-        selected: e==this.#obj
+    for( const v of values ) {
+      select.children.append(new Element('option', v.title ?? v.const, {
+        value: v.const,
+        selected: v.const==this.#obj,
+        title: v.description
       }));
-    });
+    }
     return select;
   }
-  #getRadioButtons() {
-    return this.#schema.enum.map(e=>{
+  #getRadioButtons(values) {
+    return values.map(v=>{
       return [new Element('input', {
         type: 'radio',
-        value: e,
-        id: this.#path+'--'+e,
+        value: v.const,
+        id: this.#path+'--'+v.const,
         name: this.#path,
-        checked: this.#obj == e,
+        checked: this.#obj == v.const,
       }),
-      new Element('label', e, {
-        for: this.#path+'--'+e
+      new Element('label', v.title ?? v.const, {
+        for: this.#path+'--'+v.const
       })];
     }).flat();    
   }

@@ -1,360 +1,1324 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "description": "Schema for every config object in every publication's `/pages`-folder",
-    "type": "object",
-    "properties": {
-        "meta": {
-            "$ref": "#/definitions/MetaMap",
-            "title": "Metadaten",
-            "description": "Key+Value Tupel, die verschiedene Aspekte der gesamten Seite steuern"
-        },
-        "components": {
-            "type": "array",
-            "title": "Komponenten",
-            "items": {
-                "$ref": "#/definitions/PageConfigComponent"
-            }
-        },
-        "viewGroups": {
-            "type": "array",
-            "items": {
-                "$ref": "#/definitions/PageConfigViewGroup"
-            },
-            "title": "View Groups",
-            "description": "View Groups steuern die Sichtbarkeit abhänngiger Widgets"
-        }
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Schema for every config object in every publication's `/pages`-folder",
+  "type": "object",
+  "properties": {
+    "meta": {
+      "$ref": "#/definitions/MetaMap"
     },
-    "definitions": {
-        "ContentConfig": {
-            "type": "object",
-            "properties": {
-                "targetProperty": {
-                    "type": "string"
-                },
-                "minCount": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "maxCount": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "sort": {
-                    "type": "string",
-                    "enum": [
-                        "publishdate_desc",
-                        "modifieddate_desc"
-                    ]
-                },
-                "sources": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ContentConfigSource"
-                    }
-                },
-                "resolveAllSourcesBeforeSort": {
-                    "type": "boolean"
-                },
-                "deduplicationId": {
-                    "type": "string"
-                }
-            }
-        },
-        "ContentConfigSource": {
-            "type": "object",
-            "required": [
-                "type"
-            ],
-            "additionalProperties": false,
-            "properties": {
-                "type": {
-                    "type": "string",
-                    "enum": [
-                        "publication",
-                        "section",
-                        "group",
-                        "mostread",
-                        "list",
-                        "theme",
-                        "author",
-                        "related"
-                    ]
-                },
-                "params": {
-                    "$ref": "#/definitions/ParamMap"
-                },
-                "count": {
-                    "type": "integer"
-                },
-                "sort": {
-                    "type": "string"
-                },
-                "filter": {
-                    "type": "string"
-                },
-                "filters": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ContentConfigFilter"
-                    }
-                },
-                "maxAgeInMonths": {},
-                "fromDate": {}
-            },
-            "if": {
-                "type": "object",
-                "properties": {
-                    "type": {
-                        "const": "section"
-                    }
-                },
-                "required": [
-                    "type"
-                ]
-            },
-            "then": {
-                "properties": {
-                    "maxAgeInMonths": {
-                        "type": "integer",
-                        "description": "only for type=section!",
-                        "minimum": 1
-                    },
-                    "fromDate": {
-                        "type": "string",
-                        "description": "only for type=section! format yyyy-MM-dd"
-                    }
-                }
-            },
-            "else": {
-                "not": {
-                    "anyOf": [
-                        {
-                            "required": [
-                                "maxAgeInMonths"
-                            ]
-                        },
-                        {
-                            "required": [
-                                "fromDate"
-                            ]
-                        }
-                    ]
-                }
-            }
-        },
-        "ContentConfigFilter": {
-            "type": "object",
-            "properties": {
-                "type": {
-                    "type": "string",
-                    "enum": [
-                        "default",
-                        "nonLive",
-                        "premium",
-                        "onlyPaid",
-                        "free",
-                        "onlyFree",
-                        "nonTest",
-                        "noTest",
-                        "noIndex",
-                        "hasTeaserImage",
-                        "nothing",
-                        "timePeriod",
-                        "hasPlayout"
-                    ]
-                },
-                "params": {
-                    "$ref": "#/definitions/ParamMap"
-                }
-            }
-        },
-        "PageConfigViewGroup": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "string",
-                    "enum": [
-                        "ALL_OR_NOTHING",
-                        "FIRST_WITH_CONTENT"
-                    ]
-                }
-            }
-        },
-        "PageConfigComponent": {
-            "type": "object",
-            "properties": {
-                "type": {
-                    "type": "string",
-                    "enum": [
-                        "TEASER_SLIDER",
-                        "XHTML_BOX",
-                        "OPENER_BOX",
-                        "TOWER_BOX",
-                        "EXCLUSIVE_BOX",
-                        "TOPIC_BOX",
-                        "BOX_HEADLINE",
-                        "OPULENZ_BOX",
-                        "COMPONENT_ITERATOR",
-                        "VARIABLE_LIST_BOX_COM",
-                        "TEXTLINK_BOX",
-                        "NEWSLETTER_SIGNUP",
-                        "VARIABLE_LIST_BOX_COMBO",
-                        "CAROUSEL_TEASER"
-                    ]
-                },
-                "params": {
-                    "$ref": "#/definitions/ParamMap"
-                },
-                "hideWithoutContent": {
-                    "type": "boolean"
-                },
-                "enabled": {
-                    "type": "boolean"
-                },
-                "viewGroupId": {
-                    "type": "string"
-                },
-                "feedFormat": {
-                    "type": "string",
-                    "examples": [
-                        "RSS"
-                    ]
-                },
-                "feedConfigName": {
-                    "type": "string",
-                    "description": "Name of the feed, will be used for generation. Only for feeds!"
-                },
-                "$contentConfig": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ContentConfig"
-                    }
-                },
-                "$contentContext": {
-                    "type": "object",
-                    "properties": {
-                        "section": {
-                            "type": "object",
-                            "properties": {
-                                "sectionUniqueName": {}
-                            }
-                        }
-                    }
-                },
-                "$componentIterator": {
-                    "$ref": "#/definitions/PageConfigComponentIterator"
-                }
-            }
-        },
-        "PageConfigComponentIterator": {
-            "type": "object",
-            "properties": {
-                "each": {
-                    "type": "string"
-                },
-                "eachCondition": {
-                    "type": "string"
-                },
-                "component": {
-                    "$ref": "#/definitions/PageConfigComponent"
-                }
-            }
-        },
-        "MetaMap": {
-            "type": "object",
-            "properties": {
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "string"
-                },
-                "keywords": {
-                    "type": "string"
-                }
-            }
-        },
-        "ParamMap": {
-            "type": "object",
-            "properties": {
-                "allNewsLink": {},
-                "groupNames": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "groupIds": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "sectionId": {},
-                "listName": {},
-                "sectionUniqueName": {},
-                "homeOnly": {},
-                "topicHeader": {
-                    "type": "object",
-                    "properties": {
-                        "label": {},
-                        "fullPath": {},
-                        "topicTags": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "label": {},
-                                    "fullPath": {}
-                                }
-                            }
-                        }
-                    }
-                },
-                "label": {
-                    "type": "string"
-                },
-                "fullPath": {
-                    "type": "string"
-                },
-                "center": {
-                    "type": "object",
-                    "properties": {
-                        "title": {},
-                        "variant": {}
-                    }
-                },
-                "right": {
-                    "type": "object",
-                    "properties": {
-                        "title": {},
-                        "variant": {}
-                    }
-                },
-                "left": {
-                    "type": "object",
-                    "properties": {
-                        "title": {},
-                        "variant": {}
-                    }
-                },
-                "variant": {},
-                "teaserType": {},
-                "title": {},
-                "pageVariant": {},
-                "articleTypes": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        }
+    "components": {
+      "type": "array",
+      "title": "Komponenten",
+      "items": {
+        "$ref": "#/definitions/PageConfigComponent"
+      }
+    },
+    "viewGroups": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/PageConfigViewGroup"
+      },
+      "title": "View Gruppen",
+      "description": "View Groups definieren Abh?ngigkeiten zwischen Komponenten. Damit wird die Sichtbarkeit der Komponenten in Abh?ngigkeit vom Bef?llungsstand gesteuert."
     }
+  },
+  "definitions": {
+    "ContentConfig": {
+      "type": "object",
+      "properties": {
+        "targetProperty": {
+          "type": "string",
+          "title": "Panelname",
+          "enum": [
+            "bigTeaser",
+            "opulenceTeaser",
+            "teasers",
+            "left.teasers",
+            "center.teasers",
+            "right.teasers",
+            "elements",
+            "feed"
+          ],
+          "anyOf": [
+            {
+              "const": "bigTeaser",
+              "title": "Aufmacher Teaser",
+              "description": ""
+            },
+            {
+              "const": "opulenceTeaser",
+              "title": "Opulenz Teaser",
+              "description": ""
+            },
+            {
+              "const": "teasers",
+              "title": "Teaser",
+              "description": ""
+            },
+            {
+              "const": "left.teasers",
+              "title": "Teaser links",
+              "description": ""
+            },
+            {
+              "const": "center.teasers",
+              "title": "Teaser mittig",
+              "description": ""
+            },
+            {
+              "const": "right.teasers",
+              "title": "Teaser rechts",
+              "description": ""
+            },
+            {
+              "const": "elements",
+              "title": "Elemente",
+              "description": ""
+            },
+            {
+              "const": "feed",
+              "title": "Feed",
+              "description": ""
+            }
+          ]
+        },
+        "minCount": {
+          "type": "integer",
+          "minimum": 0,
+          "title": "Mindestanzahl"
+        },
+        "maxCount": {
+          "type": "integer",
+          "minimum": 0,
+          "title": "Maximale Anzahl"
+        },
+        "sort": {
+          "type": "string",
+          "title": "Sortierung",
+          "enum": [
+            "publishdate_desc",
+            "modifieddate_desc"
+          ],
+          "anyOf": [
+            {
+              "const": "publishdate_desc",
+              "title": "Publikationsdatum absteigend"
+            },
+            {
+              "const": "modifieddate_desc",
+              "title": "?nderungsdatum absteigend"
+            }
+          ]
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ContentConfigSource"
+          },
+          "title": "Quellen"
+        },
+        "resolveAllSourcesBeforeSort": {
+          "type": "boolean",
+          "title": "Alle Quellen vollst?ndig laden",
+          "description": "Normalerweise werden Artikel in der angegebenen Reihenfolge aus den Quellen geladen. Sobald gen?gend Artikel geladen sind, wird der Ladevorgang beendet und die Artikel der restlichen Quellen werden  ignoriert.\nIn bestimmten F?llen (z.B. wenn Artikel nach Aktualit?t ausgegeben werden) kann  dass dazu f?hren, dass Artikel aus ignorierten F?llen f?lschlicherweise nicht angezeigt werden.\nMit dieser Option werden alle Quellen vollst?ndig geladen, bevor die Artikel sortiert und die Liste auf die erforderliche L?nge gek?rzt wird.\n"
+        },
+        "deduplicationId": {
+          "type": "string",
+          "title": "Doubletten-Filter Gruppe",
+          "description": "Innerhalb einer Doubletten-Filter Gruppe wird sichergestellt, dass Artikel nicht doppelt angezeigt werden"
+        }
+      },
+      "title": "Panel"
+    },
+    "ContentConfigSource": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/SourceType"
+        },
+        "params": {
+          "$ref": "#/definitions/SourceParams"
+        },
+        "count": {
+          "type": "integer",
+          "title": "Anzahl"
+        },
+        "sort": {
+          "type": "string",
+          "title": "Sortierung"
+        },
+        "filter": {
+          "type": "string",
+          "title": "Filter ???"
+        },
+        "filters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ContentConfigFilter"
+          }
+        },
+        "maxAgeInMonths": {
+          "title": "Maximales Artikelalter (Monate)"
+        },
+        "fromDate": {
+        }
+      },
+      "if": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "const": "section"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "maxAgeInMonths": {
+            "type": "integer",
+            "description": "only for type=section!",
+            "minimum": 1
+          },
+          "fromDate": {
+            "type": "string",
+            "description": "only for type=section! format yyyy-MM-dd"
+          }
+        }
+      },
+      "else": {
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "maxAgeInMonths"
+              ]
+            },
+            {
+              "required": [
+                "fromDate"
+              ]
+            }
+          ]
+        }
+      },
+      "title": "Datenabruf"
+    },
+    "ContentConfigFilter": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "title": "Filtertyp",
+          "enum": [
+            "default",
+            "nonLive",
+            "premium",
+            "onlyPaid",
+            "free",
+            "onlyFree",
+            "nonTest",
+            "noTest",
+            "noIndex",
+            "hasTeaserImage",
+            "nothing",
+            "timePeriod",
+            "hasPlayout"
+          ],
+          "anyOf": [
+              {
+                "const": "default",
+                "title": "Standard Filter",
+                "description": "Entfernt inaktive Artikel, nicht aufberteitete Artikel, Testartikel, und Artikel, die auf Indexseiten nicht erlaubt sind"
+              },
+              {
+                "const": "nonLive",
+                "title": "Aktive Artikel",
+                "description": "Entfernt unveröffentlichte Artikel, eingeplante aber nicht aktive Artikel sowie abgelaufene Artikel."
+              },
+              {
+                "const": "premium",
+                "title": "Premium Artikel",
+                "description": "Entfernt alle Artikel, die nicht 'Paid' sind."
+              },
+              {
+                "const": "onlyPaid",
+                "title": "Premium Artikel (Doublette)",
+                "description": "Entfernt alle Artikel, die nicht als 'Paid' gekennzeichnet sind.",
+                "$comment": "Identical to 'premium'. This value shoudl be deleted." 
+              },
+              { 
+                "const": "free",            
+                "title": "Freie Artikel", 
+                "description": "Entfernt alle Artikel, die nicht als 'Free' gekennzeichnet sind." 
+              },
+              { 
+                "const": "onlyFree",        
+                "title": "Freie Artikel (Doublette)", 
+                "description": "Entfernt alle Artikel, die nicht als 'Free' gekennzeichnet sind.", 
+                "$comment": "Identical to 'free'. This value shoudl be deleted." 
+              },
+              { 
+                "const": "nonTest",         
+                "title": "Keine Testinhalte", 
+                "description": "Entfernt Artikel, die als Testinhalte gekennzeichnet sind." 
+              },
+              { 
+                "const": "noTest",          
+                "title": "Keine Testinhalte (Doublette)", 
+                "description": "Entfernt Artikel, die als Testinhalte gekennzeichnet sind.", 
+                "$comment": "Identical to 'nonTest'. This value shoudl be deleted." 
+              },
+              { 
+                "const": "noIndex",         
+                "title": "Auf Indexseiten erlaubte Artikel", 
+                "description": "Entfernt Artikel, die nicht auf Indexseiten angezeigt werden sollen." 
+              },
+              { 
+                "const": "hasTeaserImage",  
+                "title": "Artikel mit Teaserbild", 
+                "description": "Entfernt alle Atikel ohne Teaserbild." 
+              },
+              { 
+                "const": "nothing",         
+                "title": "Alle Artikel (kein Filter)", 
+                "description": "Absolut überflüssig. Dieser \"Filter\" macht nichts und hat auch keinen Einfluss auf die übrigen Filter.", 
+                "$comment": "WTF!? Remove this please."
+              },
+              { 
+                "const": "timePeriod",      
+                "title": "Nach Publikationszeitraum", 
+                "description": "Filtert Artikel anhand des Publkationsdatums" 
+              },
+              { 
+                "const": "hasPlayout",
+                "title": "Bereit zur Ausspielung", 
+                "description": "Entfernt Artikel, die den Veröffentlichungs- und Aufbereitungsprozess noch nicht vollständig durchlaufen haben." 
+              }
+          ]
+        },
+        "params": {
+          "type": "object",
+          "title": "Optionen",
+          "properties": {
+            "startDate": {
+              "type": "string",
+              "title": "Startdatum",
+              "$comment": "only for type=timePeriod!"
+            },
+            "endDate": {
+              "type": "string",
+              "title": "Enddatum",
+              "$comment": "only for type=timePeriod!"
+            }
+          }
+        }
+      }
+    },
+    "PageConfigViewGroup": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Name"
+        },
+        "type": {
+          "type": "string",
+          "title": "Typ",
+          "enum": [
+            "ALL_OR_NOTHING",
+            "FIRST_WITH_CONTENT"
+          ],
+          "anyOf": [
+            {
+              "const": "ALL_OR_NOTHING",
+              "title": "Alles oder nichts",
+              "description": "Die Komponenten dieser Gruppe werden nur angezeigt, wenn alle Komponenten Daten enthalten."
+            },
+            {
+              "const": "FIRST_WITH_CONTENT",
+              "title": "Erste Komponente mit Inhalt",
+              "description": "Nur die erste Komponente mit Inhalt wird angezeigt, alle anderen sind ausgeblendet."
+            }
+          ]
+        }
+      },
+      "title": "View-Group"
+    },
+    "PageConfigComponent": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/PageComponentType"
+        },
+        "params": {
+          "$ref": "#/definitions/ComponentParams"
+        },
+        "hideWithoutContent": {
+          "type": "boolean",
+          "title": "Nur anzeigen, wenn Inhalte vorhanden sind"
+        },
+        "enabled": {
+          "type": "boolean",
+          "title": "Aktiv"
+        },
+        "viewGroupId": {
+          "type": "string",
+          "title": "View-Group Name"
+        },
+        "feedFormat": {
+          "type": "string",
+          "examples": [
+            "RSS"
+          ],
+          "title": "Feed Format"
+        },
+        "feedConfigName": {
+          "type": "string",
+          "description": "Name of the feed, will be used for generation. Only for feeds!"
+        },
+        "$contentConfig": {
+          "type": "array",
+          "title": "Panel",
+          "items": {
+            "$ref": "#/definitions/ContentConfig"
+          }
+        },
+        "$contentContext": {
+          "$ref": "#/definitions/ContentContext"
+        },
+        "$componentIterator": {
+          "$ref": "#/definitions/PageConfigComponentIterator"
+        }
+      },
+      "title": "Komponente"
+    },
+    "PageConfigComponentIterator": {
+      "type": "object",
+      "properties": {
+        "each": {
+          "type": "string"
+        },
+        "eachCondition": {
+          "type": "string"
+        },
+        "component": {
+          "$ref": "#/definitions/PageConfigComponent"
+        }
+      }
+    },
+    "ArticleTypeList": {
+      "type": "array",
+      "title": "Artikeltypen",
+      "$comment": "valid for all types",
+      "items": {
+          "type": "string",
+          "enum": [
+            "news",
+            "opinion",
+            "agentur",
+            "printimport",
+            "leserreporter",
+            "sales",
+            "advertorial",
+            "expert",
+            "ticker",
+            "recipe",
+            "longform",
+            "stockreport",
+            "quote",
+            "textmodule",
+            "infobox",
+            "teaser",
+            "gallery",
+            "textgallery",
+            "download",
+            "image",
+            "video",
+            "youtube",
+            "xhtml",
+            "video_playlist",
+            "twitter",
+            "facebook",
+            "pinterest",
+            "instagram",
+            "embed",
+            "compareslider",
+            "before_after_image",
+            "tag_author",
+            "tag_teaser"
+          ],
+          "anyOf": [
+            {
+              "const": "news",
+              "title": "Nachrictenartikel"
+            },
+            {
+              "const": "opinion",
+              "title": "Meinungsartikel"
+            },
+            {
+              "const": "agentur",
+              "title": "Agenturmeldung"
+            },
+            {
+              "const": "printimport",
+              "title": "Printimport",
+              "$comment": "is this type still in use?"
+            },
+            {
+              "const": "leserreporter",
+              "title": "Leserreporter",
+              "$comment": "is this type still in use?"
+            },
+            {
+              "const": "sales",
+              "title": "Sales (Anzeige)"
+            },
+            {
+              "const": "advertorial",
+              "title": "Advertorial (Anzeige)"
+            },
+            {
+              "const": "expert",
+              "title": "Expertenartikel (Anzeige)"
+            },
+            {
+              "const": "ticker",
+              "title": "Newsticker"
+            },
+            {
+              "const": "recipe",
+              "title": "Rezept",
+              "$comment": "is this type still in use? Originally implemented for BILD der FRAU."
+            },
+            {
+              "const": "longform",
+              "title": "Longform"
+            },
+            {
+              "const": "stockreport",
+              "title": "Börsenreport",
+              "$comment": "is this type still in use? Was used in Berliner Morgenpost but none of the old articles were migrated."
+            },
+            {
+              "const": "quote",
+              "title": "Zitat"
+            },
+            {
+              "const": "textmodule",
+              "title": "Textblock"
+            },
+            {
+              "const": "infobox",
+              "title": "Infobox"
+            },
+            {
+              "const": "teaser",
+              "title": "Teaser"
+            },
+            {
+              "const": "gallery",
+              "title": "Bildergalerie"
+            },
+            {
+              "const": "textgallery",
+              "title": "Textgalerie"
+            },
+            {
+              "const": "download",
+              "title": "Datei-Download"
+            },
+            {
+              "const": "image",
+              "title": "Bild"
+            },
+            {
+              "const": "video",
+              "title": "Video"
+            },
+            {
+              "const": "youtube",
+              "title": "Youtube Video"
+            },
+            {
+              "const": "xhtml",
+              "title": "XHTML Artikel"
+            },
+            {
+              "const": "video_playlist",
+              "title": "Video Playliste"
+            },
+            {
+              "const": "twitter",
+              "title": "X (Twitter)"
+            },
+            {
+              "const": "facebook",
+              "title": "Facebook"
+            },
+            {
+              "const": "pinterest",
+              "title": "Pinterest"
+            },
+            {
+              "const": "instagram",
+              "title": "Instagram"
+            },
+            {
+              "const": "embed",
+              "title": "Allgemeiner Embed-Code"
+            },
+            {
+              "const": "compareslider",
+              "title": "Compare-Slider",
+              "$comment": "what's the difference between compareslider and before_after_image?"
+            },
+            {
+              "const": "before_after_image",
+              "title": "Vorher-Nacher Bild",
+              "$comment": "what's the difference between compareslider and before_after_image?"
+            },
+            {
+              "const": "tag_author",
+              "title": "Autorenartikel"
+            },
+            {
+              "const": "tag_teaser",
+              "title": "Themenseite"
+            }
+          ]
+      }
+    },  
+    "ArticleType": {
+      "type": "string",
+      "enum": [
+        "news",
+        "opinion",
+        "agentur",
+        "printimport",
+        "leserreporter",
+        "sales",
+        "advertorial",
+        "expert",
+        "ticker",
+        "recipe",
+        "longform",
+        "stockreport",
+        "quote",
+        "textmodule",
+        "infobox",
+        "teaser",
+        "gallery",
+        "textgallery",
+        "download",
+        "image",
+        "video",
+        "youtube",
+        "xhtml",
+        "video_playlist",
+        "twitter",
+        "facebook",
+        "pinterest",
+        "instagram",
+        "embed",
+        "compareslider",
+        "before_after_image",
+        "tag_author",
+        "tag_teaser"
+      ]
+    },
+    "SourceParams": {
+      "type": "object",
+      "properties": {
+        "publicationName": {
+          "type": "string",
+          "title": "Publikation",
+          "$comment": "valid for all types",
+          "enum": [
+            "${publicationName}",
+            "zro",
+            "hao",
+            "bmo",
+            "bzv-bz",
+            "bzv-hk",
+            "nrw-waz",
+            "nrw-nrz",
+            "nrw-wp",
+            "nrw-wr",
+            "nrw-ikz",
+            "mgt-ta",
+            "mgt-tlz",
+            "mgt-otz",
+            "bzv-multiconfig",
+            "nrw-multiconfig",
+            "mgt-multiconfig"
+          ],
+          "anyOf": [
+            {
+              "const": "${publicationName}",
+              "title": "Aktive Publikation",
+              "description": "Verwendet immer die aktuelle Publikation"
+            },
+            {
+              "const": "zro",
+              "title": "Zentralredaktion"
+            },
+            {
+              "const": "hao",
+              "title": "Hamburger Abendblatt"
+            },
+            {
+              "const": "bmo",
+              "title": "Berliner Morgenpost"
+            },
+            {
+              "const": "bzv-bz",
+              "title": "Braunschweiger Zeitung"
+            },
+            {
+              "const": "bzv-hk",
+              "title": "Harzkurier"
+            },
+            {
+              "const": "nrw-waz",
+              "title": "WAZ",
+              "description": "Westdeutsche Allgemeine Zeitung"
+            },
+            {
+              "const": "nrw-nrz",
+              "title": "NRZ",
+              "description": "Neue Rhein/Neue Ruhr Zeitung"
+            },
+            {
+              "const": "nrw-wp",
+              "title": "Westfalenpost"
+            },
+            {
+              "const": "nrw-wr",
+              "title": "Westfälische Rundschau"
+            },
+            {
+              "const": "nrw-ikz",
+              "title": "IKZ",
+              "description": "Iserlohner Kreisanzeiger und Zeitung"
+            },
+            {
+              "const": "mgt-ta",
+              "title": "Thüringer Allgemeine"
+            },
+            {
+              "const": "mgt-tlz",
+              "title": "TLZ",
+              "description": "Thüringische Landeszeitung"
+            },
+            {
+              "const": "mgt-otz",
+              "title": "OTZ",
+              "description": "Ostthüringer Zeitung"
+            },
+            {
+              "const": "bzv-multiconfig",
+              "title": "BZV Multiconfig",
+              "description": "wird möglicherweise nicht benögit"
+            },
+            {
+              "const": "nrw-multiconfig",
+              "title": "NRW Multiconfig",
+              "description": "wird möglicherweise nicht benögit"
+            },
+            {
+              "const": "mgt-multiconfig",
+              "title": "MGT Multiconfig",
+              "description": "wird möglicherweise nicht benögit"
+            }
+          ]
+        },
+        "sectionUniqueName": {
+          "type": "string",
+          "description": "valid for types: [group, cueGroup, section, list, mostread]",
+          "examples": [
+            "ece_frontpage",
+            "${section.uniqueName}"
+          ]
+        },
+        "sectionUniqueNames": {
+          "type": "array",
+          "description": "valid for types: [section]",
+          "items": {
+            "type": "string"
+          },
+          "examples": [
+            "[ece_frontpage]"
+          ]
+        },
+        "sectionId": {
+          "type": "string",
+          "description": "valid for types: [cueGroup, group, section, list, mostread]",
+          "examples": [
+            "1747"
+          ]
+        },
+        "groupIds": {
+          "type": "array",
+          "description": "valid for types: [group]",
+          "items": {
+            "type": "string"
+          }
+        },
+        "groupName": {
+          "type": "string",
+          "description": "valid for types: [group,cueGroup]"
+        },
+        "groupNames": {
+          "type": "array",
+          "description": "valid for types: [group, cueGroup]",
+          "items": {
+            "type": "string"
+          }
+        },
+        "articleTypes": {
+          "$ref": "#/definitions/ArticleTypeList"
+        },
+        "listName": {
+          "type": "string",
+          "description": "valid for types: [list]",
+          "examples": [
+            "Eskalationslage 8 Artikel"
+          ]
+        },
+        "listId": {
+          "type": "string",
+          "description": "valid for types: [list]",
+          "examples": [
+          ]
+        },
+        "relationNames": {
+          "type": "array",
+          "description": "valid for types: [related]",
+          "items": {
+            "type": "string"
+          }
+        },
+        "homeOnly": {
+          "type": "boolean",
+          "description": "valid for types: [group,section]"
+        },
+        "withSubsections": {
+          "type": "boolean",
+          "description": "valid for types: [section]"
+        }
+      }
+    },
+    "SourceType": {
+      "type": "string",
+      "title": "Typ",
+      "enum": [
+        "publication",
+        "section",
+        "group",
+        "mostread",
+        "list",
+        "theme",
+        "author",
+        "related",
+        "cueGroup",
+        "cueSection"
+      ],
+      "anyOf": [
+        {
+          "const": "publication",
+          "title": "Publikation",
+          "description": "Neueste Artikel aus der gesamten Publikation"
+        },
+        {
+          "const": "section",
+          "title": "Rubrik",
+          "description": "Neueste Artikel aus einer Rubrik"
+        },
+        {
+          "const": "group",
+          "title": "Gruppe",
+          "description": "In einer Gruppe platzierte Artikel"
+        },
+        {
+          "const": "mostread",
+          "title": "Meistgelesen",
+          "description": "Artikel mit den meisten Zugriffen in den letzten Stunden"
+        },
+        {
+          "const": "list",
+          "title": "Liste",
+          "description": "Artikel aus einer Liste"
+        },
+        {
+          "const": "theme",
+          "title": "Thema",
+          "description": "Artikel zu einem Thema (Schlagwort)"
+        },
+        {
+          "const": "author",
+          "title": "Autor",
+          "description": "Artikel eines Autors"
+        },
+        {
+          "const": "related",
+          "title": "Verknüpfte Artikel",
+          "description": "Artikel, die mit dem aktuellen Artikel verknüpft sind"
+        }
+      ]
+    },
+    "ComponentParams": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "backend only passes this to playout",
+      "properties": {
+        "label": {
+          "type": "string",
+          "examples": [
+            "Meistgelesene Artikel"
+          ]
+        },
+        "useAd": {
+          "type": "boolean"
+        },
+        "adVariant": {
+          "type": "string",
+          "examples": [
+            "n1"
+          ]
+        },
+        "variant": {
+          "type": "string",
+          "enum": [
+            "text",
+            "numbered",
+            "paid",
+            "tile",
+            "corporate",
+            "default",
+            "nnc",
+            "subtitle",
+            "teaser",
+            "title",
+            "timed",
+            "category",
+            "topic",
+            ""
+          ]
+        },
+        "allNewsLink": {
+          "type": "string",
+          "examples": [
+            "/schlagzeilen/"
+          ]
+        },
+        "fullPath": {
+          "type": "string",
+          "examples": [
+            "/schlagzeilen/"
+          ]
+        },
+        "fullPathLabel": {
+          "type": "string",
+          "examples": [
+            "Alle Schlagzeilen"
+          ]
+        },
+        "imageUrl": {
+          "type": "string",
+          "examples": [
+            "https://img.sparknews.funkemedien.de/238613447/238613447_1686052094_v16_9_1200.jpeg"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "examples": [
+            "EXKLUSIVE ARTIKEL LESEN -"
+          ]
+        },
+        "level": {
+          "type": "string",
+          "title": "Überschriftenebene",
+          "examples": [
+            "h2"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "examples": [
+            "Mit PLUS erhalten Sie unbegrenzten Zugang auf alle exklusiven Artikel. Hier finden Sie eine Auswahl der neuesten und beliebtesten PLUS-Artikel.<br>Sie haben noch kein PLUS Abo?"
+          ]
+        },
+        "plusPath": {
+          "type": "string",
+          "examples": [
+            "/plus/"
+          ]
+        },
+        "left": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "variant": {
+              "type": "string",
+              "examples": [
+                "default"
+              ]
+            }
+          }
+        },
+        "center": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "variant": {
+              "type": "string",
+              "examples": [
+                "default"
+              ]
+            }
+          }
+        },
+        "right": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "variant": {
+              "type": "string",
+              "examples": [
+                "default"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "ContentContext": {
+      "type": "object",
+      "properties": {
+        "section": {
+          "type": "object",
+          "properties": {
+            "sectionUniqueName": {
+              "type": "string",
+              "examples": [
+                "ece_frontpage"
+              ]
+            },
+            "sectionId": {
+              "type": "string",
+              "examples": [
+              ]
+            }
+          }
+        },
+        "publication": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "MetaMap": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "keywords": {
+          "type": "string"
+        }
+      },
+      "title": "Metadaten",
+      "description": "Key+Value Tupel, die verschiedene Aspekte der gesamten Seite steuern"
+    },
+    "PageComponentType": {
+      "type": "string",
+      "title": "Typ",
+      "enum": [
+        "NEWSLETTER_SIGNUP",
+        "OPENER_BOX",
+        "OPULENZ_BOX",
+        "TAGS_BOX",
+        "TEASER_SLIDER",
+        "TOPIC_BOX",
+        "TOWER_BOX",
+        "VARIABLE_LIST_BOX_COMBO",
+        "EXCLUSIVE_BOX",
+        "TEXTLINK_BOX",
+        "XHTML_BOX",
+        "BOX_HEADLINE",
+        "TOPIC_SELECTION",
+        "LETTER_GROUP",
+        "LETTER_GROUP_LIST",
+        "INDEX_SUBNAVIGATION",
+        "PLUS_OPENER",
+        "PODCAST_DETAIL_OPENER",
+        "PODCAST_EPISODE_OPENER",
+        "E_PAPER_LANDINGPAGE_OPENER",
+        "NNC_TEXT_CTA_INFOBOX",
+        "NNC_MULTILINK_CONTACTBOX",
+        "SIMPLE_IMAGEBOX",
+        "NEWSTICKER_BOX",
+        "ARTICLE_LIST_RELATED",
+        "CAROUSEL_TEASER",
+        "CAROUSEL_PODCAST_TEASER",
+        "ALL_PODCASTS_TOWER",
+        "PODCAST_EPISODES_TOWER",
+        "PIANO_ELEMENT",
+        "NNC_STEP_BLOCK",
+        "CAROUSEL_NNC_IMAGE_TEXT",
+        "AD_SLOT",
+        "AD_SLOT_SKY_OUTSIDE",
+        "BACK_TO_HOME",
+        "TABOOLA_ELEMENT",
+        "FEED"
+      ],
+      "anyOf": [
+        {
+          "const": "NEWSLETTER_SIGNUP",
+          "title": "Newsletter Anmeldebox",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "OPENER_BOX",
+          "title": "Aufmacher Box",
+          "description": "",
+          "$comment": "used in backend + frontend"
+        },
+        {
+          "const": "OPULENZ_BOX",
+          "title": "Opulenz Box",
+          "description": "",
+          "$comment": "used in backend + frontend"
+        },
+        {
+          "const": "TAGS_BOX",
+          "title": "Schlagwort Box",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "TEASER_SLIDER",
+          "title": "Teaser Slider",
+          "description": "",
+          "$comment": "used in backend + frontend"
+        },
+        {
+          "const": "TOPIC_BOX",
+          "title": "Themen Box",
+          "description": "",
+          "$comment": "used in backend + frontend"
+        },
+        {
+          "const": "TOWER_BOX",
+          "title": "Tower Box",
+          "description": "",
+          "$comment": "used in backend + frontend"
+        },
+        {
+          "const": "VARIABLE_LIST_BOX_COMBO",
+          "title": "Variable Listen Box Kombination",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "EXCLUSIVE_BOX",
+          "title": "Exklusiv Box",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "TEXTLINK_BOX",
+          "title": "Textlink Box",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "XHTML_BOX",
+          "title": "XHTML Box",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "BOX_HEADLINE",
+          "title": "Box Überschrift",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "TOPIC_SELECTION",
+          "title": "Themenauswahl",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "LETTER_GROUP",
+          "title": "Buchstaben Gruppe",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "LETTER_GROUP_LIST",
+          "title": "Buchstaben Gruppen-Liste",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "INDEX_SUBNAVIGATION",
+          "title": "Index Subnavigation",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "PLUS_OPENER",
+          "title": "PLUS Aufmacher",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "PODCAST_DETAIL_OPENER",
+          "title": "Podcast Detail Aufmacher",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "PODCAST_EPISODE_OPENER",
+          "title": "Podcast-Episoden Aufmacher",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "E_PAPER_LANDINGPAGE_OPENER",
+          "title": "E-Paper Landingpage Aufmacher",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "NNC_TEXT_CTA_INFOBOX",
+          "title": "NNC_TEXT_CTA_INFOBOX",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "NNC_MULTILINK_CONTACTBOX",
+          "title": "NNC_MULTILINK_CONTACTBOX",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "SIMPLE_IMAGEBOX",
+          "title": "Einfache Imagebox",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "NEWSTICKER_BOX",
+          "title": "Newsticker Box",
+          "description": "",
+          "$comment": "used in backend + frontend"
+        },
+        {
+          "const": "ARTICLE_LIST_RELATED",
+          "title": "Liste verwandter Artikel",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "CAROUSEL_TEASER",
+          "title": "Karussell Teaser",
+          "description": "",
+          "$comment": "used in backend + frontend"
+        },
+        {
+          "const": "CAROUSEL_PODCAST_TEASER",
+          "title": "Podcast Karussell Teaser",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "ALL_PODCASTS_TOWER",
+          "title": "Podcasts Tower",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "PODCAST_EPISODES_TOWER",
+          "title": "Podcast-Episoden Tower",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "PIANO_ELEMENT",
+          "title": "Piano Element",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "NNC_STEP_BLOCK",
+          "title": "NNC_STEP_BLOCK",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "CAROUSEL_NNC_IMAGE_TEXT",
+          "title": "CAROUSEL_NNC_IMAGE_TEXT",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "AD_SLOT",
+          "title": "Ad Slot",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "AD_SLOT_SKY_OUTSIDE",
+          "title": "Sky-Outside Ad Slot",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "BACK_TO_HOME",
+          "title": "Zurück zur Homepage",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "TABOOLA_ELEMENT",
+          "title": "Taboola Element",
+          "description": "",
+          "$comment": "used in frontend"
+        },
+        {
+          "const": "FEED",
+          "title": "Feed",
+          "description": "",
+          "$comment": "used in backend"
+        }
+      ]
+    }
+  }
 }
