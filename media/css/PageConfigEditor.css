@@ -24,7 +24,7 @@
 
 .article-type-list {
   display: inline-block;
-  height: 10em;
+  height: 12em;
   overflow-y: scroll;
   list-style: none;
   vertical-align: top;
@@ -33,7 +33,9 @@
   background-color: white;
   padding: 4px;
   margin-top: 0;
+  width: 75%;
 }
+
 .article-type-list:active,
 .article-type-list:has(input:active),
 .article-type-list:focus,
@@ -44,4 +46,9 @@
   border-radius: 2px;
   outline: 1px solid blue;
   box-shadow: 0 0 5px blue;  
+}
+
+.article-type-list li {
+  width: 14em;
+  float: left;
 }

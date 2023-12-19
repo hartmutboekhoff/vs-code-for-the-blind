@@ -257,7 +257,7 @@ class BR extends EmptyElement {
 class Textarea extends Element {
   constructor(value, attributes) {
     super('textarea', attributes);
-    this.value = value;
+    this.value = value ?? '';
   }
 
   get children() {

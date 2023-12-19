@@ -1,4 +1,4 @@
-const {Element, BR} = require('./html');
+const {Element, BR, Textarea} = require('./html');
 const {toNiceText} = require('./utility');
 
 
@@ -106,7 +106,7 @@ class NumericInputLine extends InputLine {
 class TextareaInputLine extends InputLine {
   constructor(id, label, value, description, attributes) {
     super(id, label, description, attributes);
-    this.input = this.inputs.append(new Element('textarea', value, Object.assign({rows:4,cols:80,style:'vertical-align:top; font-family:sans-serif;'}, attributes, {id, name: id, class:undefined})));
+    this.input = this.inputs.append(new Textarea(value, Object.assign({rows:4,cols:80,style:'vertical-align:top; font-family:sans-serif;'}, attributes, {id, name: id, class:undefined})));
   }
 }
 
