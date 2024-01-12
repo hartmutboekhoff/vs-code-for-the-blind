@@ -14,8 +14,7 @@ const notUsedHere = require('./factory');
  * @param {vscode.ExtensionContext} context
  */
 async function activate(context) {
-	console.log('Congratulations, your extension "spark-siteconfig-vscode-plugin" is now active!');
-	console.log(context);
+	//console.log(context);
 //	console.log(__filename);
 	//console.log(await loadModules('','*.js',true));
 

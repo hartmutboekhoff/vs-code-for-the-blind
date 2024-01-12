@@ -1,7 +1,9 @@
 const vscode = require('vscode');
 const Disposables = require('./Disposables');
 const {camelCase  ,resolveJsonHierarchy} = require('./utility');
-const {diff:diffJson} = require('./jsonDiff');
+//const {diff:diffJson} = require('./jsonDiff');
+
+const ConfigPath = 'SparkSiteeconfigEditor';
 
 class CustomEditorBase {
   static options = {
@@ -18,8 +20,10 @@ class CustomEditorBase {
   #disposables = new Disposables();
   #json = {valid:false};
   //#differences = [];
+  #userSettings;
   
   constructor(context, document, webviewPanel, token) {
+    this.#userSettings = vscode.workspace.getConfiguration(ConfigPath);
     this.#context = context;
     this.#document = document;
     this.#panel = webviewPanel;
@@ -44,6 +48,9 @@ class CustomEditorBase {
 		this.#renderHtml()
   }
 
+  get settings() { 
+    return this.#userSettings; 
+  }
   get context() {
     return this.#context;
   }

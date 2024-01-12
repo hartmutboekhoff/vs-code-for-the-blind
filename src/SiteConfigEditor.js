@@ -1,3 +1,4 @@
+require('./Set');
 const vscode = require('vscode');
 const CustomEditorBase = require('./CustomEditorBase');
 const Factories = require('./factory');
@@ -7,6 +8,7 @@ const Traversion = require('./Traverse');
 const {HtmlFrame, Element} = require('./html');
 const {RootValue} = require('./htmlDataElements');
 const {view:UnmappedValue} = require('./views/UnmappedValue.js');
+const {resolveJsonSchemaPath, buildJsonPath} = require('./utility');
 
 /*
 class AllFieldsObject {
@@ -55,8 +57,8 @@ class AllFieldsObject {
 class HtmlBuilder extends Traversion {
   #insertPositionStack =  []; // elements are inserted by unshift()
   
-  constructor(mapper, factory, options) {
-    super(options);
+  constructor(mapper, factory, traverseoptions) {
+    super(traverseoptions);
     this.html = new HtmlFrame();
     this.#setInsertPosition(this.html.body, '');
     this.mapper = mapper;
@@ -77,14 +79,15 @@ class HtmlBuilder extends Traversion {
   #applyDebugInfo(view, path, obj, schemaPath, schema, depth) {
     view.classList.add('has-debug-info');
     view.dataset.jsonPath = path;
-    view.dataset.jsonData = obj;
+    view.dataset.jsonData = JSON.stringify(obj);
     if( schemaPath != undefined ) view.dataset.schemaPath = schemaPath;
-    if( schema != undefined ) view.dataset.schema = schema;
+    if( schema != undefined ) view.dataset.schema = JSON.stringify(schema);
     view.dataset.depth = depth;
   }
   
   onValue(obj, key, path, depth) {
     const match = this.mapper.findAll(path);
+
     if( match.length == 0 ) {
       const umv = new UnmappedValue(obj, undefined, key, path, 'unmatched');
       this.#applyDebugInfo(umv, path, obj);
@@ -110,6 +113,11 @@ class HtmlBuilder extends Traversion {
             this.preventNesting();
           else if( Array.isArray(view.preventSubElements) )
             this.preventNesting(view.preventSubElements);
+         
+         if( m.schema?.type == 'object' &&
+             m.schema.properties != undefined ) {
+           this.nestingOptions.included = Object.keys(m.schema.properties);
+         }
         }
       });
       //return new AllFieldsObject(obj, match[0].schema);
@@ -124,6 +132,44 @@ class HtmlBuilder extends Traversion {
   }
 }
 
+class HtmlFragmentBuilder {
+  #factory; #schema;
+  #fragmentSchemaRoot; #fragmentJsonRoot;
+  
+  constructor(factory, schema, subSchemaPath, jsonPath) {
+    this.#factory = factory;
+    this.#schema = schema;
+    this.#fragmentSchemaRoot = subSchemaPath;
+    this.#fragmentJsonRoot = jsonPath;
+  }
+  
+  generate(schemaKey, jsonKey) {
+    this.html = this.#getView(this.#fragmentSchemaRoot+'.'+schemaKey,buildJsonPath(this.#fragmentJsonRoot, jsonKey));
+  }
+  #getView(subSchemaPath, jsonPath) {
+console.log(subSchemaPath, jsonPath);    
+    const subSchema = resolveJsonSchemaPath(subSchemaPath,this.#schema);
+    const view = this.#factory.get(subSchemaPath,subSchema.type)
+                     .getView(undefined,jsonPath);
+    if( view == undefined || view.preventSubElements === true )  
+      return view;
+      
+    if( subSchema.type == 'object' ) {
+      let keylist = new Set(Object.keys(subSchema.properties));
+console.log('keylkeylistist', )
+      if( typeof view.preventSubElements == 'array' )
+        keylist = keylist.difference(new Set(view.preventSubElements));
+
+      [...keylist].forEach(k=>{
+        view.children.append(this.#getView(
+          buildJsonPath(subSchemaPath,'properties',k),
+          buildJsonPath(jsonPath,k)
+        ))
+      });
+    }
+    return view;
+  }
+}
 
 class SiteConfigEditor extends CustomEditorBase {
   #factoryName; #factory; 
@@ -151,10 +197,13 @@ class SiteConfigEditor extends CustomEditorBase {
   
   initHtml(html) {
 	  html.head.title = this.document.fileName;
-		//html.head.styleSheets.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','css', 'jsonview.css')));
 		html.head.styleSheets.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','css', 'common.css')));
 		//html.head.scripts.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','js', 'jsonview.js')));
 		html.head.scripts.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','js', 'editor.js')));
+		if( this.settings.developerMode == true ) {
+  		html.head.styleSheets.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'css', 'develop.css')));
+  		html.body.classList.add('dev-mode');
+  	}
   }
   beforeRendering(html) {
   }
@@ -169,7 +218,7 @@ class SiteConfigEditor extends CustomEditorBase {
   renderHtml() {
     if( this.#factory == undefined ) return this.renderFailScreen(`View-factory "${this.#factoryName}" is not loaded.`);
 
-    const builder = new HtmlBuilder(this.#mapper, this.#factory, {maxDepth:11});
+    const builder = new HtmlBuilder(this.#mapper, this.#factory, {maxDepth:15});
     this.initHtml(builder.html);
     builder.start(this.json);
     this.beforeRendering(builder.html);
@@ -194,6 +243,28 @@ class SiteConfigEditor extends CustomEditorBase {
     }
     this.replaceJson(message.path, message.value);
     this.#cancelChangeMessage = true;
+  }
+  onAddItemMessage(message) {
+    console.log('add item:', message);
+    
+    const builder = new HtmlFragmentBuilder(this.#factory, this.#schema, message.schemaPath, message.jsonPath);
+    builder.generate(message.schemaKey, message.jsonKey??1234);
+console.log(builder.html.toString());    
+    this.postMessage('addItem',{
+      jsonPath:message.jsonPath,
+      newElement: builder.html.toString(),
+    });
+    
+    const subSchema = resolveJsonSchemaPath(message.schemaPath, this.#schema);
+    const itemSchema = resolveJsonSchemaPath(message.schemaKey, subSchema, this.#schema);
+console.log(itemSchema, subSchema);    
+
+    const view = this.#factory
+      .get(message.schemaPath+'.'+message.schemaKey, itemSchema?.type, undefined);
+      //?.getView(obj,m.schema,key,path,m.status);
+console.log(view);
+console.log(view.getView(undefined,itemSchema,100,message.jsonPath+'[100]','valid').renderHtml());
+
   }
   async onDocumentChanged(ev) {
     if( !this.#cancelChangeMessage ) {

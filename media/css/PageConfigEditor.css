@@ -24,31 +24,34 @@
 
 .article-type-list {
   display: inline-block;
-  height: 12em;
-  overflow-y: scroll;
+  height: 13em;
+  overflow-y: auto;
   list-style: none;
   vertical-align: top;
-  border: 1px solid black;
+  __border: 1px solid black;
+  margin: 1px;
   border-radius: 2px;
-  background-color: white;
+  __background-color: white;
   padding: 4px;
-  margin-top: 0;
   width: 75%;
 }
 
-.article-type-list:active,
+__.article-type-list:active,
 .article-type-list:has(input:active),
 .article-type-list:focus,
 .article-type-list:has(input:focus) {
   background-color: #ffc;
   padding: 2px;
   border: 3px solid white;
+  margin:0;
   border-radius: 2px;
   outline: 1px solid blue;
   box-shadow: 0 0 5px blue;  
 }
 
 .article-type-list li {
-  width: 14em;
+  width: 25%;
   float: left;
+  overflow: hidden;
+  white-space: nowrap;
 }

@@ -1,7 +1,7 @@
 {
   "name": "spark-siteconfig-vscode-plugin",
-  "displayName": "spark-siteconfig-vscode-plugin",
-  "publisher": "funkemedien",
+  "displayName": "Spark Siteconfig Editor",
+  "publisher": "funkeservices",
   "description": "",
   "version": "0.0.1",
   "engines": {
@@ -71,7 +71,17 @@
       }
       
 
-    ]
+    ],
+    "configuration": {
+      "title": "Spark Siteconfig Editor",
+      "properties": {
+        "SparkSiteeconfigEditor.developerMode": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable eeveloer-mode to highligt special elements in the editor-view"
+        }
+      }
+    }
   },
   "scripts": {
     "lint": "eslint .",

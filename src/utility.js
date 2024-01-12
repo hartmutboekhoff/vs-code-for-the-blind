@@ -23,6 +23,33 @@ function resolveJsonPath(path,obj) {
   return splitJsonPath(path)
           .reduce((acc,k)=>acc?.[k], obj);
 }
+function resolveJsonSchemaPath(path,subSchema,schemaRoot = undefined) {
+  function resolve$ref(subSchema) {
+    if( subSchema == undefined ||  !('$ref' in subSchema) ) return subSchema;
+    const refParts = subSchema.$ref.split('/');
+    if( refParts[0] != '#' )
+      throw 'External references are not Supported.';
+
+    refParts.splice(0,1);
+    let result = schemaRoot;
+    for( const rp of refParts ) {
+      result = result[rp] ?? result.properties?.[rp];
+      if( result == undefined )
+        break;
+    }
+    return result;
+  }
+  
+  schemaRoot ??= subSchema;
+  const pathParts = splitJsonPath(path);
+  let result = subSchema;
+  for( const p of pathParts ) {
+    result = resolve$ref(result[p]);
+    if( result == undefined ) 
+      break;
+  }
+  return result;
+}
 
 function isValidIdentifier(str) {
   const validIdentifier = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
@@ -74,6 +101,7 @@ module.exports = {
   splitJsonPath,
   resolveJsonHierarchy,
   resolveJsonPath,
+  resolveJsonSchemaPath,
   isValidIdentifier,
   buildJsonPath,
   renameObjectProperty,

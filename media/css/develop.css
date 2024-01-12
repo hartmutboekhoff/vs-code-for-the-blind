@@ -1,0 +1,269 @@
+body {
+  background-color: #ddd;
+  color: blue;
+  font-size: 1em;
+  
+  
+  
+}
+h1 {
+  font-size: 2em;
+}
+
+.error {
+  background-color: #800;
+  color: white;
+  font-weight: bold;
+}
+.warning {
+  background-color: #ff0;
+}
+
+
+
+
+fieldset > legend {
+  background-color: #ddd;
+
+}
+
+
+
+
+
+
+
+
+fieldset > legend > span.collapse-button {
+
+
+
+  background-color: #aaa;
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+fieldset:not(.collapsed):has(> legend > span.collapse-button:hover) {
+  background-color: #e8e8e8;
+  border: 2px solid black;
+  box-shadow: 0 0 6px black;
+}
+
+legend .description {
+
+  color: #666;
+
+
+
+
+
+}
+
+
+
+
+
+
+.generic {
+  border: 2px dotted #f80;
+}
+
+
+
+
+[view-path] {
+  outline: 3px solid lime;
+  outline-offset: 2px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fieldset > p span.description {
+  background-color: #ffc;
+  color: #440;
+  border: 1px solid #880;
+
+
+
+
+  font-size: .7em;
+}
+fieldset input:focus, 
+fieldset textarea:focus, 
+fieldset select:focus {
+  background-color: #ffc;
+
+  border: 3px solid white;
+
+  outline: 1px solid blue;
+  box-shadow: 0 0 5px blue;
+
+}
+
+.search-filter {
+  background-color: #aaa;
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

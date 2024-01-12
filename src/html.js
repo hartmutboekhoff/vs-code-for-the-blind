@@ -139,6 +139,10 @@ class Dataset {
   }
 }
 
+const SelfClosingTags = [
+  'br', 'input', 'hr', 'img', 'meta', 'link' 
+];
+
 class Element {
   static #debugMode = true;
 	#children; #attributes;
@@ -208,8 +212,11 @@ class Element {
     try {
       if( !this.hasName() ) 
         return this.renderChildren(indent);
-      //if( this.#children == undefined || this.#children.length == 0 ) 
-      //  return this.renderEmptyTag(indent);
+      if( this.#children == undefined || this.#children.length == 0 ) 
+        if( SelfClosingTags.includes(this.name) )
+          return this.renderEmptyTag(indent);
+        else
+          return `${this.renderStartTag(indent)}${this.renderEndTag(0)}`;
       return `${this.renderStartTag(indent)}\n${this.renderChildren(indent+1)}\n${this.renderEndTag(indent)}`;
     }
     catch(e) {

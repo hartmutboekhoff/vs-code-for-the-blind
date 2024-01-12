@@ -88,6 +88,12 @@ exports.selectors = [
     SchemaType: 'string',
     DataType: undefined,
     EditorType: undefined
+  },
+  {
+    SchemaPath: undefined,
+    SchemaType: undefined,
+    DataType: 'string',
+    EditorType: undefined
   }
 ];
 

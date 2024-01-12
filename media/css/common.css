@@ -1,9 +1,9 @@
 body {
-  background-color: #ddd;
-  color: blue;
+  
+  
   font-size: 1em;
-  width: 100vw;
-  height: 100vh;
+  padding-left: 8px;;
+
   overflow: scroll;
 }
 h1 {
@@ -20,10 +20,10 @@ h1 {
 }
 
 fieldset {
-  padding-right: .2em;
+  padding-right: 6Spx;
 }
 fieldset > legend {
-  background-color: #ddd;
+  __background-color: #ddd;
   padding: .2em .5em .2em .2em;
 }
 
@@ -38,7 +38,8 @@ fieldset > legend > span.collapse-button {
   display:inline-block;
   height: 15px;
   width:15px;
-  background-color: #aaa;
+  color: var(--vscode-button-foreground);
+  background-color: var(--vscode-button-background);
   vertical-align: bottom;
   text-decoration: unset;
 }
@@ -48,16 +49,16 @@ fieldset > legend > span.collapse-button:before {
   vertical-align:top;
   line-height: .5em;
   margin: 0 4px;
+  cursor:pointer;
 }
 fieldset.collapsed > legend > span.collapse-button:before {
   content:"+";
   margin: 0 2px;
 }
-
 fieldset:not(.collapsed):has(> legend > span.collapse-button:hover) {
-  background-color: #e8e8e8;
-  border: 2px solid black;
-  box-shadow: 0 0 6px black;
+  background-color: var(--vscode-editor-selectionHighlightBackground);/*#e8e8e8;*/
+  border-style: outset;
+  box-shadow: 0 0 6px var(--vscode-editor-selectionHighlightBackground);/*black;*/
 }
 
 legend .description {
@@ -75,17 +76,17 @@ legend .description:before {
 legend .description:empty:before {
   content: ''
 }
-.generic {
-  border: 3px dotted #f80;
-}
+
+
+
 
 .unspecified-map table td {
   vertical-align: top;
 }
-[view-path] {
-  outline: 3px solid lime;
-  outline-offset: 2px;
-}
+
+
+
+
 
 .match-failed:before {
   content: "";
@@ -215,15 +216,20 @@ span.action-buttons>button.move-button {
   background-color: #393;
   color: white;
 }
-fieldset.has-debug-info>div.debug-info-overlay {
+span.action-buttons>button.addItem-button {
+  width: initial;
+  padding: .1em .5em;
+}
+
+.has-debug-info>div.debug-info-overlay {
   position: absolute;
-  top: -.7em;
+  top: 0px;
   left: 0px;
-  width: calc(100% - 1px);
-  height: calc(100% - .2em - 0px);
+  width: calc(100% - 2px);
+  height: calc(100% - 2px);
   background-color: #ddd;
   margin: 0;
-  padding: .0em 0 .1em;
+  padding: .0 0 .1em;
   z-index: 1;
   display: grid;
   grid-template-columns: 50% 50%;
@@ -231,18 +237,22 @@ fieldset.has-debug-info>div.debug-info-overlay {
   grid-template-areas: 
     "schema-path json-path"
     "schema json-data";
-  min-height: calc(13em - .8em);
+  min-height: 7em;
 }
-fieldset:has(div.debug-info-overlay)>legend {
+:has(div.debug-info-overlay)>legend {
   z-index: 10;
   position: relative;
 }
-fieldset:has(>div.debug-info-overlay) {
+:has(>div.debug-info-overlay)>span.action-buttons {
+  display:none;
+}
+:has(>div.debug-info-overlay) {
   min-height: 13em;
 }
 div.debug-info-overlay > pre {
   width: 100%;
   height: 100%;
+  margin: 0;
   font-weight: bold;
   background-color: #ccf;
   border: 1px solid #88c;
@@ -266,3 +276,18 @@ div.debug-info-overlay > pre.schemaPath { grid-area: schema-path; }
 div.debug-info-overlay > pre.schema { grid-area: schema; }
 div.debug-info-overlay > pre.jsonPath { grid-area: json-path; }
 div.debug-info-overlay > pre.jsonData { grid-area: json-data; }
+
+div.debug-info-overlay > button {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  padding: .1em 0;
+  text-align: center;
+  border: 1px solid #a44;
+  background-color: #f00;
+  color: white;
+  margin: 2px;
+  width: 1.5em;  
+  height: 1.5em;
+  z-index: 1;
+}
