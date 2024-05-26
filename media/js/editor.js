@@ -124,6 +124,7 @@
     });
     document.querySelectorAll('fieldset > legend > span.collapse-button').forEach(el=>{
       el.addEventListener('click',ev=>{
+        ev.stopPropagation();
         const fs = ev.target.closest('fieldset');
         if( ev.ctrlKey && ev.shiftKey ) {
           ev.target.closest('fieldset')
@@ -143,14 +144,11 @@
           fs.classList.toggle('collapsed');
         }
       });
-/*
-      el.addEventListener('dblclick',ev=>{
-        if( ev.ctrlKey )
-          ev.target.closest('fieldset')
-            .querySelectorAll('fieldset')
-            .forEach(e=>e.classList.add('collapsed'));
-      }); 
-*/
+    });
+    document.querySelectorAll('fieldset > legend:has(span.collapse-button)').forEach(el=>{
+      el.addEventListener('click',ev=>{
+        ev.target.closest('fieldset').classList.toggle('collapsed');
+      });
     });
     document.getElementById('global-filter')?.addEventListener('input',ev=>{
       const filter = ev.target.value.toLowerCase();

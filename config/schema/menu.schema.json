@@ -3,7 +3,7 @@
     "type": "object",
     "definitions": {
         "navItem": {
-            "description": "A menu can have entries or submenus. This is recursive.",
+            "description": "A menu can have entries or subMenus. This is recursive.",
             "type": "object",
             "properties": {
                 "label": {
@@ -82,5 +82,6 @@
         "legalNav": {
             "$ref": "#/definitions/navArray"
         }
-    }
+    },
+    "additionalProperties": false
 }

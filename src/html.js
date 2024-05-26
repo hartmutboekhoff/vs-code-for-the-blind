@@ -49,6 +49,7 @@ class ChildElements extends Array {
     });
   }
   removeAt(index) { super.splice(index,1); }
+  clear() { super.splice(0, Infinity); }
   
   renderHtml(indent=0) {
     return this.map(e=>e.renderHtml(indent)).join('\n');
@@ -151,7 +152,7 @@ class Element {
 	constructor(name='', textContent, attributes) {
 		this.#name = name ?? '';
 		if( attributes == undefined && typeof textContent == 'object' )
-		  [attributes, textContent] = [textContent, attributes]; //swap
+		  [attributes, textContent] = [textContent]; //swap
 
 		if( textContent != undefined )
 		  this.children.append(new PlainText(textContent))
@@ -172,7 +173,15 @@ class Element {
 	set attributes(v) {
     Object.assign(this.attributes, v);
 	}
-	
+
+  get innerText() {
+    return this.#children?.reduce((c,acc)=>`${acc} ${c.innerText}`,'') ?? '';
+  }
+  set innerText(v) {
+    this.children.clear();
+    this.children.append(new PlainText(v));
+  }
+  
 	get className() {
 	  return this.#attributes?.['class'] ?? '';
 	}
@@ -238,6 +247,12 @@ class PlainText extends Element {
 	}
 	get children() {
 		return [];
+	}
+	get innerText() {
+	  return this.text;
+	}
+	set innerText(v) {
+	  this.text = v;
 	}
 	renderHtml(indent) {
 		return INDENT_STRING.repeat(indent)+this.text;
