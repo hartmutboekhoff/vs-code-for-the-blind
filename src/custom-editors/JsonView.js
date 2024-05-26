@@ -1,11 +1,10 @@
 const vscode = require('vscode');
-//const CustomEditorBase = require('../CustomEditorBase');
-const CustomEditorBase = require('../CustomEditorBase');
+const JsonEditorBase = require('../JsonEditorBase');
 const { HtmlFrame } = require('../html');
 const { RootValue } = require('../htmlDataElements');
 
 
-class JsonView extends CustomEditorBase {
+class JsonView extends JsonEditorBase {
 
 	constructor(context, document, webviewPanel, token) {
 	  super(context, document, webviewPanel, token);

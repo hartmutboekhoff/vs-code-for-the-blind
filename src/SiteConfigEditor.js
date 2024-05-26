@@ -1,6 +1,6 @@
 require('./Set');
 const vscode = require('vscode');
-const CustomEditorBase = require('./CustomEditorBase');
+const JsonEditorBase = require('./JsonEditorBase');
 const Factories = require('./factory');
 const JsonSchemaMapper = require('./JsonSchemaMapper')
 const {loadJsonData} = require('./loader');
@@ -171,7 +171,7 @@ console.log('keylkeylistist', )
   }
 }
 
-class SiteConfigEditor extends CustomEditorBase {
+class SiteConfigEditor extends JsonEditorBase {
   #factoryName; #factory; 
   #schemaPath; #schema;  #mapper;
   #cancelChangeMessage = false;

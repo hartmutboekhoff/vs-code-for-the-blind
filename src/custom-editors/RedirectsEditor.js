@@ -1,5 +1,4 @@
 const vscode = require('vscode');
-//const CustomEditorBase = require('../CustomEditorBase');
 const SiteConfigEditor = require('../SiteConfigEditor');
 const { HtmlFrame } = require('../html');
 const {TextInputLine} = require('../htmlFormFields');
