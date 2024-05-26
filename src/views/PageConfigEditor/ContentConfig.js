@@ -10,7 +10,7 @@ class PageConfigComponent extends ValueGroupWrapper {
   }
   
   get preventSubElements() {
-    return false;
+    return ['type'];
   }
 }
 

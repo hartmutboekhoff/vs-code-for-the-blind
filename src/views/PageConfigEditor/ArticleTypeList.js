@@ -7,7 +7,7 @@ class ArticleTypeList extends Element {
   constructor(obj, schema, key, path, status) {
     super('div',{id:path,class:'article-types'});
     this.children.append(new Element('label', schema.title??'Artikeltypen', {'for':path+'--list'}));
-    const ul = new Element('ul', {class:'article-type-list', tabinde:0});
+    const ul = new Element('ul', {class:'article-type-list', tabindex:0});
     const articletypes = getStringValuesList(schema.items.enum, schema.items.anyOf);
     for( const atype of articletypes ) {
       const li = new Element('li',{class:'article-type'});

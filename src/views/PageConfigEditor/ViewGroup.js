@@ -5,7 +5,7 @@ const {getStringValuesList} = require('../helpers/utility');
 
 class ViewGroup extends ValueGroupWrapper {
   constructor(obj, schema, key, path, status) {
-    super(schema, key, obj.id ?? path, {class:'view-group match-'+status});
+    super(schema, obj.id ?? key, '', {class:'view-group match-'+status});
 
     this.children.append(
       new TextInputLine(path+'.id', 

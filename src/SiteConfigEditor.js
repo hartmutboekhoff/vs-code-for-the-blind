@@ -109,16 +109,29 @@ class HtmlBuilder extends Traversion {
           
           this.#insert(view);
           this.#setInsertPosition(view, path);
+          
           if( view.preventSubElements == true ) 
             this.preventNesting();
           else if( Array.isArray(view.preventSubElements) )
             this.preventNesting(view.preventSubElements);
-         
-         if( m.schema?.type == 'object' &&
-             m.schema.properties != undefined ) {
-           this.nestingOptions.included = Object.keys(m.schema.properties);
+          else if( Array.isArray(view.getSubkeys?.()) )
+            this.nestingOptions.included = view.getSubkeys();
+          else if( typeof view.getSubkeys?.() == 'string' )
+            this.nestingOptions.included = [view.getSubkeys()];
+
+         if( this.nestingOptions.included.length == 0 
+             && m.schema?.type == 'object'
+             && m.schema.properties != undefined ) {
+           if( this.nestingOptions.excluded.length == 0 )
+            this.nestingOptions.required = Object.keys(m.schema.properties);
+           else
+             this.nestingOptions.included = Object.keys(m.schema.properties);
          }
+
+
         }
+        //else 
+        //  this.#insert(new Element('p', `No view found for "${key}"`));
       });
       //return new AllFieldsObject(obj, match[0].schema);
       return obj;
@@ -147,7 +160,6 @@ class HtmlFragmentBuilder {
     this.html = this.#getView(this.#fragmentSchemaRoot+'.'+schemaKey,buildJsonPath(this.#fragmentJsonRoot, jsonKey));
   }
   #getView(subSchemaPath, jsonPath) {
-console.log(subSchemaPath, jsonPath);    
     const subSchema = resolveJsonSchemaPath(subSchemaPath,this.#schema);
     const view = this.#factory.get(subSchemaPath,subSchema.type)
                      .getView(undefined,jsonPath);
@@ -156,7 +168,6 @@ console.log(subSchemaPath, jsonPath);
       
     if( subSchema.type == 'object' ) {
       let keylist = new Set(Object.keys(subSchema.properties));
-console.log('keylkeylistist', )
       if( typeof view.preventSubElements == 'array' )
         keylist = keylist.difference(new Set(view.preventSubElements));
 

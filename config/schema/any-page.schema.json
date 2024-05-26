@@ -19,12 +19,13 @@
         "$ref": "#/definitions/PageConfigViewGroup"
       },
       "title": "View Gruppen",
-      "description": "View Groups definieren Abh?ngigkeiten zwischen Komponenten. Damit wird die Sichtbarkeit der Komponenten in Abh?ngigkeit vom Bef?llungsstand gesteuert."
+      "description": "View Groups definieren Abhängigkeiten zwischen Komponenten. Damit wird die Sichtbarkeit der Komponenten in Abhängigkeit vom Bef?llungsstand gesteuert."
     }
   },
   "definitions": {
     "ContentConfig": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "targetProperty": {
           "type": "string",
@@ -120,7 +121,7 @@
         "resolveAllSourcesBeforeSort": {
           "type": "boolean",
           "title": "Alle Quellen vollst?ndig laden",
-          "description": "Normalerweise werden Artikel in der angegebenen Reihenfolge aus den Quellen geladen. Sobald gen?gend Artikel geladen sind, wird der Ladevorgang beendet und die Artikel der restlichen Quellen werden  ignoriert.\nIn bestimmten F?llen (z.B. wenn Artikel nach Aktualit?t ausgegeben werden) kann  dass dazu f?hren, dass Artikel aus ignorierten F?llen f?lschlicherweise nicht angezeigt werden.\nMit dieser Option werden alle Quellen vollst?ndig geladen, bevor die Artikel sortiert und die Liste auf die erforderliche L?nge gek?rzt wird.\n"
+          "description": "Normalerweise werden Artikel in der angegebenen Reihenfolge aus den Quellen geladen. Sobald gen?gend Artikel geladen sind, wird der Ladevorgang beendet und die Artikel der restlichen Quellen werden  ignoriert.\nIn bestimmten F?llen (z.B. wenn Artikel nach Aktualit?t ausgegeben werden) kann  dass dazu f?hren, dass Artikel aus ignorierten F?llen f?lschlicherweise nicht angezeigt werden.\nMit dieser Option werden alle Quellen vollst?ndig geladen, bevor die Artikel sortiert und die Liste auf die erforderliche L?nge gek?rzt wird."
         },
         "deduplicationId": {
           "type": "string",
@@ -162,9 +163,14 @@
           }
         },
         "maxAgeInMonths": {
+          "type": "integer",
+          "$comment": "only for type=section!",
           "title": "Maximales Artikelalter (Monate)"
         },
         "fromDate": {
+          "type": "string",
+          "$comment": "only for type=section! format yyyy-MM-dd",
+          "title": "Startdatum"
         }
       },
       "if": {
@@ -173,25 +179,19 @@
           "type": {
             "const": "section"
           }
-        },
-        "required": [
-          "type"
-        ]
+        }
       },
       "then": {
         "properties": {
           "maxAgeInMonths": {
             "type": "integer",
-            "description": "only for type=section!",
             "minimum": 1
-          },
-          "fromDate": {
-            "type": "string",
-            "description": "only for type=section! format yyyy-MM-dd"
           }
-        }
+        },
+        "required": ["maxAgeInMonths", "fromDate"]
       },
       "else": {
+        "$comment": "Is it really neccessary have to check this?",
         "not": {
           "anyOf": [
             {
@@ -211,6 +211,7 @@
     },
     "ContentConfigFilter": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "type": {
           "type": "string",
@@ -228,13 +229,15 @@
             "hasTeaserImage",
             "nothing",
             "timePeriod",
-            "hasPlayout"
+            "hasPlayout",
+            "notOnIndexPage",
+            "excludeOwnerPublications"
           ],
           "anyOf": [
               {
                 "const": "default",
                 "title": "Standard Filter",
-                "description": "Entfernt inaktive Artikel, nicht aufberteitete Artikel, Testartikel, und Artikel, die auf Indexseiten nicht erlaubt sind"
+                "description": "Entfernt inaktive Artikel, nicht aufbereitete Artikel und Testartikel, sowo Artikel, die auf Indexseiten nicht erlaubt sind."
               },
               {
                 "const": "nonLive",
@@ -276,8 +279,8 @@
               },
               { 
                 "const": "noIndex",         
-                "title": "Auf Indexseiten erlaubte Artikel", 
-                "description": "Entfernt Artikel, die nicht auf Indexseiten angezeigt werden sollen." 
+                "title": "Nur indizierbare Artikel", 
+                "description": "Entfernt Artikel, bei denen die Option NOINDEX gesetzt ist." 
               },
               { 
                 "const": "hasTeaserImage",  
@@ -285,10 +288,9 @@
                 "description": "Entfernt alle Atikel ohne Teaserbild." 
               },
               { 
-                "const": "nothing",         
-                "title": "Alle Artikel (kein Filter)", 
-                "description": "Absolut überflüssig. Dieser \"Filter\" macht nichts und hat auch keinen Einfluss auf die übrigen Filter.", 
-                "$comment": "WTF!? Remove this please."
+                "const": "nothing",
+                "title": "Alle Filter deaktivieren",
+                "description": "Deaktiviert ALLE impliziten Filter und Defaultfilter."
               },
               { 
                 "const": "timePeriod",      
@@ -299,6 +301,16 @@
                 "const": "hasPlayout",
                 "title": "Bereit zur Ausspielung", 
                 "description": "Entfernt Artikel, die den Veröffentlichungs- und Aufbereitungsprozess noch nicht vollständig durchlaufen haben." 
+              },
+              { 
+                "const": "notOnIndexPage",
+                "title": "Auf Indexseiten erlaubte Artikel", 
+                "description": "Entfernt Artikel, die auf Indexseiten nicht zugelassen sind." 
+              },
+              { 
+                "const": "excludeOwnerPublications",
+                "title": "Heimpublikationen ausschließen", 
+                "description": "Entfernt Artikel, die bestimmte Heimpublikationen besitzen." 
               }
           ]
         },
@@ -315,13 +327,24 @@
               "type": "string",
               "title": "Enddatum",
               "$comment": "only for type=timePeriod!"
+            },
+            "publicationNames": {
+              "type": "array",
+              "$comment": "only for type=excludeOwnerPublications!",
+              "items": {
+                "type": "string",
+                "examples": [
+                  "zro"
+                ]
             }
           }
         }
       }
+      }
     },
     "PageConfigViewGroup": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "id": {
           "type": "string",
@@ -352,6 +375,7 @@
     },
     "PageConfigComponent": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "type": {
           "$ref": "#/definitions/PageComponentType"
@@ -400,6 +424,7 @@
     },
     "PageConfigComponentIterator": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "each": {
           "type": "string"
@@ -456,7 +481,7 @@
           "anyOf": [
             {
               "const": "news",
-              "title": "Nachrictenartikel"
+              "title": "Nachrichtenartikel"
             },
             {
               "const": "opinion",
@@ -635,6 +660,7 @@
     },
     "SourceParams": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "publicationName": {
           "type": "string",
@@ -838,12 +864,22 @@
         },
         {
           "const": "section",
-          "title": "Rubrik",
+          "title": "Rubrik (Escenic)",
+          "description": "Neueste Artikel aus einer Rubrik"
+        },
+        {
+          "const": "cueSection",
+          "title": "Rubrik (CUE)",
           "description": "Neueste Artikel aus einer Rubrik"
         },
         {
           "const": "group",
-          "title": "Gruppe",
+          "title": "Gruppe (Escenic)",
+          "description": "In einer Gruppe platzierte Artikel"
+        },
+        {
+          "const": "cueGroup",
+          "title": "Gruppe (CUE)",
           "description": "In einer Gruppe platzierte Artikel"
         },
         {
@@ -876,7 +912,7 @@
     "ComponentParams": {
       "type": "object",
       "additionalProperties": true,
-      "description": "backend only passes this to playout",
+      "$comment": "backend only passes this to playout",
       "properties": {
         "label": {
           "type": "string",
@@ -1002,11 +1038,44 @@
               ]
             }
           }
+        },
+        "topicHeader": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string"
+            },
+            "fullPath": {
+              "type": "string"
+            },
+            "topicTags": {
+              "type": "array",
+              "title": "Schlagwörter",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string"
+                  },
+                  "fullPath": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "teaserType": {
+          "type": "string",
+          "examples": [
+            "portrait",
+            "opinion"]
         }
       }
     },
     "ContentContext": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "section": {
           "type": "object",
@@ -1093,7 +1162,8 @@
         "AD_SLOT_SKY_OUTSIDE",
         "BACK_TO_HOME",
         "TABOOLA_ELEMENT",
-        "FEED"
+        "FEED",
+        "COMPONENT_ITERATOR"
       ],
       "anyOf": [
         {
@@ -1164,7 +1234,7 @@
         },
         {
           "const": "BOX_HEADLINE",
-          "title": "Box Überschrift",
+          "title": "Box ?berschrift",
           "description": "",
           "$comment": "used in frontend"
         },
@@ -1302,7 +1372,7 @@
         },
         {
           "const": "BACK_TO_HOME",
-          "title": "Zurück zur Homepage",
+          "title": "Zur?ck zur Homepage",
           "description": "",
           "$comment": "used in frontend"
         },
@@ -1317,6 +1387,13 @@
           "title": "Feed",
           "description": "",
           "$comment": "used in backend"
+        },
+        {
+          "const": "COMPONENT_ITERATOR",
+          "title": "Wiederholung",
+          "description": "Wiederholte Komponennte (Nicht mehr verwenden!)",
+          "$comment": "used in backend. This option should be deprecated!"
+          
         }
       ]
     }

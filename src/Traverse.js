@@ -122,7 +122,7 @@ class Traversion {
   }
   set nestingOptions(options) {
     const current = this.#stack.current;
-    switch( typeof option ) {
+    switch( typeof options ) {
       case 'object':
         current.options.nesting = true;
         current.options.included = options.included ?? [];
@@ -225,10 +225,11 @@ class Traversion {
 
     const getNestingKeys=(objKeys)=>{
       const nestingKeys = 
-        (new Set(current.options.included))
+        (new Set(this.#globallyIncludedKeys))
           .union(new Set(current.options.required))
-          .union(new Set(this.#globallyIncludedKeys))
-          .union(new Set(objKeys));
+          .union(current.options.included.length > 0
+                   ? new Set(current.options.included)
+                   : new Set(objKeys));
 
       const excludedKeys = 
         (new Set(current.options.excluded))

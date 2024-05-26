@@ -39,6 +39,9 @@
         "selector": [
           {
             "filenamePattern": "**/pages/escenic/*.json"
+          },
+          {
+            "filenamePattern": "**/pages/cue/*.json"
           }
         ]
       },
@@ -78,7 +81,7 @@
         "SparkSiteeconfigEditor.developerMode": {
           "type": "boolean",
           "default": false,
-          "description": "Enable eeveloer-mode to highligt special elements in the editor-view"
+          "description": "Enable develoer-mode to highligt special elements in the editor-view"
         }
       }
     }

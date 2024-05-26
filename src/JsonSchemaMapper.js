@@ -144,6 +144,12 @@ class JsonSchemaObjectMapper {
         return counter == 1;
       },
       'required': (data,required)=>required.reduce((acc,r)=>acc&&r in data,true),
+      'dependentRequired': (data,dependentRequired)=>{
+        for( const [prop,required] of Object.entries(dependentRequired) )
+          if( prop in data && !required.reduce((acc,r)=>acc&&r in data,true) )
+            return false;
+        return true;
+      },
       'pattern': (data,pattern)=>new RegExp(pattern).test(data),
     },
     'any': {

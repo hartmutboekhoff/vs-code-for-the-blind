@@ -24,22 +24,20 @@
 
 .article-type-list {
   display: inline-block;
-  height: 13em;
+  column-count: 4;
   overflow-y: auto;
   list-style: none;
   vertical-align: top;
-  __border: 1px solid black;
   margin: 1px;
   border-radius: 2px;
-  __background-color: white;
   padding: 4px;
-  width: 75%;
+  width: 80%;
 }
 
-__.article-type-list:active,
+.article-type-list:active,
 .article-type-list:has(input:active),
 .article-type-list:focus,
-.article-type-list:has(input:focus) {
+.article-type-list:focus-within {
   background-color: #ffc;
   padding: 2px;
   border: 3px solid white;
@@ -50,8 +48,25 @@ __.article-type-list:active,
 }
 
 .article-type-list li {
-  width: 25%;
-  float: left;
-  overflow: hidden;
   white-space: nowrap;
+}
+
+
+
+.page-content-component {
+  margin-top: 1em;
+}
+.component-panel {
+  margin-top: 1em;
+  background-color:#aff;
+}
+.component-panel>legend {
+  background-color: #aff;
+}
+.content-source {
+  margin-top: 1em;
+  background-color: #afc;
+}
+.content-source>legend {
+  background-color: #afc;
 }
