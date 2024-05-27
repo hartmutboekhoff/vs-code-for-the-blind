@@ -96,6 +96,21 @@ class RadioInputLine extends InputLine {
   }
 }
 
+class CheckboxInputLine extends InputLine {
+  constructor(id, label, value, description, attributes) {
+    super(id, label, description, attributes);
+    this.checkBox = new Element('input', {
+      type:'checkbox',
+      name:id,
+      value,
+      id,
+      checked:value==true
+    });
+    this.children.unshift(this.checkBox);
+  }
+  
+}
+
 class NumericInputLine extends InputLine {
   constructor(id, label, value, description, attributes) {
     super(id, label, description, attributes);
@@ -128,6 +143,7 @@ module.exports = {
   MultiSelectInputLine,
   DropdownInputLine,
   RadioInputLine,
+  CheckboxInputLine,
   NumericInputLine,
   TextareaInputLine,
   Legend,

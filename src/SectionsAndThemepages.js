@@ -1,12 +1,12 @@
-const ecscenicSections = require('../../config/data/escenic-sections.json');
-const cueSections = require('../../config/data/cue-sections.json');
-const cueThemepages = require('../../config/data/cue-themepages.json');
+const escenicSections = require('../config/data/escenic-sections.json');
+const cueSections = require('../config/data/cue-sections.json');
+const cueThemepages = require('../config/data/cue-themepages.json');
 
 class SectionList {
   #sections;
   
   constructor(json) {
-    this.s#sections = json;
+    this.#sections = json;
   }
   get(idOrPublication, uniqueName) {
     return +idOrPublication == NaN

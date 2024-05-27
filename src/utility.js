@@ -94,6 +94,14 @@ function getAllPropertyNames(obj) {
   return  [...names]; 
 }
 
+function prepareDropdownOptions(enums,anyOf) {
+  if( enums == undefined || enums.length == 0 )
+    return anyOf;
+  return enums.map(e=>{
+    return {...anyOf?.find(a=>a.const==e), const:e};
+  });
+}
+
 module.exports = {
   camelCase: toCamelCase, // better use 'toCamelCase'
   toCamelCase,
@@ -106,4 +114,5 @@ module.exports = {
   buildJsonPath,
   renameObjectProperty,
   getAllPropertyNames,
+  prepareDropdownOptions,
 }

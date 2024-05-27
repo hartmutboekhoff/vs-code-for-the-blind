@@ -8,7 +8,7 @@ class JsonEditorBase extends CustomEditorBase {
   #json = {valid:false};
   
   constructor(context, document, webviewPanel, token) {
-    super((context, document, webviewPanel, token);
+    super(context, document, webviewPanel, token);
   }
 
   get json() {

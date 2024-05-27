@@ -1,7 +1,7 @@
 const vscode = require('vscode');
 const CustomEditorBase = require('../CustomEditorBase');
 const { HtmlFrame, Element } = require('../html');
-const {ecscenicSections, cueSections, cueThemepages} = require('./SectionsAndThemepages');
+const {ecscenicSections, cueSections, cueThemepages} = require('../SectionsAndThemepages');
 
 class MappingLine {
   constructor(lineNumber,[publication, cueSectionId, cueThemepageId, escenicSectionId, hint]) {
@@ -56,11 +56,12 @@ class SectionMappingEditor extends CustomEditorBase {
   #mapping;
 
 	constructor(context, document, webviewPanel, token) {
-	  super(context, document, webviewPanel, 'RedirectsEditorViews', '../config/schema/redirects.schema.json', token);
+	  super(context, document, webviewPanel, 'SectionMappingEditorViews', '../config/schema/redirects.schema.json', token);
+	  
   }
 
   #parseData() {
-    this.#mapping = new Mapping(this.#text);
+    this.#mapping = new Mapping(this.text);
   }
   
   initialize() {
@@ -83,4 +84,4 @@ class SectionMappingEditor extends CustomEditorBase {
 
 }
 
-module.exports = RedirectsEditor;
+module.exports = SectionMappingEditor;
