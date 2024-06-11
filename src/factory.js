@@ -46,6 +46,7 @@ class Factory {
   #status = 'new';
   #directories;
   #modules = [];
+  #disabledModules = [];
   #errors = [];
 	#categories;
 	#interfaceDef;
@@ -68,8 +69,13 @@ class Factory {
         loaded: m.$loaded,
         path: m.$path,
         dirIndex: m.$dirIndex,
-        selectors: m.$selectors,
-        error: m.$error,
+        selectors: m.$selectors
+      })),
+    getDisabledModuleInfos: ()=>this.#disabledModules.map(m=>({
+        name:m.$plainName,
+        description: m.$description,
+        loaded: false,
+        path: m.$path
       })),
 	  getCategories: ()=>this.#categories,
 	  getModuleCache: ()=>this.#modCache.getDiagnosticData(),
@@ -104,25 +110,29 @@ class Factory {
 	    });
 
     this.#errors = loaded.errors;
-    this.#modules = Array
-      .from(new Set(loaded.modules))
-      .map(m=>{
+    Array.from(new Set(loaded.modules))
+      .forEach(m=>{
         try {
-          m.$selectors = new ModuleSelectors(m, this.#categories);
-          m.$interface = this.#createModuleInterface(m);
-          return m;
+          if( m.disabled == true ) {
+            this.#disabledModules.push(m);
+          }
+          else {
+            m.$selectors = new ModuleSelectors(m, this.#categories);
+            m.$interface = this.#createModuleInterface(m);
+            this.#modules.push(m);
+          }
         }
         catch(e) {
           m.$error = e;
           this.#errors.push(m);
-          return undefined;
         }
-      })
-      .filter(m=>m!=undefined);
-    
+      });
+
     console.log(`${this.name}-Factory: ${this.#modules.length} modules were successfully loaded.`);
     if( this.#errors.length > 0 )
-     console.warn(`${this.name}-Factory: ${this.#errors.length} modules could not be loaded.`, this.#errors);
+      console.warn(`${this.name}-Factory: ${this.#errors.length} modules could not be loaded.`, this.#errors);
+    if( this.#disabledModules.length > 0 )
+      console.debug(`${this.name}-Factory: ${this.#disabledModules.length} modules are disabled.`, this.#disabledModules);
 	}
   #createModuleInterface(module) {
     if( this.#interfaceDef == undefined || Object.keys(this.#interfaceDef).length == 0 )
@@ -170,6 +180,7 @@ class Factory {
   } 
   #findBestMatch(selectorObj) {
   	const matches =	this.#findAllMatches(selectorObj);
+  
   	if( matches.length == 0 ) return undefined;
   	if( matches.length == 1 ) return matches[0].module;
 
@@ -177,9 +188,9 @@ class Factory {
 
   	// Ambiguities are OK, as long as ambiguous matches refer to the same module
   	for( let i = 1 ; i < matches.length ; i++ ) {
-  		if( ModuleMatch.compare(matches[0], matches[i]) != 0 )
+  		if( ModuleMatch.compare(matches[0], matches[i], selectorObj[0].includes('#.definitions.PageConfigComponent')) != 0 )
   			return matches[0].module; // this is the best match
-  		if( matches[0].module != matches[i].getModle() ){
+  		if( matches[0].module != matches[i].module ){
   			console.log(0,i,matches[0].module, matches[i].module);
   			console.log(matches[0].module === matches[i].module);
   			console.log(matches[0].module == matches[i].module);
@@ -252,6 +263,7 @@ class FactoryLoader {
 	      status: diag.getStatus(),
     	  errors: diag.getErrors(),
         modules: diag.getModuleInfos(),
+        disabledModules: diag.getDisabledModuleInfos(),
     	  categories: diag.getCategories(),
     	  moduleCache: diag.getModuleCache(),
     	  setCache: diag.getSetCache(),

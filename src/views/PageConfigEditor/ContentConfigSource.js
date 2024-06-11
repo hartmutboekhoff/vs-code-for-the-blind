@@ -1,35 +1,39 @@
 const {Element} = require('../../html');
 const {TextInputLine, DropdownInputLine} = require('../../htmlFormFields');
 const {ValueGroupWrapper} = require('../helpers/dataElementViews');
+const {getEnumLabel} = require('../helpers/utility');
 
 
 class ContentConfigSource extends ValueGroupWrapper {
   constructor(obj, schema, key, path, status) {
     super(schema, obj.type, '', {class: 'content-source'});
-    let subtitle;
+    this.summary.add(obj.count+' Artikel');
+    if( obj.params ) {
+      this.summary.add('Publikation',obj.params.publicationName??'aktuelle Publikation');
+      this.summary.add('Rubrik', obj.params?.sectionName ?? obj.params?.sectionNames?.join(', ') ?? obj.params.sectionUniqueName ?? '');
+    }
+
     switch( obj.type ) {
       case 'list':
-        subtitle = obj.params?.listName 
-                   ?? obj.params?.listNames?.join(', ') 
-                   ?? '';
+        this.summary.add('Liste',obj.params?.listName ?? obj.params?.listNames?.join(', ') ?? '');
         break;
       case 'group':
-        subtitle = obj.params?.groupName 
-                   ?? obj.params?.groupNames?.join(', ') 
-                   ?? '';
+        this.summary.add('Gruppe', obj.params?.groupName ?? obj.params?.groupNames?.join(', ') ?? '');
         break;
+        
       case 'section':
-        subtitle = obj.params?.sectionName 
-                   ?? obj.params?.sectionNames?.join(', ') ?? obj.params.sectionUniqueName 
-                   ?? obj.params?.sectionNames?.join(', ') 
-                   ?? '';
-        break;
+      default:
     }
-    this.subtitle.innerText =  subtitle? `${obj.count} Artikel (${subtitle})` : `${obj.count} Artikel`;
+
+    if( obj.params?.articleTypes ) 
+      this.summary.add('Artikeltypen', obj.params.articleTypes.join(', '));
+    if( obj.filters )
+      this.summary.add('Filter', obj.filters.map(f=>f.type).join(', '));
+
   }
   
   getSubkeys() {
-    return ['count', 'params'];
+    return ['count', 'params', 'filters'];
   }
 }
 

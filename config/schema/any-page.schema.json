@@ -157,10 +157,7 @@
           "title": "Filter ???"
         },
         "filters": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ContentConfigFilter"
-          }
+          "$ref": "#/definitions/ContentConfigFilters"
         },
         "maxAgeInMonths": {
           "type": "integer",
@@ -188,7 +185,10 @@
             "minimum": 1
           }
         },
-        "required": ["maxAgeInMonths", "fromDate"]
+        "required": [
+          "maxAgeInMonths",
+          "fromDate"
+        ]
       },
       "else": {
         "$comment": "Is it really neccessary have to check this?",
@@ -209,35 +209,47 @@
       },
       "title": "Datenabruf"
     },
-    "ContentConfigFilter": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "type": {
-          "type": "string",
-          "title": "Filtertyp",
-          "enum": [
-            "default",
-            "nonLive",
-            "premium",
-            "onlyPaid",
-            "free",
-            "onlyFree",
-            "nonTest",
-            "noTest",
-            "noIndex",
-            "hasTeaserImage",
-            "nothing",
-            "timePeriod",
-            "hasPlayout",
-            "notOnIndexPage",
-            "excludeOwnerPublications"
-          ],
-          "anyOf": [
+    "ContentConfigFilters": {
+      "type": "array",
+      "title": "Filter",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Filtertyp",
+            "enum": [
+              "default",
+              "defaultWithoutNoIndex",
+              "nonFuture",
+              "nonLive",
+              "premium",
+              "free",
+              "nonTest",
+              "noIndex",
+              "hasTeaserImage",
+              "nothing",
+              "timePeriod",
+              "hasPlayout",
+              "notOnIndexPage",
+              "excludeOwnerPublications"
+            ],
+            "anyOf": [
               {
                 "const": "default",
                 "title": "Standard Filter",
                 "description": "Entfernt inaktive Artikel, nicht aufbereitete Artikel und Testartikel, sowo Artikel, die auf Indexseiten nicht erlaubt sind."
+              },
+              {
+                "const": "defaultWithoutNoIndex",
+                "title": "Standard Filter ohne NoIndex",
+                "description": "Entfernt inaktive Artikel, nicht aufbereitete Artikel und Testartikel."
+              },
+              {
+                "const": "nonFuture",
+                "title": "Keine zukünftigen Artikel",
+                "description": "Entfernt eingeplante aber nicht aktive Artikel."
               },
               {
                 "const": "nonLive",
@@ -250,96 +262,79 @@
                 "description": "Entfernt alle Artikel, die nicht 'Paid' sind."
               },
               {
-                "const": "onlyPaid",
-                "title": "Premium Artikel (Doublette)",
-                "description": "Entfernt alle Artikel, die nicht als 'Paid' gekennzeichnet sind.",
-                "$comment": "Identical to 'premium'. This value shoudl be deleted." 
+                "const": "free",
+                "title": "Freie Artikel",
+                "description": "Entfernt alle Artikel, die nicht als 'Free' gekennzeichnet sind."
               },
-              { 
-                "const": "free",            
-                "title": "Freie Artikel", 
-                "description": "Entfernt alle Artikel, die nicht als 'Free' gekennzeichnet sind." 
+              {
+                "const": "nonTest",
+                "title": "Keine Testinhalte",
+                "description": "Entfernt Artikel, die als Testinhalte gekennzeichnet sind."
               },
-              { 
-                "const": "onlyFree",        
-                "title": "Freie Artikel (Doublette)", 
-                "description": "Entfernt alle Artikel, die nicht als 'Free' gekennzeichnet sind.", 
-                "$comment": "Identical to 'free'. This value shoudl be deleted." 
+              {
+                "const": "noIndex",
+                "title": "Nur indizierbare Artikel",
+                "description": "Entfernt Artikel, bei denen die Option NOINDEX gesetzt ist."
               },
-              { 
-                "const": "nonTest",         
-                "title": "Keine Testinhalte", 
-                "description": "Entfernt Artikel, die als Testinhalte gekennzeichnet sind." 
+              {
+                "const": "hasTeaserImage",
+                "title": "Artikel mit Teaserbild",
+                "description": "Entfernt alle Atikel ohne Teaserbild."
               },
-              { 
-                "const": "noTest",          
-                "title": "Keine Testinhalte (Doublette)", 
-                "description": "Entfernt Artikel, die als Testinhalte gekennzeichnet sind.", 
-                "$comment": "Identical to 'nonTest'. This value shoudl be deleted." 
-              },
-              { 
-                "const": "noIndex",         
-                "title": "Nur indizierbare Artikel", 
-                "description": "Entfernt Artikel, bei denen die Option NOINDEX gesetzt ist." 
-              },
-              { 
-                "const": "hasTeaserImage",  
-                "title": "Artikel mit Teaserbild", 
-                "description": "Entfernt alle Atikel ohne Teaserbild." 
-              },
-              { 
+              {
                 "const": "nothing",
                 "title": "Alle Filter deaktivieren",
                 "description": "Deaktiviert ALLE impliziten Filter und Defaultfilter."
               },
-              { 
-                "const": "timePeriod",      
-                "title": "Nach Publikationszeitraum", 
-                "description": "Filtert Artikel anhand des Publkationsdatums" 
+              {
+                "const": "timePeriod",
+                "title": "Nach Publikationszeitraum",
+                "description": "Filtert Artikel anhand des Publkationsdatums"
               },
-              { 
+              {
                 "const": "hasPlayout",
-                "title": "Bereit zur Ausspielung", 
-                "description": "Entfernt Artikel, die den Veröffentlichungs- und Aufbereitungsprozess noch nicht vollständig durchlaufen haben." 
+                "title": "Bereit zur Ausspielung",
+                "description": "Entfernt Artikel, die den Veröffentlichungs- und Aufbereitungsprozess noch nicht vollständig durchlaufen haben."
               },
-              { 
+              {
                 "const": "notOnIndexPage",
-                "title": "Auf Indexseiten erlaubte Artikel", 
-                "description": "Entfernt Artikel, die auf Indexseiten nicht zugelassen sind." 
+                "title": "Auf Indexseiten erlaubte Artikel",
+                "description": "Entfernt Artikel, die auf Indexseiten nicht zugelassen sind."
               },
-              { 
+              {
                 "const": "excludeOwnerPublications",
-                "title": "Heimpublikationen ausschließen", 
-                "description": "Entfernt Artikel, die bestimmte Heimpublikationen besitzen." 
+                "title": "Heimpublikationen ausschließen",
+                "description": "Entfernt Artikel, die bestimmte Heimpublikationen besitzen."
               }
-          ]
-        },
-        "params": {
-          "type": "object",
-          "title": "Optionen",
-          "properties": {
-            "startDate": {
-              "type": "string",
-              "title": "Startdatum",
-              "$comment": "only for type=timePeriod!"
-            },
-            "endDate": {
-              "type": "string",
-              "title": "Enddatum",
-              "$comment": "only for type=timePeriod!"
-            },
-            "publicationNames": {
-              "type": "array",
-              "$comment": "only for type=excludeOwnerPublications!",
-              "items": {
+            ]
+          },
+          "params": {
+            "type": "object",
+            "title": "Optionen",
+            "properties": {
+              "startDate": {
                 "type": "string",
-                "examples": [
-                  "zro"
-                ]
+                "title": "Startdatum",
+                "$comment": "only for type=timePeriod!"
+              },
+              "endDate": {
+                "type": "string",
+                "title": "Enddatum",
+                "$comment": "only for type=timePeriod!"
+              },
+              "publicationNames": {
+                "type": "array",
+                "$comment": "only for type=excludeOwnerPublications!",
+                "items": {
+                  "type": "string",
+                  "examples": [
+                    "zro"
+                  ]
+                }
+              }
             }
           }
         }
-      }
       }
     },
     "PageConfigViewGroup": {
@@ -442,184 +437,184 @@
       "title": "Artikeltypen",
       "$comment": "valid for all types",
       "items": {
-          "type": "string",
-          "enum": [
-            "news",
-            "opinion",
-            "agentur",
-            "printimport",
-            "leserreporter",
-            "sales",
-            "advertorial",
-            "expert",
-            "ticker",
-            "recipe",
-            "longform",
-            "stockreport",
-            "quote",
-            "textmodule",
-            "infobox",
-            "teaser",
-            "gallery",
-            "textgallery",
-            "download",
-            "image",
-            "video",
-            "youtube",
-            "xhtml",
-            "video_playlist",
-            "twitter",
-            "facebook",
-            "pinterest",
-            "instagram",
-            "embed",
-            "compareslider",
-            "before_after_image",
-            "tag_author",
-            "tag_teaser"
-          ],
-          "anyOf": [
-            {
-              "const": "news",
-              "title": "Nachrichtenartikel"
-            },
-            {
-              "const": "opinion",
-              "title": "Meinungsartikel"
-            },
-            {
-              "const": "agentur",
-              "title": "Agenturmeldung"
-            },
-            {
-              "const": "printimport",
-              "title": "Printimport",
-              "$comment": "is this type still in use?"
-            },
-            {
-              "const": "leserreporter",
-              "title": "Leserreporter",
-              "$comment": "is this type still in use?"
-            },
-            {
-              "const": "sales",
-              "title": "Sales (Anzeige)"
-            },
-            {
-              "const": "advertorial",
-              "title": "Advertorial (Anzeige)"
-            },
-            {
-              "const": "expert",
-              "title": "Expertenartikel (Anzeige)"
-            },
-            {
-              "const": "ticker",
-              "title": "Newsticker"
-            },
-            {
-              "const": "recipe",
-              "title": "Rezept",
-              "$comment": "is this type still in use? Originally implemented for BILD der FRAU."
-            },
-            {
-              "const": "longform",
-              "title": "Longform"
-            },
-            {
-              "const": "stockreport",
-              "title": "Börsenreport",
-              "$comment": "is this type still in use? Was used in Berliner Morgenpost but none of the old articles were migrated."
-            },
-            {
-              "const": "quote",
-              "title": "Zitat"
-            },
-            {
-              "const": "textmodule",
-              "title": "Textblock"
-            },
-            {
-              "const": "infobox",
-              "title": "Infobox"
-            },
-            {
-              "const": "teaser",
-              "title": "Teaser"
-            },
-            {
-              "const": "gallery",
-              "title": "Bildergalerie"
-            },
-            {
-              "const": "textgallery",
-              "title": "Textgalerie"
-            },
-            {
-              "const": "download",
-              "title": "Datei-Download"
-            },
-            {
-              "const": "image",
-              "title": "Bild"
-            },
-            {
-              "const": "video",
-              "title": "Video"
-            },
-            {
-              "const": "youtube",
-              "title": "Youtube Video"
-            },
-            {
-              "const": "xhtml",
-              "title": "XHTML Artikel"
-            },
-            {
-              "const": "video_playlist",
-              "title": "Video Playliste"
-            },
-            {
-              "const": "twitter",
-              "title": "X (Twitter)"
-            },
-            {
-              "const": "facebook",
-              "title": "Facebook"
-            },
-            {
-              "const": "pinterest",
-              "title": "Pinterest"
-            },
-            {
-              "const": "instagram",
-              "title": "Instagram"
-            },
-            {
-              "const": "embed",
-              "title": "Allgemeiner Embed-Code"
-            },
-            {
-              "const": "compareslider",
-              "title": "Compare-Slider",
-              "$comment": "what's the difference between compareslider and before_after_image?"
-            },
-            {
-              "const": "before_after_image",
-              "title": "Vorher-Nacher Bild",
-              "$comment": "what's the difference between compareslider and before_after_image?"
-            },
-            {
-              "const": "tag_author",
-              "title": "Autorenartikel"
-            },
-            {
-              "const": "tag_teaser",
-              "title": "Themenseite"
-            }
-          ]
+        "type": "string",
+        "enum": [
+          "news",
+          "opinion",
+          "agentur",
+          "printimport",
+          "leserreporter",
+          "sales",
+          "advertorial",
+          "expert",
+          "ticker",
+          "recipe",
+          "longform",
+          "stockreport",
+          "quote",
+          "textmodule",
+          "infobox",
+          "teaser",
+          "gallery",
+          "textgallery",
+          "download",
+          "image",
+          "video",
+          "youtube",
+          "xhtml",
+          "video_playlist",
+          "twitter",
+          "facebook",
+          "pinterest",
+          "instagram",
+          "embed",
+          "compareslider",
+          "before_after_image",
+          "tag_author",
+          "tag_teaser"
+        ],
+        "anyOf": [
+          {
+            "const": "news",
+            "title": "Nachrichtenartikel"
+          },
+          {
+            "const": "opinion",
+            "title": "Meinungsartikel"
+          },
+          {
+            "const": "agentur",
+            "title": "Agenturmeldung"
+          },
+          {
+            "const": "printimport",
+            "title": "Printimport",
+            "$comment": "is this type still in use?"
+          },
+          {
+            "const": "leserreporter",
+            "title": "Leserreporter",
+            "$comment": "is this type still in use?"
+          },
+          {
+            "const": "sales",
+            "title": "Sales (Anzeige)"
+          },
+          {
+            "const": "advertorial",
+            "title": "Advertorial (Anzeige)"
+          },
+          {
+            "const": "expert",
+            "title": "Expertenartikel (Anzeige)"
+          },
+          {
+            "const": "ticker",
+            "title": "Newsticker"
+          },
+          {
+            "const": "recipe",
+            "title": "Rezept",
+            "$comment": "is this type still in use? Originally implemented for BILD der FRAU."
+          },
+          {
+            "const": "longform",
+            "title": "Longform"
+          },
+          {
+            "const": "stockreport",
+            "title": "Börsenreport",
+            "$comment": "is this type still in use? Was used in Berliner Morgenpost but none of the old articles were migrated."
+          },
+          {
+            "const": "quote",
+            "title": "Zitat"
+          },
+          {
+            "const": "textmodule",
+            "title": "Textblock"
+          },
+          {
+            "const": "infobox",
+            "title": "Infobox"
+          },
+          {
+            "const": "teaser",
+            "title": "Teaser"
+          },
+          {
+            "const": "gallery",
+            "title": "Bildergalerie"
+          },
+          {
+            "const": "textgallery",
+            "title": "Textgalerie"
+          },
+          {
+            "const": "download",
+            "title": "Datei-Download"
+          },
+          {
+            "const": "image",
+            "title": "Bild"
+          },
+          {
+            "const": "video",
+            "title": "Video"
+          },
+          {
+            "const": "youtube",
+            "title": "Youtube Video"
+          },
+          {
+            "const": "xhtml",
+            "title": "XHTML Artikel"
+          },
+          {
+            "const": "video_playlist",
+            "title": "Video Playliste"
+          },
+          {
+            "const": "twitter",
+            "title": "X (Twitter)"
+          },
+          {
+            "const": "facebook",
+            "title": "Facebook"
+          },
+          {
+            "const": "pinterest",
+            "title": "Pinterest"
+          },
+          {
+            "const": "instagram",
+            "title": "Instagram"
+          },
+          {
+            "const": "embed",
+            "title": "Allgemeiner Embed-Code"
+          },
+          {
+            "const": "compareslider",
+            "title": "Compare-Slider",
+            "$comment": "what's the difference between compareslider and before_after_image?"
+          },
+          {
+            "const": "before_after_image",
+            "title": "Vorher-Nacher Bild",
+            "$comment": "what's the difference between compareslider and before_after_image?"
+          },
+          {
+            "const": "tag_author",
+            "title": "Autorenartikel"
+          },
+          {
+            "const": "tag_teaser",
+            "title": "Themenseite"
+          }
+        ]
       }
-    },  
+    },
     "ArticleType": {
       "type": "string",
       "enum": [
@@ -1069,7 +1064,8 @@
           "type": "string",
           "examples": [
             "portrait",
-            "opinion"]
+            "opinion"
+          ]
         }
       }
     },
@@ -1393,7 +1389,6 @@
           "title": "Wiederholung",
           "description": "Wiederholte Komponennte (Nicht mehr verwenden!)",
           "$comment": "used in backend. This option should be deprecated!"
-          
         }
       ]
     }

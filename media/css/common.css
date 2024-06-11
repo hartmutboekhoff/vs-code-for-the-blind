@@ -24,14 +24,16 @@ fieldset {
                      linear-gradient(180deg, rgba(20,20,20,.3), transparent 10px);
   _border: none;
 }
-fieldset:first-child {
+fieldset:first-child,
+fieldset>summary  +* {
   margin-top: 1em;
 }
 fieldset > legend {
   padding: .2em .5em .2em .2em;
   margin-left: -14px;
+  width: calc(100% + 14px);
   cursor: pointer;
-  background-image: linear-gradient(rgba(40,40,40,.4), rgba(50,5,50,.2) 10%, rgba(50,50,50,.1));
+  background-image: linear-gradient(rgba(20,20,20,.4), rgba(200,200,200,.5) 10%, rgba(50,5,50,.2) 20%, rgba(50,50,50,.1));
   border: 1px solid #333;
   border-bottom: none;
   border-radius: 4px 4px 0 0;
@@ -72,6 +74,44 @@ fieldset:not(.collapsed):has(> legend > span.collapse-button:hover) {
   box-shadow: 0 0 6px var(--vscode-editor-selectionHighlightBackground);/*black;*/
 }
 
+fieldset>div.summary {
+  display: none;
+  color: black;
+  font-size: .8em;
+}
+fieldset>div.summary.allways-visible {
+  display:block;
+  margin-bottom: 4em;
+}
+fieldset.collapsed>div.summary {
+  display: block;
+}
+fieldset>div.summary p {
+  display:grid;
+  grid-template-columns: auto auto auto;
+  column-gap: 1em;
+  padding: 0 .5em;
+  margin: 0;
+  float: left;
+}
+
+fieldset>div.summary p:not(:has(.details)), 
+fieldset>div.summary p:not(:has(.value)) {
+  display:block;
+}
+
+fieldset>div.summary p span.title { 
+  grid-column-start: 1; 
+  font-weight: bold;
+}
+fieldset>div.summary p span.value { 
+  grid-column-start: 2; 
+  color: blue;
+}
+fieldset>div.summary p span.details { 
+  grid-column-start: 3; 
+}
+
 legend .description {
   font-style: italic;
   color: #666;
@@ -81,15 +121,10 @@ legend .description {
   display:inline-block;
   vertical-align: bottom;
 }
-legend .description:before {
+
+legend .description:not(:empty):before {
   content: ' - ';
 }
-legend .description:empty:before {
-  content: ''
-}
-
-
-
 
 .unspecified-map table td {
   vertical-align: top;
@@ -214,6 +249,8 @@ span.action-buttons>button.json-button {
   font-family: monospace;
   font-weight: bold;
   z-index: 9;
+  position: relative;
+  top: -20px;
 }
 span.action-buttons>button.up-button {
   background-color: #4a4;
@@ -301,4 +338,9 @@ div.debug-info-overlay > button {
   width: 1.5em;  
   height: 1.5em;
   z-index: 1;
+}
+
+.disabled {
+  filter:sepia(1);
+  background-color: #aaa;
 }

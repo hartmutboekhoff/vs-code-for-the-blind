@@ -19,26 +19,33 @@ class ChildElements extends Array {
     this.#parent = parent;
   } 
   
-  push(...elements) { super.push(...elements); }
+  #ensureElements(params) {
+    return params.map(p=>{
+      if( p instanceof Element ) return p;
+      if( typeof p == 'string' ) return new PlainText(p);
+      if( Array.isArray(p) ) return this.#ensureElements(p);
+    }).flat(Infinity);
+  }
+  push(...elements) { super.push(...this.#ensureElements(elements)); }
   append(...elements) { 
-    super.push(...elements); 
+    super.push(...this.#ensureElements(elements)); 
     return elements.length == 0? undefined : elements.length == 1? elements[0] : elements;
   }
-  unshift(...elements) { super.unshift(...elements); }
+  unshift(...elements) { super.unshift(...this.#ensureElements(elements)); }
   insertBefore(before, ...elements) { 
     const index = super.indexOf(before);
     if( index < 0 ) return undefined;
-    super.splice(index,0,...elements);
+    super.splice(index,0,...this.#ensureElements(elements));
     return elements.length == 0? undefined : elements.length == 1? elements[0] : elements;
   }
   insertAfter(after, ...elements) {
     const index = super.indexOf(after);
     if( index < 0 ) return undefined;
-    super.splice(index+1,0, ...elements);
+    super.splice(index+1,0, ...this.#ensureElements(elements));
     return elements.length == 0? undefined : elements.length == 1? elements[0] : elements;
   }
   insertAt(index, ...elements) { 
-    super.splice(index,0, ...elements); 
+    super.splice(index,0, ...this.#ensureElements(elements)); 
     return elements.length == 0? undefined : elements.length == 1? elements[0] : elements;
   }
   remove(...elements) {
@@ -218,15 +225,30 @@ class Element {
   }
   
   renderHtml(indent=0) {
+    if( false === this.preRender?.() )
+      return '';
+    
+    const html = this.#renderHtml(indent);
+    return this.postRender?.(html) ?? html;
+  }
+  #renderHtml(indent=0) {
     try {
       if( !this.hasName() ) 
         return this.renderChildren(indent);
-      if( this.#children == undefined || this.#children.length == 0 ) 
+
+      if( this.#children == undefined || this.#children.length == 0 ) {
         if( SelfClosingTags.includes(this.name) )
           return this.renderEmptyTag(indent);
         else
           return `${this.renderStartTag(indent)}${this.renderEndTag(0)}`;
-      return `${this.renderStartTag(indent)}\n${this.renderChildren(indent+1)}\n${this.renderEndTag(indent)}`;
+      }
+      else {
+        const innerHTML = this.renderChildren(indent+1);
+        if( innerHTML == '' )
+          return `${this.renderStartTag(indent)}${this.renderEndTag(0)}`;
+        else
+          return `${this.renderStartTag(indent)}\n${innerHTML}\n${this.renderEndTag(indent)}`;
+      }
     }
     catch(e) {
       console.error(e);
@@ -255,7 +277,11 @@ class PlainText extends Element {
 	  this.text = v;
 	}
 	renderHtml(indent) {
-		return INDENT_STRING.repeat(indent)+this.text;
+	  return typeof this.text != 'string'
+	          ? this.text
+	          : this.text.trim() != ''
+	          ? INDENT_STRING.repeat(indent)+this.text.replace(/\n/mg,INDENT_STRING.repeat(indent))
+	          : '';
 	}
 }
 

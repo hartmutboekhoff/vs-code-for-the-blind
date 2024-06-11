@@ -150,7 +150,7 @@ class Traversion {
       return this.onValue(obj, key, path, this.#stack.length-1);
     }
     catch(e) {
-      console.debug('Exception user-code while traversing object-tree.', 'onValue', path, e)
+      console.error('Exception in user-code while traversing object-tree.', 'onValue', path, '\n', e)
     }
   }
   #onRecursion(obj, key, path) {

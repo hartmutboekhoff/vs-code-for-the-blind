@@ -101,6 +101,7 @@ class ModuleMatch extends Array {
     super();
     this.module = module;
     this.aggregated = this.#aggregatedValue;
+    this.directoryPriority = module.$dirIndex;
     
     for( const m of selectorMatches ) {
       this.#aggregatedValue.aggregate(m);
@@ -124,6 +125,7 @@ class ModuleMatch extends Array {
   toString() {
     return this.module.$plainName+'='+this.#aggregatedValue.toString()+':{'+[...this].map(s=>s.toString()).join(',')+'}';
   }
+
   static compare(a,b) {
     if( a.length != b.length ) throw 'mist';
     for( let i = 0 ; i < a.length ; i++ ) {
@@ -260,7 +262,6 @@ class ModuleSelector extends Array {
 class ModuleSelectors extends Array {
   constructor(module, categories) {
     super();
-    this.directoryPriority = module.$dirIndex;
     
     for( const ms of module.selectors ?? [] ) {
       this.push(new ModuleSelector(module,categories,ms));

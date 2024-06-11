@@ -1,11 +1,11 @@
 const {Element} = require('../../html');
 const {TextInputLine, DropdownInputLine, RadioInputLine} = require('../../htmlFormFields');
 const {ValueGroupWrapper} = require('../helpers/dataElementViews');
-const {getStringValuesList} = require('../helpers/utility');
+const {getStringValuesList, getEnumLabel} = require('../helpers/utility');
 
 class ViewGroup extends ValueGroupWrapper {
   constructor(obj, schema, key, path, status) {
-    super(schema, obj.id ?? key, '', {class:'view-group match-'+status});
+    super(schema, obj.id ?? key, getEnumLabel(obj.type,schema.properties.type.anyOf), {class:'view-group match-'+status});
 
     this.children.append(
       new TextInputLine(path+'.id', 
@@ -21,6 +21,7 @@ class ViewGroup extends ValueGroupWrapper {
                            {class: 'view-group-type'}
                           )
     );
+    this.collapsed = true;
   }
   
   get preventSubElements() {
