@@ -283,7 +283,15 @@ async function loadCommands(context,rootDir,rootNS) {
       return;
     }
 
-	  context.subscriptions.push(vscode.commands.registerCommand(key, ()=>func.function(context)));
+	  context.subscriptions.push(vscode.commands.registerCommand(key, ()=>{
+	    try {
+	      func.function(context);
+	    }
+	    catch(e) {
+	      console.warn('Failed to execute command '+key, e);
+	    }
+	    
+	  }));
     console.log(`Registered command "${key}" from ${func.info}`);
   });
 }

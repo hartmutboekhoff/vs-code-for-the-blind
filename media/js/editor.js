@@ -145,11 +145,19 @@
         }
       });
     });
-    document.querySelectorAll('fieldset > legend:has(span.collapse-button)').forEach(el=>{
+    //document.querySelectorAll('fieldset > legend:has(span.collapse-button)').forEach(el=>{
+    document.querySelectorAll('fieldset > legend:has(span.collapse-button), fieldset:has(>legend>span.collapse-button)>.summary').forEach(el=>{
       el.addEventListener('click',ev=>{
         ev.target.closest('fieldset').classList.toggle('collapsed');
       });
     });
+    document.querySelectorAll('fieldset:has(>legend>span.collapse-button)').forEach(el=>{
+      el.addEventListener('click',ev=>{
+        if( el == ev.target && el.classList.contains('collapsed'))
+          el.classList.remove('collapsed');
+      })
+    });
+    
     document.getElementById('global-filter')?.addEventListener('input',ev=>{
       const filter = ev.target.value.toLowerCase();
       document.querySelectorAll('.root fieldset').forEach(el=>{

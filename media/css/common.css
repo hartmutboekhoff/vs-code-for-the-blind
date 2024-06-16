@@ -1,3 +1,10 @@
+* {
+  --background-color: hsla(calc(var(--background-color-h) + var(--element-depth) * var(--background-color-h-delta)),
+                           calc(var(--background-color-s) + var(--element-depth) * var(--background-color-s-delta)),
+                           calc(var(--background-color-l) + var(--element-depth) * var(--background-color-l-delta)),
+                           calc(var(--background-color-a) + var(--element-depth) * var(--background-color-a-delta))
+                          );
+}
 body {
   font-size: 1em;
   padding-left: 8px;;
@@ -18,25 +25,66 @@ h1 {
 }
 
 fieldset {
-  padding-right: 6px;
-  margin-top: 2.5em;
-  background-image:  linear-gradient(0deg, rgba(20,20,20,.3), rgba(255,255,255,.5), transparent 10px), 
-                     linear-gradient(180deg, rgba(20,20,20,.3), transparent 10px);
-  _border: none;
+  --shade-color: rgba(20,20,20,.1);
+  --background-color-h: 20;
+  --background-color-s: 50%;
+  --background-color-l: 90%;
+  --background-color-a: 1;
+  --background-color-h-delta: 40;
+  --background-color-s-delta: -2%;
+  --background-color-l-delta: -3%;
+  --background-color-a-delta: 0;
+  --element-depth: 0;
+
+  --radius: 10px;
+
+  
+  padding: 0 6px 1.5em .6em;
+  margin-top: 3em;
+
+  background-color: var(--background-color);
+  background-image: linear-gradient(to top, var(--shade-color), transparent 20px),
+                    linear-gradient(to left, var(--shade-color), transparent 20px),
+                    linear-gradient(to right, var(--shade-color), transparent 20px);
+  
+  border-radius: 0 0 var(--radius) var(--radius);
 }
+fieldset fieldset { --element-depth: 1; }
+fieldset fieldset fieldset { --element-depth: 2; }
+fieldset fieldset fieldset fieldset { --element-depth: 3; }
+fieldset fieldset fieldset fieldset fieldset { --element-depth: 4; }
+fieldset fieldset fieldset fieldset fieldset fieldset { --element-depth: 5; }
+fieldset fieldset fieldset fieldset fieldset fieldset fieldset { --element-depth: 6; }
+
+/*
+fieldset fieldset { --background-color-l: 90%; }
+fieldset fieldset fieldset { --background-color-l: 80%; }
+fieldset fieldset fieldset fieldset fieldset { --background-color-l: 70%; }
+fieldset fieldset fieldset fieldset fieldset fieldset { --background-color-l: 60%; }
+*/
 fieldset:first-child,
-fieldset>summary  +* {
+fieldset>summary + * {
   margin-top: 1em;
 }
 fieldset > legend {
-  padding: .2em .5em .2em .2em;
-  margin-left: -14px;
-  width: calc(100% + 14px);
+  --background-color-s: 60%;
+  --background-color-l: 75%;
+
+  padding: .2em .5em .3em 1em;
+  position:relative;
+  left: -.7em;
+  top: -.8em;
+  width: calc(100% - .7em); 
   cursor: pointer;
-  background-image: linear-gradient(rgba(20,20,20,.4), rgba(200,200,200,.5) 10%, rgba(50,5,50,.2) 20%, rgba(50,50,50,.1));
-  border: 1px solid #333;
+
+  background-color: var(--background-color);
+  background-image: linear-gradient(to bottom, var(--shade-color), transparent 20px),
+                    linear-gradient(to left, var(--shade-color), transparent 20px),
+                    linear-gradient(to right, var(--shade-color), transparent 20px);
+
+  border: inherit;
   border-bottom: none;
-  border-radius: 4px 4px 0 0;
+  border-radius: var(--radius) var(--radius) 0 0;
   min-width: 25%;
 }
 

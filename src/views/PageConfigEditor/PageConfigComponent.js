@@ -61,7 +61,7 @@ class PageConfigComponent extends ValueGroupWrapper {
       
     }
     else if( obj.type == "BOX_HEADLINE" ) {
-      this.summary.add('&Uumlberschrift', obj.title);
+      this.summary.add('&Uumlberschrift', obj.params?.title);
     }
   }
   #addLabels(obj) {

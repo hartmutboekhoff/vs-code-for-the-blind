@@ -20,6 +20,10 @@ class ContentConfigPanel extends ValueGroupWrapper {
       const atypes = aggregateArticleTypes(...obj.sources);
       if( atypes != '' )
         this.summary.add('Artikeltypen', atypes);
+      const filters = new Set(obj.sources.map(s=>s.filters?.map(f=>f.type)).flat());
+      if( filters.size > 0 )
+        this.summary.add('Filter', [...filters].join(', '));
+        
     }
   }
   

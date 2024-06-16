@@ -72,25 +72,33 @@
 
 
 .page-content-component {
-  margin-top: 1em;
+  _margin-top: 2em;
 }
 .page-content-component>legend span.description {
   color: black;
   font-weight: bold;
 }
+.component-panel,
+.component-panel * {
+  --background-color-h: 120;
+  --background-color-l-delta: -2%;
+}
 .component-panel {
   margin-top: 1em;
-  background-color:#aff;
 }
 .component-panel>legend {
-  background-color: #aff;
+  _background-color: #aff;
 }
-.content-source {
-  margin-top: 1em;
-  background-color: #afc;
+fieldset.content-source, 
+fieldset.content-source fieldset  {
+  _--background-color-h: 120;
+  _--background-color-s: 50%;
+  
+  _margin-top: 1em;
+  _background-color: #afc;
 }
 .content-source>legend {
-  background-color: #afc;
+  _background-color: #afc;
 }
 
 ul.link-label {
