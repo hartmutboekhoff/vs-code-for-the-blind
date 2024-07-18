@@ -406,9 +406,15 @@ div.popup-data > a.title {
 }
 div.popup-data > div.popup {
 	display:none;
-	position: absolute;
+	position: fixed;
+	z-index: 10;
 	width: 90vw;
 	height: 90vh;
+	top: 5vh;
+	left: 4vw;
+	border: 2px solid red;
+	background-color: white;
+	outline: 4px solid yellow;
 }
 div.popup-data.open > div.popup {
 	display:block;
