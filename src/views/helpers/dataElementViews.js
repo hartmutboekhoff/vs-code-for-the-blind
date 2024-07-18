@@ -315,8 +315,60 @@ class Summary extends Element {
   }
 }
 
+class PopupGroupWrapper extends Element {
+	#title; #subtitle; 
+	#popup; #top; #main; #bottom;
+	#summary;
+	
+	constructor(schema, title, subtitle, attributes) {
+		if( typeof subtitle == 'object' && attributes == undefined ) [subtitle,attributes] = ['', subtitle];
+    super('div', attributes);
+		
+		this.classList.add('popup-data');
+		this.#title = this.children.append(new Element('a', title??schema.title, {class:'title'}));
+		this.#subtitle = this.children.append(new Element('span',subtitle??schema.description, {class:'subtitle'}));
+		this.#summary = this.children.append(new Summary());
+		this.#popup = this.children.append(new Element('div', {'class':'popup'}));
+		this.#top = new Element('');
+		this.#main = new Element('');
+		this.#bottom = new Element('');
+		this.#popup.children.append(this.#top, this.#main, this.#bottom);
+		
+	}
+	
+  get title() {
+    return this.#title;
+  } 
+  get subtitle() {
+    return this.#subtitle;
+  }
+  get children() {
+    return this.#main?.children ?? super.children;
+  }
+  get top() {
+    return this.#top?.children;
+  }
+  get bottom() {
+    return this.#bottom?.children;
+  }
+  get summary() {
+    return this.#summary;
+  }
+  get viewPath() { 
+    return this.attributes['view-path']; 
+  }
+  set viewPath(v) { 
+    if( v == undefined || v.trim() == '' )
+      delete this.attributes['view-path'];
+    else
+      this.attributes['view-path'] = v; 
+  }
+	
+}
+
 module.exports = {
   ValueGroupWrapper,
+  PopupGroupWrapper,
   EnumValueArray,
   OptionGroup,
   Summary,

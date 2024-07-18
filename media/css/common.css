@@ -392,3 +392,24 @@ div.debug-info-overlay > button {
   filter:sepia(1);
   background-color: #aaa;
 }
+
+
+
+div.popup-data {
+	
+}
+div.popup-data > a.title {
+	font-size: 1.5em;
+	font-weight: bold;
+	cursor: pointer;
+	
+}
+div.popup-data > div.popup {
+	display:none;
+	position: absolute;
+	width: 90vw;
+	height: 90vh;
+}
+div.popup-data.open > div.popup {
+	display:block;
+}
