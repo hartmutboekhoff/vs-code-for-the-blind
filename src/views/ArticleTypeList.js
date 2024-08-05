@@ -1,7 +1,7 @@
-const {Element} = require('../../html');
-const {getStringValuesList} = require('../helpers/utility');
-const {toNiceText} = require('../../utility');
-const {EnumValueArray} = require('../helpers/dataElementViews')
+const {Element} = require('../html');
+const {getStringValuesList} = require('./helpers/utility');
+const {toNiceText} = require('../utility');
+const {EnumValueArray} = require('./helpers/dataElementViews')
 
 class ArticleTypeList extends EnumValueArray {
   constructor(obj, schema, key, path, status) {
@@ -20,6 +20,12 @@ exports.selectors = [
     SchemaType: undefined,
     DataType: undefined,
     EditorType: "PageConfigEditor"
+  },
+  {
+    SchemaPath: '#.definitions.ArticleTypeList',
+    SchemaType: undefined,
+    DataType: undefined,
+    EditorType: "FeedConfigEditor"
   }
 ];
 

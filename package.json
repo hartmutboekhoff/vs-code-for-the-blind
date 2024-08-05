@@ -38,10 +38,25 @@
         "displayName": "Page-Config Editor",
         "selector": [
           {
+            "filenamePattern": "**/pages/*.json"
+          },
+          {
             "filenamePattern": "**/pages/escenic/*.json"
           },
           {
             "filenamePattern": "**/pages/cue/*.json"
+          }
+        ]
+      },
+      {
+        "viewType": "SparkSiteConfig.FeedConfigEditor",
+        "displayName": "Feed-Config Editor",
+        "selector": [
+          {
+            "filenamePattern": "**/feeds/*.json"
+          },
+          {
+            "filenamePattern": "**/feeds/cue/*.json"
           }
         ]
       },

@@ -1,7 +1,7 @@
-const {Element} = require('../../html');
-const {TextInputLine, DropdownInputLine} = require('../../htmlFormFields');
-const {ValueGroupWrapper} = require('../helpers/dataElementViews');
-const {getEnumLabel} = require('../helpers/utility');
+const {Element} = require('../html');
+const {TextInputLine, DropdownInputLine} = require('../htmlFormFields');
+const {ValueGroupWrapper} = require('./helpers/dataElementViews');
+const {getEnumLabel} = require('./helpers/utility');
 
 
 class ContentConfigSource extends ValueGroupWrapper {
@@ -44,6 +44,12 @@ exports.selectors = [
     SchemaType: undefined,
     DataType: undefined,
     EditorType: "PageConfigEditor"
+  },
+  {
+    SchemaPath: '#.definitions.ContentConfigSource',
+    SchemaType: undefined,
+    DataType: undefined,
+    EditorType: "FeedConfigEditor"
   }
 ];
 

@@ -1,5 +1,8 @@
 const INDENT_STRING = '\t';
 
+function getIndent(indent) {
+  return !indent? '' : INDENT_STRING.repeat(indent);
+}
 function htmlEncode(text) {
   switch(typeof text) {
     case 'undefined': return '';
@@ -104,17 +107,19 @@ class TokenList {
   #update() {
     this.#element.className = this.toString();
   }
-  add(name) {
-    this.#tokens.add(name);
+  add(...names) {
+    names.forEach(n=>this.#tokens.add(n));
     this.#update();
   }
-  remove(name) {
-    this.#tokens.delete(name);
+  remove(...names) {
+    names.forEach(n=>this.#tokens.delete(n));
     this.#update();
   }
-  toggle(name) {
-    if( !this.remove(name) )
-      this.add(name);
+  toggle(...names) {
+    names.forEach(n=>{
+      if( !this.remove(n) )
+        this.add(n);
+    });
     this.#update();
   }
   clear() {
@@ -207,14 +212,18 @@ class Element {
 	}
   
   hasName() { return this.name != ''; }
+  
+  renderIndent(indent) {
+    return getIndent(indent);
+  }
   renderStartTag(indent=0) {
-    return this.hasName()? `${INDENT_STRING.repeat(indent)}<${this.name}${this.renderAttributes()}>` : '';
+    return this.hasName()? `${getIndent(indent)}<${this.name}${this.renderAttributes()}>` : '';
   }
   renderEndTag(indent=0) {
-    return this.hasName()? `${INDENT_STRING.repeat(indent)}</${this.name}>` : '';
+    return this.hasName()? `${getIndent(indent)}</${this.name}>` : '';
   }
   renderEmptyTag(indent=0) {
-    return this.hasName()? `${INDENT_STRING.repeat(indent)}<${this.name}${this.renderAttributes()}/>` : '';
+    return this.hasName()? `${getIndent(indent)}<${this.name}${this.renderAttributes()}/>` : '';
   }
   renderAttributes() {
     return (this.#attributes? this.#attributes.toString() : '')
@@ -280,7 +289,7 @@ class PlainText extends Element {
 	  return typeof this.text != 'string'
 	          ? this.text
 	          : this.text.trim() != ''
-	          ? INDENT_STRING.repeat(indent)+this.text.replace(/\n/mg,INDENT_STRING.repeat(indent))
+	          ? getIndent(indent)+this.text.replace(/\n/mg,getIndent(indent))
 	          : '';
 	}
 }

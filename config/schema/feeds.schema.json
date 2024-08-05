@@ -1,0 +1,900 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Schema to validate feed configurations",
+  "type": "object",
+  "properties": {
+    "meta": {
+      "type": "object"
+    },
+    "feedConfigName": {
+      "type": "string"
+    },
+    "feedFormat": {
+      "type": "string",
+      "enum": [
+        "rss"
+      ]
+    },
+    "maxFeedAgeMinutes": {
+      "type": "integer"
+    },
+    "withContent": {
+      "type": "boolean"
+    },
+    "$contentContext": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/contextPublication"
+      },
+      "minItems": 1
+    },
+    "$contentConfig": {
+      "type": "object",
+      "properties": {
+        "targetProperty": {
+          "const": "feed"
+        },
+        "deduplicationId": {
+          "const": "default"
+        },
+        "minCount": {
+          "type": "integer"
+        },
+        "maxCount": {
+          "type": "integer"
+        },
+        "resolveAllSourcesBeforeSort": {
+          "type": "boolean"
+        },
+        "sort": {
+          "type": "string",
+          "enum": [
+            "publishdate_desc"
+          ]
+        },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/ContentConfigSource"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "definitions": {
+    "contextPublication": {
+      "type": "object",
+      "properties": {
+        "publication": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "enum": [
+                "bmo", 
+                "hao", 
+                "bzv-bz", 
+                "bzv-hk", 
+                "mgt-ta", 
+                "mgt-tlz", 
+                "mgt-otz", 
+                "nrw-waz", 
+                "nrw-nrz", 
+                "nrw-wp", 
+                "nrw-wr", 
+                "nrw-ikz"
+              ]
+            }
+          },
+          "required": ["name"],
+          "additionalProperties": false
+        },
+        "section": {
+          "type": "object",
+          "properties": {
+            "sectionUniqueName": {
+              "type": "string"
+            }
+          },
+          "required": ["sectionUniqueName"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["publication", "section"],
+      "additionalProperties": false
+    },
+    "ContentConfigSource": {
+      "type": "object",
+      "title": "Datenabruf",
+      "required": [
+        "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/SourceType"
+        },
+        "params": {
+          "$ref": "#/definitions/SourceParams"
+        },
+        "count": {
+          "type": "integer",
+          "title": "Anzahl"
+        },
+        "sort": {
+          "type": "string",
+          "title": "Sortierung"
+        },
+        "filter": {
+          "type": "string",
+          "deprecated": true,
+          "$comment": "has yet to be removed from /spark-backend/app/src/main/java/de/funke/sparkbackend/transformer/config/ContentConfigSource.java"
+        },
+        "filters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ContentConfigFilter"
+          }
+        },
+        "maxAgeInMonths": {
+          "type": "integer",
+          "title": "Maximales Artikelalter (Monate)",
+          "$comment": "only for type=section!",
+          "minimum": 1
+        },
+        "fromDate": {
+          "type": "string",
+          "title": "Startdatum (JJJJ-MM-TT)",
+          "$comment": "only for type=section! format yyyy-MM-dd"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "not": {
+                  "const": "section"
+                }
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "maxAgeInMonths"
+                  ]
+                },
+                {
+                  "required": [
+                    "fromDate"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "group" }
+            }
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "params": {
+                "type": "object",
+                "properties": {
+                  "groupName": true, 
+                  "groupNames": true, 
+                  "groupId": true, 
+                  "groupIds": true,
+                  "publicationName": true,
+                  "sectionUniqueName": true,
+                  "articleTypes": true,
+                  "sectionId": true
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "list" }
+            }
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "params": {
+                "type": "object",
+                "properties": {
+                  "listName": true,
+                  "publicationName": true,
+                  "sectionUniqueName": true,
+                  "articleTypes": true,
+                  "sectionId": true
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "publication" }
+            }
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "params": {
+                "type": "object",
+                "properties": {
+                  "articleTypes": true
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    "SourceParams": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "publicationName": {
+          "type": "string",
+          "title": "Publikation",
+          "$comment": "valid for all types",
+          "enum": [
+            "${publicationName}",
+            "zro",
+            "hao",
+            "bmo",
+            "bzv-bz",
+            "bzv-hk",
+            "nrw-waz",
+            "nrw-nrz",
+            "nrw-wp",
+            "nrw-wr",
+            "nrw-ikz",
+            "mgt-ta",
+            "mgt-tlz",
+            "mgt-otz",
+            "bzv-multiconfig",
+            "nrw-multiconfig",
+            "mgt-multiconfig"
+          ],
+          "anyOf": [
+            {
+              "const": "${publicationName}",
+              "title": "Aktive Publikation",
+              "description": "Verwendet immer die aktuelle Publikation"
+            },
+            {
+              "const": "zro",
+              "title": "Zentralredaktion"
+            },
+            {
+              "const": "hao",
+              "title": "Hamburger Abendblatt"
+            },
+            {
+              "const": "bmo",
+              "title": "Berliner Morgenpost"
+            },
+            {
+              "const": "bzv-bz",
+              "title": "Braunschweiger Zeitung"
+            },
+            {
+              "const": "bzv-hk",
+              "title": "Harzkurier"
+            },
+            {
+              "const": "nrw-waz",
+              "title": "WAZ",
+              "description": "Westdeutsche Allgemeine Zeitung"
+            },
+            {
+              "const": "nrw-nrz",
+              "title": "NRZ",
+              "description": "Neue Rhein/Neue Ruhr Zeitung"
+            },
+            {
+              "const": "nrw-wp",
+              "title": "Westfalenpost"
+            },
+            {
+              "const": "nrw-wr",
+              "title": "Westf�lische Rundschau"
+            },
+            {
+              "const": "nrw-ikz",
+              "title": "IKZ",
+              "description": "Iserlohner Kreisanzeiger und Zeitung"
+            },
+            {
+              "const": "mgt-ta",
+              "title": "Th�ringer Allgemeine"
+            },
+            {
+              "const": "mgt-tlz",
+              "title": "TLZ",
+              "description": "Th�ringische Landeszeitung"
+            },
+            {
+              "const": "mgt-otz",
+              "title": "OTZ",
+              "description": "Ostth�ringer Zeitung"
+            },
+            {
+              "const": "bzv-multiconfig",
+              "title": "BZV Multiconfig",
+              "description": "�bergeordnete Publikation f�r den Standort Braunschweig"
+            },
+            {
+              "const": "nrw-multiconfig",
+              "title": "NRW Multiconfig",
+              "description": "�bergeordnete Publikation f�r den Standort NRW"
+            },
+            {
+              "const": "mgt-multiconfig",
+              "title": "MGT Multiconfig",
+              "description": "�bergeordnete Publikation f�r den Standort Th�ringen"
+            }
+          ]
+        },
+        "sectionUniqueName": {
+          "type": "string",
+          "description": "valid for types: [group, section, list, mostread]",
+          "examples": [
+            "ece_frontpage",
+            "${section.uniqueName}"
+          ]
+        },
+        "sectionUniqueNames": {
+          "type": "array",
+          "description": "valid for types: [section]",
+          "items": {
+            "type": "string"
+          },
+          "examples": [
+            "[ece_frontpage]"
+          ]
+        },
+        "sectionId": {
+          "type": "string",
+          "description": "valid for types: [group, section, list, mostread]",
+          "examples": [
+            "1747"
+          ]
+        },
+        "groupIds": {
+          "type": "array",
+          "description": "valid for types: [group]",
+          "items": {
+            "type": "string",
+            "pattern": "\\d+"            
+          }
+        },
+        "groupName": {
+          "$ref": "#/definitions/SourceGroupName",
+          "$comment": "valid for types: 'group'"
+        },
+        "groupNames": {
+          "type": "array",
+          "$comment": "valid for types: 'group'",
+          "items": {
+            "$ref": "#/definitions/SourceGroupName"
+          }
+        },
+        "articleTypes": {
+          "$ref": "#/definitions/ArticleTypeList"
+        },
+        "listName": {
+          "type": "string",
+          "description": "valid for types: [list]",
+          "examples": [
+            "Eskalationslage 8 Artikel"
+          ]
+        },
+        "listId": {
+          "type": "string",
+          "description": "valid for types: [list]",
+          "examples": [
+          ]
+        },
+        "relationNames": {
+          "type": "array",
+          "description": "valid for types: [related]",
+          "items": {
+            "type": "string"
+          }
+        },
+        "homeOnly": {
+          "type": "boolean",
+          "description": "valid for types: [group,section]"
+        },
+        "withSubsections": {
+          "type": "boolean",
+          "description": "valid for types: [section]"
+        }
+      }
+    },
+    "SourceType": {
+      "type": "string",
+      "title": "Typ",
+      "enum": [
+        "publication",
+        "section",
+        "group",
+        "mostread",
+        "list",
+        "theme",
+        "author",
+        "related"
+      ],
+      "anyOf": [
+        {
+          "const": "publication",
+          "title": "Publikation",
+          "description": "Neueste Artikel aus der gesamten Publikation"
+        },
+        {
+          "const": "section",
+          "title": "Rubrik (Escenic)",
+          "description": "Neueste Artikel aus einer Rubrik"
+        },
+        {
+          "const": "group",
+          "title": "Gruppe (Escenic)",
+          "description": "In einer Gruppe platzierte Artikel"
+        },
+        {
+          "const": "mostread",
+          "title": "Meistgelesen",
+          "description": "Artikel mit den meisten Zugriffen in den letzten Stunden"
+        },
+        {
+          "const": "list",
+          "title": "Liste",
+          "description": "Artikel aus einer Liste"
+        },
+        {
+          "const": "theme",
+          "title": "Thema",
+          "description": "Artikel zu einem Thema (Schlagwort)"
+        },
+        {
+          "const": "author",
+          "title": "Autor",
+          "description": "Artikel eines Autors"
+        },
+        {
+          "const": "related",
+          "title": "Verkn�pfte Artikel",
+          "description": "Artikel, die mit dem aktuellen Artikel verkn�pft sind"
+        }
+      ]
+    },
+    "SourceGroupName": {
+      "type": "string",
+      "enum": [
+        "breaking_news",
+        "opulence",
+        "opulence_2",
+        "opener",
+        "tower",
+        "tower_2",
+        "tower_3",
+        "content_1",
+        "content_2",
+        "content_3",
+        "content_4",
+        "content_5",
+        "content_6",
+        "content_7",
+        "content_8",
+        "content_9",
+        "content_10",
+        "content_11",
+        "content_12",
+        "promotion",
+        "promotion_2",
+        "promotion_3",
+        "promotion_4",
+        "promotion_5",
+        "promotion_6"
+      ]
+    },
+    "ArticleTypeList": {
+      "type": "array",
+      "title": "Artikeltypen",
+      "$comment": "valid for all types",
+      "items": {
+          "type": "string",
+          "enum": [
+            "news",
+            "opinion",
+            "agentur",
+            "printimport",
+            "leserreporter",
+            "sales",
+            "advertorial",
+            "expert",
+            "ticker",
+            "recipe",
+            "longform",
+            "stockreport",
+            "quote",
+            "textmodule",
+            "infobox",
+            "teaser",
+            "gallery",
+            "textgallery",
+            "download",
+            "image",
+            "video",
+            "youtube",
+            "xhtml",
+            "video_playlist",
+            "twitter",
+            "facebook",
+            "pinterest",
+            "instagram",
+            "embed",
+            "compareslider",
+            "before_after_image",
+            "tag_author",
+            "tag_teaser",
+            "interview",
+            "question_answer",
+            "listicle"
+          ],
+          "anyOf": [
+            {
+              "const": "news",
+              "title": "Nachrichtenartikel"
+            },
+            {
+              "const": "opinion",
+              "title": "Meinungsartikel"
+            },
+            {
+              "const": "agentur",
+              "title": "Agenturmeldung"
+            },
+            {
+              "const": "printimport",
+              "title": "Printimport",
+              "$comment": "is this type still in use?"
+            },
+            {
+              "const": "leserreporter",
+              "title": "Leserreporter",
+              "$comment": "is this type still in use?"
+            },
+            {
+              "const": "sales",
+              "title": "Sales (Anzeige)"
+            },
+            {
+              "const": "advertorial",
+              "title": "Advertorial (Anzeige)"
+            },
+            {
+              "const": "expert",
+              "title": "Expertenartikel (Anzeige)"
+            },
+            {
+              "const": "ticker",
+              "title": "Newsticker"
+            },
+            {
+              "const": "recipe",
+              "title": "Rezept",
+              "$comment": "is this type still in use? Originally implemented for BILD der FRAU."
+            },
+            {
+              "const": "longform",
+              "title": "Longform"
+            },
+            {
+              "const": "stockreport",
+              "title": "B�rsenreport",
+              "$comment": "is this type still in use? Was used in Berliner Morgenpost but none of the old articles were migrated."
+            },
+            {
+              "const": "quote",
+              "title": "Zitat"
+            },
+            {
+              "const": "textmodule",
+              "title": "Textblock"
+            },
+            {
+              "const": "infobox",
+              "title": "Infobox"
+            },
+            {
+              "const": "teaser",
+              "title": "Teaser"
+            },
+            {
+              "const": "gallery",
+              "title": "Bildergalerie"
+            },
+            {
+              "const": "textgallery",
+              "title": "Textgalerie"
+            },
+            {
+              "const": "download",
+              "title": "Datei-Download"
+            },
+            {
+              "const": "image",
+              "title": "Bild"
+            },
+            {
+              "const": "video",
+              "title": "Video"
+            },
+            {
+              "const": "youtube",
+              "title": "Youtube Video"
+            },
+            {
+              "const": "xhtml",
+              "title": "XHTML Artikel"
+            },
+            {
+              "const": "video_playlist",
+              "title": "Video Playliste"
+            },
+            {
+              "const": "twitter",
+              "title": "X (Twitter)"
+            },
+            {
+              "const": "facebook",
+              "title": "Facebook"
+            },
+            {
+              "const": "pinterest",
+              "title": "Pinterest"
+            },
+            {
+              "const": "instagram",
+              "title": "Instagram"
+            },
+            {
+              "const": "embed",
+              "title": "Allgemeiner Embed-Code"
+            },
+            {
+              "const": "compareslider",
+              "title": "Compare-Slider",
+              "$comment": "what's the difference between compareslider and before_after_image?"
+            },
+            {
+              "const": "before_after_image",
+              "title": "Vorher-Nacher Bild",
+              "$comment": "what's the difference between compareslider and before_after_image?"
+            },
+            {
+              "const": "tag_author",
+              "title": "Autorenartikel"
+            },
+            {
+              "const": "tag_teaser",
+              "title": "Themenseite"
+            },
+            {
+              "const": "interview",
+              "title": "Interview"
+            },
+            {
+              "const": "question_answer",
+              "title": "Frage-Antwort Artikel"
+            },
+            {
+              "const": "listicle",
+              "title": "Listicle"
+            }
+          ]
+      }
+    },  
+    "ArticleType": {
+      "type": "string",
+      "enum": [
+        "news",
+        "opinion",
+        "agentur",
+        "printimport",
+        "leserreporter",
+        "sales",
+        "advertorial",
+        "expert",
+        "ticker",
+        "recipe",
+        "longform",
+        "stockreport",
+        "quote",
+        "textmodule",
+        "infobox",
+        "teaser",
+        "gallery",
+        "textgallery",
+        "download",
+        "image",
+        "video",
+        "youtube",
+        "xhtml",
+        "video_playlist",
+        "twitter",
+        "facebook",
+        "pinterest",
+        "instagram",
+        "embed",
+        "compareslider",
+        "before_after_image",
+        "tag_author",
+        "tag_teaser",
+        "interview",
+        "question_answer",
+        "listicle"
+      ]
+    },
+    "ContentConfigFilter": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "title": "Filtertyp",
+          "enum": [
+            "default",
+            "nonLive",
+            "premium",
+            "onlyPaid",
+            "free",
+            "onlyFree",
+            "nonTest",
+            "noTest",
+            "noIndex",
+            "hasTeaserImage",
+            "nothing",
+            "timePeriod",
+            "hasPlayout",
+            "notOnIndexPage",
+            "excludeOwnerPublications"
+          ],
+          "anyOf": [
+              {
+                "const": "default",
+                "title": "Standard Filter",
+                "description": "Entfernt inaktive Artikel, nicht aufbereitete Artikel und Testartikel, sowo Artikel, die auf Indexseiten nicht erlaubt sind."
+              },
+              {
+                "const": "nonLive",
+                "title": "Aktive Artikel",
+                "description": "Entfernt unver�ffentlichte Artikel, eingeplante aber nicht aktive Artikel sowie abgelaufene Artikel."
+              },
+              {
+                "const": "premium",
+                "title": "Premium Artikel",
+                "description": "Entfernt alle Artikel, die nicht 'Paid' sind."
+              },
+              {
+                "const": "onlyPaid",
+                "title": "Premium Artikel (Doublette)",
+                "description": "Entfernt alle Artikel, die nicht als 'Paid' gekennzeichnet sind.",
+                "$comment": "Identical to 'premium'. This value should be deleted." 
+              },
+              { 
+                "const": "free",            
+                "title": "Freie Artikel", 
+                "description": "Entfernt alle Artikel, die nicht als 'Free' gekennzeichnet sind." 
+              },
+              { 
+                "const": "onlyFree",        
+                "title": "Freie Artikel (Doublette)", 
+                "description": "Entfernt alle Artikel, die nicht als 'Free' gekennzeichnet sind.", 
+                "$comment": "Identical to 'free'. This value should be deleted." 
+              },
+              { 
+                "const": "nonTest",         
+                "title": "Keine Testinhalte", 
+                "description": "Entfernt Artikel, die als Testinhalte gekennzeichnet sind." 
+              },
+              { 
+                "const": "noTest",          
+                "title": "Keine Testinhalte (Doublette)", 
+                "description": "Entfernt Artikel, die als Testinhalte gekennzeichnet sind.", 
+                "$comment": "Identical to 'nonTest'. This value should be deleted." 
+              },
+              { 
+                "const": "noIndex",         
+                "title": "Nur indizierbare Artikel", 
+                "description": "Entfernt Artikel, bei denen die Option NOINDEX gesetzt ist." 
+              },
+              { 
+                "const": "hasTeaserImage",  
+                "title": "Artikel mit Teaserbild", 
+                "description": "Entfernt alle Atikel ohne Teaserbild." 
+              },
+              { 
+                "const": "nothing",         
+                "title": "Alle Filter deaktivieren", 
+                "description": "Deaktiviert ALLE impliziten Filter und Defaultfilter."
+              },
+              { 
+                "const": "timePeriod",      
+                "title": "Nach Publikationszeitraum", 
+                "description": "Filtert Artikel anhand des Publkationsdatums" 
+              },
+              { 
+                "const": "hasPlayout",
+                "title": "Bereit zur Ausspielung", 
+                "description": "Entfernt Artikel, die den Ver�ffentlichungs- und Aufbereitungsprozess noch nicht vollst�ndig durchlaufen haben." 
+              },
+              { 
+                "const": "notOnIndexPage",
+                "title": "Auf Indexseiten erlaubte Artikel", 
+                "description": "Entfernt Artikel, die auf Indexseiten nicht zugelassen sind." 
+              },
+              { 
+                "const": "excludeOwnerPublications",
+                "title": "Heimpublikationen ausschlie�en", 
+                "description": "Entfernt Artikel, die bestimmte Heimpublikationen besitzen." 
+              }
+          ]
+        },
+        "params": {
+          "type": "object",
+          "title": "Optionen",
+          "properties": {
+            "startDate": {
+              "type": "string",
+              "title": "Startdatum",
+              "$comment": "only for type=timePeriod!"
+            },
+            "endDate": {
+              "type": "string",
+              "title": "Enddatum",
+              "$comment": "only for type=timePeriod!"
+            },
+            "publicationNames": {
+              "type": "array",
+              "$comment": "only for type=excludeOwnerPublications!",
+              "items": {
+                "type": "string",
+                "examples": [
+                  "zro"
+                ]
+            }
+          }
+        }
+      }
+      }
+    }
+
+  },
+  "additionalProperties": false 
+}

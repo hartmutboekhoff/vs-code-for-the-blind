@@ -325,10 +325,12 @@ class PopupGroupWrapper extends Element {
     super('div', attributes);
 		
 		this.classList.add('popup-data');
+		
 		this.#title = this.children.append(new Element('a', title??schema.title, {class:'title'}));
 		this.#subtitle = this.children.append(new Element('span',subtitle??schema.description, {class:'subtitle'}));
 		this.#summary = this.children.append(new Summary());
-		this.#popup = this.children.append(new Element('div', {'class':'popup'}));
+		this.#popup = this.children.append(new Element('div', {'class':'overlay'}))
+		                  .children.append(new Element('div', {'class':'popup'}));
 		this.#top = new Element('');
 		this.#main = new Element('');
 		this.#bottom = new Element('');
@@ -364,6 +366,12 @@ class PopupGroupWrapper extends Element {
       this.attributes['view-path'] = v; 
   }
 	
+	__renderStartTag(indent) {
+	  return super.renderStartTag(indent)+'<div class="dialog-area">';
+	}
+	__renderEndTag(indent) {
+	  return this.renderIndent(indent)+'</div>'+this.renderEndTag(0);
+	}
 }
 
 module.exports = {

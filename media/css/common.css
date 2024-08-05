@@ -395,27 +395,42 @@ div.debug-info-overlay > button {
 
 
 
+
 div.popup-data {
-	
+  outline: 5px solid red;  
 }
+
 div.popup-data > a.title {
 	font-size: 1.5em;
 	font-weight: bold;
 	cursor: pointer;
-	
 }
-div.popup-data > div.popup {
-	display:none;
+
+div.popup-data > div.overlay {
+  display: none;
 	position: fixed;
-	z-index: 10;
-	width: 90vw;
-	height: 90vh;
-	top: 5vh;
-	left: 4vw;
+  z-index: 10;
+	width: 100vw;
+	height: 100vh;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	background-color: rgba(255,255,255,.5);
+	margin: 0;
+	padding: 0;
+}
+div.popup-data.open > div.overlay {
+  display: block;
+}
+
+div.popup-data > div.overlay > div.popup {
+	width: 90%;
+	height: 90%;
+  margin: 5% 5%;
+	padding: .5em;
 	border: 2px solid red;
+	opacity: 100%;
 	background-color: white;
 	outline: 4px solid yellow;
-}
-div.popup-data.open > div.popup {
-	display:block;
 }

@@ -23,6 +23,12 @@ exports.selectors = [
     SchemaType: undefined,
     DataType: undefined,
     EditorType: "PageConfigEditor"
+  },
+  {
+    SchemaPath: '#.properties["$contentConfig"].properties.sources',
+    SchemaType: undefined,
+    DataType: undefined,
+    EditorType: "FeedConfigEditor"
   }
 ];
 

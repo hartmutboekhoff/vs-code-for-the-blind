@@ -4,18 +4,18 @@ const { HtmlFrame } = require('../html');
 const { RootValue } = require('../htmlDataElements');
 
 
-class PageConfigEditor extends SiteConfigEditor {
+class FeedConfigEditor extends SiteConfigEditor {
 
 	constructor(context, document, webviewPanel, token) {
-	  super(context, document, webviewPanel, 'PageConfigEditorViews', '../config/schema/any-page.schema.json', token);
+	  super(context, document, webviewPanel, 'FeedConfigEditorViews', '../config/schema/feeds.schema.json', token);
   }
 
   initHtml(html) {
     super.initHtml(html);
-	  html.head.title = 'PageConfigEditor - '+this.document.fileName;
+	  html.head.title = 'FeedConfigEditor - '+this.document.fileName;
 		html.head.styleSheets.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','css', 'PageConfigEditor.css')));
 		html.head.scripts.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','js', 'PageConfigEditor.js')));
   }
 }
 
-module.exports = PageConfigEditor;
+module.exports = FeedConfigEditor;
