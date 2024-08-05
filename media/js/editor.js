@@ -160,6 +160,10 @@
       })
     });
     
+    document.querySelectorAll('div.popup-data>a.title').forEach(el=>{
+    	el.addEventListener('click', ev=>ev.target.parentElement.classList.toggle('open'));
+    });
+    
     document.getElementById('global-filter')?.addEventListener('input',ev=>{
       const filter = ev.target.value.toLowerCase();
       document.querySelectorAll('.root fieldset').forEach(el=>{
