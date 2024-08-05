@@ -1,27 +1,35 @@
 const {Element} = require('../../html');
 const {TextInputLine, DropdownInputLine} = require('../../htmlFormFields');
-const {ValueGroupWrapper} = require('../helpers/dataElementViews');
+const {ValueGroupWrapper, PopupValueGroupWrapper} = require('../helpers/dataElementViews');
 const {getEnumLabel} = require('../helpers/utility');
 
 
-class ContentConfigSource extends ValueGroupWrapper {
+class ContentConfigSource extends PopupValueGroupWrapper {
   constructor(obj, schema, key, path, status) {
     super(schema, obj.type, '', {class: 'content-source'});
+
     this.summary.add(obj.count+' Artikel');
-    if( obj.params ) {
-      this.summary.add('Publikation',obj.params.publicationName??'aktuelle Publikation');
-      this.summary.add('Rubrik', obj.params?.sectionName ?? obj.params?.sectionNames?.join(', ') ?? obj.params.sectionUniqueName ?? '');
-    }
+    if( obj.params?.publicationName )
+      this.summary.add('Publikation',obj.params.publicationName);
+    if( obj.params?.sectionName || obj.params?.sectionNames || obj.params?.sectionUniqueName )
+      this.summary.add('Rubrik', obj.params?.sectionName ?? obj.params?.sectionNames?.join(', ') ?? obj.params?.sectionUniqueName ?? '');
 
     switch( obj.type ) {
       case 'list':
         this.summary.add('Liste',obj.params?.listName ?? obj.params?.listNames?.join(', ') ?? '');
+        this.subtitle = obj.params?.listName ?? obj.params?.listNames?.join(', ') ?? '';
         break;
       case 'group':
         this.summary.add('Gruppe', obj.params?.groupName ?? obj.params?.groupNames?.join(', ') ?? '');
+        this.subtitle = obj.params?.groupName ?? obj.params?.groupNames?.join(', ') ?? '';
         break;
-        
+      case 'related':
+        this.summary.add('Relation', obj.params?.relationNames?.join(', ') ?? '');
+        this.subtitle = obj.params?.relationNames?.join(', ') ?? '';
+        break;
+      
       case 'section':
+        this.subtitle = obj.params?.sectionUniqueNames?.join(', ') ?? obj.params.sectionUniqueName ?? '';
       default:
     }
 

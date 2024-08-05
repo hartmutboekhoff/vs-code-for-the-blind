@@ -7,7 +7,7 @@ const { RootValue } = require('../htmlDataElements');
 class MenuEditor extends SiteConfigEditor {
 
 	constructor(context, document, webviewPanel, token) {
-	  super(context, document, webviewPanel, 'MenuEditorViews', '../config/schema/menu.schema.json', token);
+	  super(context, document, webviewPanel, 'MenuEditorViews', '../config/schema/menu-v2.schema.json', token);
   }
 
   initHtml(html) {

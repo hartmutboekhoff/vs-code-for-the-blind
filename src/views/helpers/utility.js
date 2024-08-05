@@ -41,8 +41,8 @@ function getSourceParams(sourceType,params) {
              ?? params.sectionUniqueName
              ?? '';
     
-    case 'relation':
-      return params.relationsNames?.join(', ');
+    case 'related':
+      return params.relationNames?.join(', ');
 
     default:
       return '';

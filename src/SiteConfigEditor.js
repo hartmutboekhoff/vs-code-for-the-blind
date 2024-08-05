@@ -100,7 +100,13 @@ class HtmlBuilder extends Traversion {
       
       match.forEach(m=>{
         const view = this.factory
-          .get(m.schemaPath.paths, m.schema?.type, Array.isArray(obj)? 'array' : typeof obj)
+          .get({
+            SchemaPath: m.schemaPath.paths, 
+            SchemaType: m.schema?.type, 
+            DataType: Array.isArray(obj)? 'array' : typeof obj, 
+            //EditorType: undefined, 
+            ComponentType: obj.type
+          })
           ?.getView(obj,m.schema,key,path,m.status);
         
         if( view != undefined ) {
@@ -209,6 +215,7 @@ class SiteConfigEditor extends JsonEditorBase {
   initHtml(html) {
 	  html.head.title = this.document.fileName;
 		html.head.styleSheets.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','css', 'common.css')));
+		html.head.styleSheets.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','css', 'match-marker-badge.css')));
 		//html.head.scripts.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','js', 'jsonview.js')));
 		html.head.scripts.push(this.view.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media','js', 'editor.js')));
 		if( this.settings.developerMode == true ) {

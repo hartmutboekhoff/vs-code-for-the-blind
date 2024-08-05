@@ -32,7 +32,7 @@ exports.selectors = [
     SchemaPath: '#.properties.components',
     SchemaType: undefined,
     DataType: undefined,
-    EditorType: "PageConfigEditor"
+    //EditorType: "PageConfigEditor"
   }
 ];
 

@@ -122,3 +122,12 @@ li.link-label > input.link {
   width: 60%;
   margin-left: 2em;
 }
+
+.min-max-input label {
+  min-width: initial;
+  margin-right: 1em;  
+}
+.min-max-input input {
+  width: 5em;
+  margin-right: 2em;
+}

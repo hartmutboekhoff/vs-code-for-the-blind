@@ -36,6 +36,7 @@
       {
         "viewType": "SparkSiteConfig.PageConfigEditor",
         "displayName": "Page-Config Editor",
+        "priority": "option",
         "selector": [
           {
             "filenamePattern": "**/pages/escenic/*.json"
@@ -45,6 +46,23 @@
           }
         ]
       },
+      
+      {
+        "viewType": "SparkSiteConfig.SimplePageConfigEditor",
+        "displayName": "Simple Page-Config Editor",
+        "priority": "default",
+        "selector": [
+          {
+            "filenamePattern": "**/pages/escenic/*.json"
+          },
+          {
+            "filenamePattern": "**/pages/cue/*.json"
+          }
+        ]
+      },
+
+
+
       {
         "viewType": "SparkSiteConfig.RedirectsEditor",
         "displayName": "Redirects Editor",

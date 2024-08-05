@@ -244,10 +244,8 @@ class Traversion {
                       : Object.keys(current.objForNesting);
     let nestingKeys = getNestingKeys(objKeys);
 
-    if( nestingKeys.length == 0 ) {
-      this.#onNoNesting(current.obj, current.key, current.path);
-      return;
-    }
+    if( nestingKeys.length == 0 )
+      return void this.#onNoNesting(current.obj, current.key, current.path);
 
     const optsVersion = current.options.changeCount;
     const adjustedObj = this.#beforeNesting(current.objForNesting, current.key, current.path);

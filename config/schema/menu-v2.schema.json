@@ -1,0 +1,292 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "definitions": {
+    "MenuGroup": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/MenuRef"
+      },
+      "minItems": 1
+    },
+    "MenuRef": {
+      "type": "string",
+      "examples": ["plusContent", "abo", "mainNav"]
+    },
+    "Menu": {
+      "type": "array",
+      "title": "Menü",
+      "items": {
+        "$ref": "#/definitions/TopMenuItem"
+      }
+    },
+    "TopMenuItem": {
+      "title": "Hauptmenüpunkt",
+      "description": "Menüpunkt der obersten Ebene. (Kann Untermenüpunkte enthalten.)",
+      "$comment": "A menu can have entries and subMenus.",
+      "type": "object",
+      "properties": {
+        "label": {
+          "$ref": "#/definitions/Label"
+        },
+        "fullPath": {
+          "$ref": "#/definitions/fullPath"
+        },
+        "type": {
+          "$ref": "#/definitions/LinkType"
+        },
+        "plusIcon": {
+          "$ref": "#/definitions/ShowPlusIcon"
+        },
+        "icon": {
+          "$ref": "#/definitions/Icon"
+        },
+        "variant": {
+          "$ref": "#/definitions/Variant"
+        },
+        "subMenu": {
+          "type": "array",
+          "title": "Untermenü",
+          "items": {
+            "$ref": "#/definitions/SubMenuItem"
+          }
+        }
+      },
+      "required": ["label", "type"],
+      "additionalProperties": false,
+      "if": {
+        "not": {
+          "properties": {
+            "type": {
+              "const": "no-link"
+            }
+          }
+        }
+      },
+      "then": {
+        "required": ["fullPath"]
+      }
+    },
+    "SubMenuItem": {
+      "title": "Untermenüpunkt",
+      "description": "Menüpunkt auf der dritten Ebene. (Keine weiteren Untermenüs.)",
+      "type": "object",
+      "properties": {
+        "label": {
+          "$ref": "#/definitions/Label"
+        },
+        "fullPath": {
+          "$ref": "#/definitions/fullPath"
+        },
+        "type": {
+          "$ref": "#/definitions/LinkType"
+        },
+        "plusIcon": {
+          "$ref": "#/definitions/ShowPlusIcon"
+        },
+        "icon": {
+          "$ref": "#/definitions/Icon"
+        },
+        "variant": {
+          "$ref": "#/definitions/Variant"
+        }
+      },
+      "required": ["label", "type"],
+      "additionalProperties": false,
+      "if": {
+        "not": {
+          "properties": {
+            "type": {
+              "const": "no-link"
+            }
+          }
+        }
+      },
+      "then": {
+        "required": ["fullPath"]
+      }
+    },
+    "Label": {
+      "type": "string",
+      "title": "Text",
+      "pattern": "[^ ]",
+      "minLength": 1
+    },
+    "fullPath": {
+      "type": "string",
+      "title": "Ziel",
+      "pattern": "^(https://|http://|/)"
+    },
+    "ShowPlusIcon": {
+      "type": "boolean",
+      "title": "Plus Icon anzeigen",
+      "default": false
+    },
+    "LinkType": {
+      "type": "string",
+      "title": "Typ",
+      "enum": ["internal", "external", "no-link"],
+      "anyOf": [
+        {
+          "const": "internal",
+          "title": "Öffnnet im selben Fenster"
+        },
+        {
+          "const": "external",
+          "title": "Öffnet in einem neuem Tab"
+        },
+        {
+          "const": "no-link",
+          "title": "Text ohne Verlinkung"
+        }
+      ]
+    },
+    "Icon": {
+      "type": "string",
+      "title": "Icon",
+      "enum": [
+        "facebook",
+        "twitter",
+        "rssfeed",
+        "instagram",
+        "tiktok",
+        "whatsapp",
+        "pinterest"
+      ],
+      "anyOf": [
+        {
+          "const": "facebook",
+          "title": "Facebook"
+        },
+        {
+          "const": "twitter",
+          "title": "X (ehemals Twitter)"
+        },
+        {
+          "const": "rssfeed",
+          "title": "RSS Feed"
+        },
+        {
+          "const": "instagram",
+          "title": ""
+        },
+        {
+          "const": "tiktok",
+          "title": "Tiktok"
+        },
+        {
+          "const": "whatsapp",
+          "title": "WhatsApp"
+        },
+        {
+          "const": "pinterest",
+          "title": "Pinterest"
+        }
+      ]
+    },
+    "Variant": {
+      "type": "string",
+      "title": "Layout Variante",
+      "enum": ["outlined"],
+      "anyOf": [
+        {
+          "const": "outlined",
+          "title": "Umrandet"
+        }
+      ]
+    }
+  },
+  "properties": {
+    "menuGroups": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/MenuGroup"
+      },
+      "propertyNames": {
+        "type": "string",
+        "enum": ["mainNav", "burgerMenu"]
+      },
+      "required": ["mainNav"]
+    },
+    "menus": {
+      "type": "object",
+      "title": "",
+      "description": "",
+      "properties": {
+        "metaNav": {
+          "title": "Meta-Navigation",
+          "description": "Service-Menüleiste am oberen Rand der Seite",
+          "$ref": "#/definitions/Menu"
+        },
+        "mainNav": {
+          "title": "Hauptmenü",
+          "description": "Rubriken der Hauptnavigation",
+          "$ref": "#/definitions/Menu"
+        },
+        "mainNavThemes": {
+          "title": "Themen im Hauptmenü",
+          "description": "",
+          "$ref": "#/definitions/Menu"
+        },
+        "paidNavButtons": {
+          "title": "Paid-Button",
+          "description": "Paid-Button in der Hauptnavigation",
+          "$ref": "#/definitions/Menu"
+        },
+        "publisherOffersNav": {
+          "title": "Verlagsangebote",
+          "description": "Angebote im Burger-Menü",
+          "$ref": "#/definitions/Menu"
+        },
+        "footerNav": {
+          "title": "Footer Navigation",
+          "description": "",
+          "$ref": "#/definitions/Menu"
+        },
+        "legalNav": {
+          "title": "Rechtliches",
+          "description": "Gesetzlich vorgeschriebene Links",
+          "$ref": "#/definitions/Menu"
+        },
+        "topicsTagsBox": {
+          "title": "Aktuelle Themen",
+          "description": "Aktuelle Themen im Burger-Menü",
+          "$ref": "#/definitions/Menu"
+        },
+        "socialLinks": {
+          "title": "Social-Media Links",
+          "description": "Social-Media Links im Footer Bereich",
+          "$ref": "#/definitions/Menu"
+        },
+        "quickSelection": {
+          "title": "Schnellauswahl",
+          "description": "???",
+          "$ref": "#/definitions/Menu"
+        },
+        "abo": {
+          "title": "Abo Menü",
+          "description": "Abo-Link in der Hauptnavigation",
+          "$ref": "#/definitions/Menu"
+        },
+        "plusContent": {
+          "title": "",
+          "description": "",
+          "$ref": "#/definitions/Menu"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "metaNav",
+        "mainNav",
+        "mainNavThemes",
+        "paidNavButtons",
+        "publisherOffersNav",
+        "footerNav",
+        "legalNav",
+        "plusContent"
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "required": ["menus", "menuGroups"]
+}

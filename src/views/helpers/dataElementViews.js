@@ -6,6 +6,7 @@ const {getStringValuesList} = require('./utility');
 
 class ValueGroupWrapper extends Element {
   #title; #subtitle; #top; #main; #bottom; #summary;
+  #childrenContainer;
   #collapseChildren = 0;
   
   constructor(schema, title, subtitle, attributes) {
@@ -18,29 +19,38 @@ class ValueGroupWrapper extends Element {
     this.#top = new Element('');
     this.#main = new Element('');
     this.#bottom = new Element('');
-    
-    super.children.append(new Element('legend'))
-         .children.append(new Element('span',{class:'collapse-button'}),
-                          this.#title, this.#subtitle);
-    super.children.append(this.#summary, this.#top,this.#main,this.#bottom);
+
+    this.#childrenContainer = this.arrangeChildren(this.#title, this.#subtitle, this.#summary, this.#top, this.#main, this.#bottom);
   }
-  setHeader() {}
-  setSummary() {}
+  arrangeChildren(title,subtitle,summary,top,main,bottom) {
+    this.children.append(new Element('legend'))
+        .children.append(new Element('span',{class:'collapse-button'}),
+                         new Element('span', {class:'match-marker'}),
+                         title, subtitle);
+    this.children.append(summary, top, main, bottom);
+    return main;
+  }
 
   get title() {
     return this.#title;
   } 
   set title(v) {
-    if( Array.isArray(v) ) {
-      if( v.length == 0 ) return;
-      this.#title.children.append(...v.map(e=>typeof e == 'string'))
-    }
+    if( typeof v == 'string' )
+      this.#title.children.append(v);
+    else if( Array.isArray(v) )
+      this.#title.children.append(...v.filter(e=>typeof e == 'string'))
   } 
   get subtitle() {
     return this.#subtitle;
   }
+  set subtitle(v) {
+    if( typeof v == 'string' )
+      this.#subtitle.children.append(v);
+    else if( Array.isArray(v) )
+      this.#subtitle.children.append(...v.filter(e=>typeof e == 'string'))
+  } 
   get children() {
-    return this.#main?.children ?? super.children;
+    return this.#childrenContainer?.children ?? super.children;
   }
   get top() {
     return this.#top?.children;
@@ -98,6 +108,25 @@ class ValueGroupWrapper extends Element {
       collapseChildren(this.top, this.#collapseChildren-1);
       collapseChildren(this.bottom, this.#collapseChildren-1);
     }
+  }
+}
+class PopupValueGroupWrapper extends ValueGroupWrapper {
+  constructor(schema, title, subtitle, attributes) {
+    super(schema, title, subtitle, attributes);
+    this.classList.add('collapsed');
+  }
+  arrangeChildren(title,subtitle,summary,top,main,bottom) {
+    const legend = new Element('legend');
+    legend.children.append(new Element('span', {class:'collapse-button popup'}),
+                           new Element('span', {class:'match-marker'}),
+                           title, subtitle);
+    const overlay = new Element('div',{class:'overlay'});
+    const popup = new Element('fieldset', {class:'popup'});
+    overlay.children.append(popup);
+    popup.children.append(legend, top, main, bottom);
+
+    this.children.append(legend, summary, overlay);
+    return main;
   }
 }
 
@@ -317,6 +346,7 @@ class Summary extends Element {
 
 module.exports = {
   ValueGroupWrapper,
+  PopupValueGroupWrapper,
   EnumValueArray,
   OptionGroup,
   Summary,

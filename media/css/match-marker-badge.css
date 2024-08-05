@@ -1,0 +1,38 @@
+.match-marker:before,
+.match-marker:after {
+  display:none;
+  content: "";
+  width: .5em;
+  height: 1em;
+  margin: 0;
+  line-height: 1em;
+  vertical-align: middle;
+  border: 1px solid black;
+}
+.match-marker:before {
+  border-radius: 1em 0 0 1em;
+  background-color: yellow;
+  border-right: none; 
+}
+.match-marker:after {
+  border-radius: 0 1em 1em 0;
+  background-color: red;
+  border-left:none;
+}
+
+fieldset:has(.match-failed) > legend > .match-marker:before,
+fieldset:has(.match-failed) > legend > .match-marker:after,
+fieldset:has(.match-unmatched) > legend > .match-marker:before,
+fieldset:has(.match-unmatched) > legend > .match-marker:after {
+  display:inline-block;
+}
+
+fieldset:has(.match-failed) > legend > .match-marker:before {
+  background-image: linear-gradient(to right, red, red);
+}
+
+fieldset:has(.match-unmatched) > legend > .match-marker:after {
+  background-image: linear-gradient(to right, yellow, yellow);
+}
+
+}

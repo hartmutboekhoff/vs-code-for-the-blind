@@ -145,12 +145,14 @@
         }
       });
     });
-    //document.querySelectorAll('fieldset > legend:has(span.collapse-button)').forEach(el=>{
+    // fieldset >legend or >summary
     document.querySelectorAll('fieldset > legend:has(span.collapse-button), fieldset:has(>legend>span.collapse-button)>.summary').forEach(el=>{
       el.addEventListener('click',ev=>{
-        ev.target.closest('fieldset').classList.toggle('collapsed');
+        ev.target.closest('fieldset:not(.popup)').classList.toggle('collapsed');
       });
     });
+    
+    // collapsed fieldsets
     document.querySelectorAll('fieldset:has(>legend>span.collapse-button)').forEach(el=>{
       el.addEventListener('click',ev=>{
         if( el == ev.target && el.classList.contains('collapsed'))

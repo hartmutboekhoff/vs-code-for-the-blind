@@ -1,0 +1,41 @@
+.match-failed:before {
+  content: "";
+  background-color: red;
+  border-width: 3px !important;
+  display: inline-block;
+  position: absolute;
+  height: 100%;
+  left: -8px;
+  width: 5px;
+}
+.match-unmatched:before,
+fieldset:has( .match-unmatched):before {
+  content: "";
+  border-right: 5px solid #fd0;
+  display: inline-block;
+  position: absolute;
+  height: 100%;
+  left: -8px;
+  max-width: 3px;
+}
+
+fieldset.match-failed:before,
+fieldset.match-unmatched:before,
+fieldset:has(.match-unmatched):before {
+  top: calc(-.8em - 4px);
+  height: calc(100% + 1.1em + 4px);
+}
+
+.match-failed,
+.match-unmatched,
+fieldset:has(.match-unmatched) {
+  position: relative;
+}
+.generic.match-unmatched .path {
+  color: #800;
+  font-weight: bold;
+  margin-left: .6em; 
+}
+.match-valid {
+  
+}

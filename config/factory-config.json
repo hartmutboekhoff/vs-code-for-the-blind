@@ -68,6 +68,49 @@
 			  }
       }
 		},
+		
+		
+		{
+			"name": "SimplePageConfigEditorViews",
+			"categories": [
+				{ "name": "SchemaPath" },
+				{ "name": "SchemaType" },
+				{ "name": "DataType" },
+			  { "name": "EditorType", 
+			    "required": false, 
+			    "default":"SimplePageConfigEditor" ,
+			    "priority": 100
+			  },
+			  { "name": "ComponentType",
+			    "required": false,
+			    "priority": 50
+			  }
+			],
+			"moduleDirectories": [
+				"./views/SimplePageConfigEditor",
+				"./views/PageConfigEditor",
+				"./views"
+			],
+			"interface": {
+			  "ViewClass": {
+			    "name": "view",
+			    "isDefault": true,
+			    "wrapper": "none",
+			    "required": true
+			  },
+			  "getView": {
+			    "name": "view",
+			    "wrapper": "constructor-call",
+			    "required": true
+			  },
+			  "setValue": {
+			    "name": "setValue",
+			    "wrapper": "none"
+			  }
+      }
+		},
+		
+		
 		{
 			"name": "RedirectsEditorViews",
 			"categories": [
