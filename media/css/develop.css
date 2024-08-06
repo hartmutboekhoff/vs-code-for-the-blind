@@ -78,6 +78,8 @@ legend .description {
 
 .generic {
   border: 2px dashed #f80;
+  ---background-color-h: 300;
+  box-shadow: 5px -12px 20px 15px #f80;
 }
 
 

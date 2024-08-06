@@ -10,7 +10,6 @@ class TowerBoxComponent extends SimpleComponentBase {
     super(obj, schema, key, path, status);
 
     this.setMainContentConfig('teasers');
-    this.bottom.append(new OptionGroup(key, obj, schema, ['deduplicationId']));
   }
   
 }
@@ -23,6 +22,27 @@ exports.selectors = [
     DataType: undefined,
     EditorType: "SimplePageConfigEditor",
     ComponentType: 'TOWER_BOX',
+  },
+  {
+    SchemaPath: '#.definitions.PageConfigComponent',
+    SchemaType: undefined,
+    DataType: undefined,
+    EditorType: "SimplePageConfigEditor",
+    ComponentType: 'ALL_PODCASTS_TOWER',
+  },
+  {
+    SchemaPath: '#.definitions.PageConfigComponent',
+    SchemaType: undefined,
+    DataType: undefined,
+    EditorType: "SimplePageConfigEditor",
+    ComponentType: 'PODCAST_DETAIL_OPENER',
+  },
+  {
+    SchemaPath: '#.definitions.PageConfigComponent',
+    SchemaType: undefined,
+    DataType: undefined,
+    EditorType: "SimplePageConfigEditor",
+    ComponentType: 'PODCAST_EPISODES_TOWER',
   }
 ];
 

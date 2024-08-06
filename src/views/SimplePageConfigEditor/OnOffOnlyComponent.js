@@ -4,7 +4,7 @@ const {ValueGroupWrapper, OptionGroup} = require('../helpers/dataElementViews');
 const {getSourceParams, prettyRange, aggregateArticleTypes} = require('../helpers/utility');
 const {SimpleComponentBase} = require('../helpers/SimpleEditorComponent');
 
-class OnOffComponent extends ValueGroupWrapper {
+class OnOffOnlyComponent extends ValueGroupWrapper {
   constructor(obj, schema, key, path, status) {
     super(schema, key, obj.type ?? path, {class:'page-content-component match-'+status});
     this.classList.add('compact', 'not-collapsible');
@@ -19,7 +19,7 @@ class OnOffComponent extends ValueGroupWrapper {
   }
 }
 
-exports.view = OnOffComponent;
+exports.view = OnOffOnlyComponent;
 exports.selectors = [
   {
     SchemaPath: '#.definitions.PageConfigComponent',
@@ -47,10 +47,43 @@ exports.selectors = [
     DataType: undefined,
     EditorType: "SimplePageConfigEditor",
     ComponentType: 'INDEX_SUBNAVIGATION'
+  },
+  {
+    SchemaPath: '#.definitions.PageConfigComponent',
+    SchemaType: undefined,
+    DataType: undefined,
+    EditorType: "SimplePageConfigEditor",
+    ComponentType: 'NNC_MULTILINK_CONTACTBOX'
+  },
+  {
+    SchemaPath: '#.definitions.PageConfigComponent',
+    SchemaType: undefined,
+    DataType: undefined,
+    EditorType: "SimplePageConfigEditor",
+    ComponentType: 'CAROUSEL_HAPPY_NEWS_TEASER'
+  },
+  {
+    SchemaPath: '#.definitions.PageConfigComponent',
+    SchemaType: undefined,
+    DataType: undefined,
+    EditorType: "SimplePageConfigEditor",
+    ComponentType: 'TAGS_BOX'
+  },
+  {
+    SchemaPath: '#.definitions.PageConfigComponent',
+    SchemaType: undefined,
+    DataType: undefined,
+    EditorType: "SimplePageConfigEditor",
+    ComponentType: 'LETTER_GROUP_LIST'
+  },
+  {
+    SchemaPath: '#.definitions.PageConfigComponent',
+    SchemaType: undefined,
+    DataType: undefined,
+    EditorType: "SimplePageConfigEditor",
+    ComponentType: 'TEXTLINK_BOX'
   }
 ];
-
-
 
 
 

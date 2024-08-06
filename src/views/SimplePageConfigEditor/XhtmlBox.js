@@ -8,7 +8,6 @@ const {SimpleComponentBase} = require('../helpers/SimpleEditorComponent');
 class XhtmlBoxComponent extends SimpleComponentBase {
   constructor(obj, schema, key, path, status) {
     super(obj, schema, key, path, status);
-//    super(schema, key, obj.type ?? path, {class:'page-content-component match-'+status});
 
     this.setMainContentConfig('elements');
   }
