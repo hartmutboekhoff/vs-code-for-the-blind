@@ -14,7 +14,7 @@ To receive information about the internal state of the editor-modules run the `S
 This plugin provides views and click-dummies for several config-files in the spark-siteconfig project. 
 
 > [!CAUTION]
-> Caution! these editors are not indendet to be used as actual editors. Allthough they can modify the files content, it is not guaranteed that the stored data is correct.
+> these editors are not indendet to be used as actual editors. Allthough they can modify the files content, it is not guaranteed that the stored data is correct.
 
 Editors are available for the following config-filess
 
