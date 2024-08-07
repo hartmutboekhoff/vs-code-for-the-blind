@@ -1,65 +1,38 @@
 # spark-siteconfig-vscode-plugin README
 
-This is the README for your extension "spark-siteconfig-vscode-plugin". After writing up a brief description, we recommend including the following sections.
+Prototype and click-dummy for a site-config editor
+
+## Usage
+
+Open project folder in vscode and press `F5` to start debugging. This will start a new instance of vscode with the plugin active. Open the spark-siteconfig project with the second instance. 
+Now the config files will be displayed with the respective eitor when opened. If multiple editors are available, use the 'open with...' command.
+
+To receive information about the internal state of the editor-modules run the `SparkSiteConfig.FactoryDiagnostics` command.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+This plugin provides views and click-dummies for several config-files in the spark-siteconfig project. 
 
-For example if there is an image subfolder under your extension project workspace:
+> Caution! these editors are not indendet to be used as actual editors. Allthough they can modify the files content, it is not guaranteed that the stored data is correct.
 
-\!\[feature X\]\(images/feature-x.png\)
+Editors are available for the following config-filess
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+* Menu-Editor - navigation configuration for desktop (/menu/menu.json)
+* Page-Config-Editor - for expert-mode page configuration 
+* Simple-Page-Config-Editor - limited page configuration indendet for use by editorss and non-technical staff members
+* Redirects-Eitor - for reirects
+* Section-Navigation-Editor - to edit index-subnavigation. Only displays an touches the indexSubnavigation parts of category-config.json
+* JSON-View - displays JSON files in a more readable way
 
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
 This extension contributes the following settings:
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+* `SparkSiteeconfigEditor.developerMode`: Changes the color-setting and highlights some elements in the editor-views.
+
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+Work in progress.
 
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
