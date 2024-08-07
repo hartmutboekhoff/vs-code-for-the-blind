@@ -1,10 +1,10 @@
 const {Element} = require('../../html');
 const {TextInputLine, DropdownInputLine} = require('../../htmlFormFields');
-const {ValueGroupWrapper, PopupGroupWrapper, OptionGroup} = require('../helpers/dataElementViews');
+const {ValueGroupWrapper, PopupValueGroupWrapper, OptionGroup} = require('../helpers/dataElementViews');
 const {getSourceParams, prettyRange, aggregateArticleTypes} = require('../helpers/utility');
 
 
-class ContentConfigPanel extends PopupGroupWrapper {
+class ContentConfigPanel extends PopupValueGroupWrapper {
   constructor(obj, schema, key, path, status) {
     super(schema, schema.title, obj.targetProperty, {class: 'component-panel'});
     this.top.append(new Element('p', {class:'min-max number'}))

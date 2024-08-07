@@ -35,6 +35,40 @@
       }
 		},
 		{
+			"name": "SectionNavigationEditorViews",
+			"categories": [
+				{ "name": "SchemaPath" },
+				{ "name": "SchemaType" },
+				{ "name": "DataType" },
+			  { "name": "EditorType", 
+			    "required": false, 
+			    "default":"SectionNavigationEditor" ,
+			    "priority": 100
+			  }
+			],
+			"moduleDirectories": [
+				"./views/SectionNavigationEditor",
+				"./views"
+			],
+			"interface": {
+			  "ViewClass": {
+			    "name": "view",
+			    "isDefault": true,
+			    "wrapper": "none",
+			    "required": true
+			  },
+			  "getView": {
+			    "name": "view",
+			    "wrapper": "constructor-call",
+			    "required": true
+			  },
+			  "setValue": {
+			    "name": "setValue",
+			    "wrapper": "none"
+			  }
+      }
+		},
+		{
 			"name": "PageConfigEditorViews",
 			"categories": [
 				{ "name": "SchemaPath" },

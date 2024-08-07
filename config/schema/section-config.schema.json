@@ -1,0 +1,309 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "global": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "paywall": {
+          "type": "object",
+          "title": "Paywall",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "title": "aktiviert"
+            }
+          }
+        }
+      }
+    },
+    "categories": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^/": {
+          "$ref": "#/definitions/SectionOptions"
+        }
+      }
+    },
+    "default": {
+      "$ref": "#/definitions/SectionOptions"
+    }
+  },
+  "definitions": {
+    "SectionOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "adparams": {
+          "$ref": "#/definitions/AdParams"
+        },
+        "newsletter": {
+          "$ref": "#/definitions/NewsletterOptions"
+        },
+        "piano": {
+          "$ref": "#/definitions/PianoOptions"
+        },
+        "paywall": {
+          "$ref": "#/definitions/PaywallOptions"
+        },
+        "forcePlayoutType": {
+          "type": "string",
+          "enum": [
+            "newsticker"
+          ]
+        },
+        "contactBox": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "headline": {
+              "type": "string"
+            },
+            "imageUrl": {
+              "type": "string"
+            },
+            "city": {
+              "type": "string"
+            },
+            "street": {
+              "type": "string"
+            },
+            "postcode": {
+              "type": "string"
+            },
+            "email1": {
+              "type": "string"
+            },
+            "email2": {
+              "type": "string"
+            },
+            "link1": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "label": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                },
+                "rel": {
+                  "type": "string"
+                }
+              }
+            },
+            "company": {
+              "type": "string"
+            },
+            "phone1": {
+              "$ref": "#/definitions/PhoneNumber"
+            },
+            "phone2": {
+              "$ref": "#/definitions/PhoneNumber"
+            }
+          }
+        },
+        "disableTracking": {
+          "type": "boolean"
+        },
+        "disableCMP": {
+          "type": "boolean"
+        },
+        "disableAds": {
+          "type": "boolean"
+        },
+        "indexSubnavigation": {
+          "$ref": "#/definitions/IndexSubnavigation"
+        },
+        "textlinkBox": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "variant": {
+              "type": "string",
+              "enum": [
+                "collection"
+              ]
+            },
+            "linkList": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "label": {
+                    "type": "string"
+                  },
+                  "fullPath": {
+                    "type": "string",
+                    "pattern": "^/"
+                  },
+                  "type": {
+                    "$ref": "#/definitions/LinkType"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "IndexSubnavigation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "title": "Beschriftung"
+        },
+        "type": {
+          "$ref": "#/definitions/LinkType"
+        },
+        "subMenu": {
+          "type": "array",
+          "title": "Navigation",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "label": {
+                "type": "string",
+                "title": "Link-Text"
+              },
+              "path": {
+                "type": "string",
+                "title": "Link-Ziel",
+                "pattern": ".*"
+              },
+              "type": {
+                "$ref": "#/definitions/LinkType"
+              }
+            }
+          }
+        }
+      }
+    },
+    "LinkType": {
+      "type": "string",
+      "title": "Link-Typ",
+      "enum": [
+        "internal",
+        "external",
+        "no-link"
+      ],
+      "anyOf": [
+        {
+          "const": "internal",
+          "title": "Öffnet im selben Fenster"
+        },
+        {
+          "const": "external",
+          "title": "Öffnet ein neues Fenster"
+        },
+        {
+          "const": "no-link",
+          "title": "kKeine Verlinkung"
+        }
+      ]
+    },
+    "AdParams": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "zoneName": {
+          "type": "string"
+        },
+        "lokstadt": {
+          "type": "string"
+        }
+      }
+    },
+    "NewsletterOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "adGuidelineArticleId": {
+          "type": "string"
+        },
+        "adGuidelineValue": {
+          "type": "string"
+        },
+        "adGuidelineId": {
+          "type": "string"
+        },
+        "contactChannelId": {
+          "type": "string"
+        },
+        "contactChannelValue": {
+          "type": "string"
+        },
+        "formId": {
+          "type": "string"
+        },
+        "accountId": {
+          "type": "string"
+        },
+        "headline": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "PianoOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "recoEngine": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "position": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    },
+    "PaywallOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "previewParagraphs": {
+          "type": "integer"
+        },
+        "paid": {
+          "type": "boolean"
+        }
+      }
+    },
+    "PhoneNumber": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "num": {
+          "type": "string"
+        },
+        "infoText": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

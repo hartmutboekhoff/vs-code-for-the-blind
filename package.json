@@ -25,6 +25,15 @@
     ],
     "customEditors": [
       {
+        "viewType": "SparkSiteConfig.SectionNavigationEditor",
+        "displayName": "Index-Subnavigation Editor",
+        "selector": [
+          {
+            "filenamePattern": "**/section-config/categories-config.json"
+          }
+        ]
+      },
+      {
         "viewType": "SparkSiteConfig.MenuEditor",
         "displayName": "Menü Editor",
         "selector": [
