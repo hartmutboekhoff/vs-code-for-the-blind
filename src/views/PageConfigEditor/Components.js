@@ -18,7 +18,7 @@ class Components extends ValueGroupWrapper {
     },{min:0,max:0});
     this.summary.add('Artikel auf der Seite',`Mindestens ${sum.min} Artikel`);
     this.summary.add('Artikel auf der Seite',`Maximal ${sum.max} Artikel`);
-    this.collapseChildren = 3;
+    this.collapseChildren = 2;
   }
 
   get preventSubElements() {

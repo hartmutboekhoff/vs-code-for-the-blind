@@ -264,12 +264,10 @@ class Summary extends Element {
       this.classList.remove('allways-visible');
 
   }
-  add(title,value,details,groupKey) {
-    this.#items.push({title, value, details, groupKey});
+  add(title,value,details,groupKey, order) {
+    this.#items.push({title, value, details, groupKey, order});
   }
   
-
-
   preRender() {
     if( this.#items.length == 0 ) return false;
     
@@ -277,6 +275,7 @@ class Summary extends Element {
     const aggregated = this.#items.reduce((acc,i,index)=>{
       const key = i.groupKey ?? i.title ?? previousTitle ?? '__index__'+index;
       acc[key] ??= {index, grouped:[]};
+      if( i.order != undefined ) acc[key].index = i.order;
       acc[key].grouped.push(i);
       return acc;
     }, {});

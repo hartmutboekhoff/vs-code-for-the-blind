@@ -293,7 +293,7 @@ class EmptyElement extends Element {
 		return [];
 	}
   renderHtml(indent) {
-    return this.renderEmptyElement(indent);
+    return this.renderEmptyTag(indent);
   }
 }
 class BR extends EmptyElement {

@@ -4,7 +4,7 @@ const {ValueGroupWrapper, PopupValueGroupWrapper} = require('../helpers/dataElem
 const {getEnumLabel} = require('../helpers/utility');
 
 
-class ContentConfigSource extends PopupValueGroupWrapper {
+class ContentConfigSource extends ValueGroupWrapper {
   constructor(obj, schema, key, path, status) {
     super(schema, obj.type, '', {class: 'content-source'});
 

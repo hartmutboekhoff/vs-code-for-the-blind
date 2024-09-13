@@ -42,7 +42,7 @@ class CustomEditorBase {
   		}, undefined, this.context.subscriptions)
 		);  
   }
-  initialize() {
+  async initialize() {
 		this.#renderHtml()
   }
 

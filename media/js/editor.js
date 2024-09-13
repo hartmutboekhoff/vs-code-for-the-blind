@@ -125,7 +125,7 @@
     document.querySelectorAll('fieldset > legend > span.collapse-button').forEach(el=>{
       el.addEventListener('click',ev=>{
         ev.stopPropagation();
-        const fs = ev.target.closest('fieldset');
+        const fs = ev.target.closest('fieldset:not(.popup)');
         if( ev.ctrlKey && ev.shiftKey ) {
           ev.target.closest('fieldset')
             .querySelectorAll('fieldset')

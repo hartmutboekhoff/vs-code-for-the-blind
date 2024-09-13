@@ -249,6 +249,7 @@ class Factory {
 class FactoryLoader {
 	#config; 
 	#factories;
+	#initPromise;
 	
 	constructor(configPath) {
 	  console.log('Start loading factories.');
@@ -276,12 +277,19 @@ class FactoryLoader {
   	};
 	}
 	
+	async get(name) {
+	  return this.#initPromise.then(()=>this[name]);
+	}
 	async #initialize(configPath) {
-		this.#config = await loadJsonData(configPath);
+	  this.#initPromise = new Promise(async (resolve,reject)=>{
+  		this.#config = await loadJsonData(configPath);
+  		this.#factories = this.#config.factories
+  			.map(cfg=>new Factory(cfg.name, cfg.moduleDirectories, cfg.categories, cfg.interface))
+  			.forEach(f=>this[f.name]=f);
+  	  resolve();
+	  });
+	  await this.#initPromise;
 		console.log('Factories loaded.');
-		this.#factories = this.#config.factories
-			.map(cfg=>new Factory(cfg.name, cfg.moduleDirectories, cfg.categories, cfg.interface))
-			.forEach(f=>this[f.name]=f);
 	}
 	
 }

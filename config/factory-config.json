@@ -78,6 +78,10 @@
 			    "required": false, 
 			    "default":"PageConfigEditor" ,
 			    "priority": 100
+			  },
+			  { "name": "ComponentType",
+			    "required": false,
+			    "priority": 50
 			  }
 			],
 			"moduleDirectories": [

@@ -99,15 +99,16 @@ class HtmlBuilder extends Traversion {
       if( match.length > 1 ) console.warn('Found multiple matches for "'+path+'"');
       
       match.forEach(m=>{
+        const inflatedSchema = this.mapper.getFullyExpandedSchema(m.schema);
         const view = this.factory
           .get({
             SchemaPath: m.schemaPath.paths, 
-            SchemaType: m.schema?.type, 
+            SchemaType: inflatedSchema?.type, 
             DataType: Array.isArray(obj)? 'array' : typeof obj, 
             //EditorType: undefined, 
             ComponentType: obj.type
           })
-          ?.getView(obj,m.schema,key,path,m.status);
+          ?.getView(obj,inflatedSchema,key,path,m.status);
         
         if( view != undefined ) {
           //view.attributes['view-path'] = path; 
@@ -198,8 +199,8 @@ class SiteConfigEditor extends JsonEditorBase {
     this.#factoryName = factoryName;
     this.#schemaPath = schemaPath;
 	}
-	initialize() {
-	  this.#factory = Factories[this.#factoryName];
+	async initialize() {
+	  this.#factory = await Factories.get(this.#factoryName);
 
 	  loadJsonData(this.#schemaPath)
 	    .then(json=>this.#schema=json)

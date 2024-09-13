@@ -48,6 +48,9 @@
   width: 100%;
   flex-grow: 3;
 }
+.filter-list.enum-array ul {
+  column-count: 3;
+}
 
 .enum-array:active,
 .enum-array:has(input:active),
@@ -62,14 +65,10 @@
   box-shadow: 0 0 5px blue;  
 }
 
-.enum-array.source-filters ul {
-  column-count: 3;  
-}
+
 .enum-array li {
   white-space: nowrap;
 }
-
-
 
 .page-content-component {
   _margin-top: 2em;

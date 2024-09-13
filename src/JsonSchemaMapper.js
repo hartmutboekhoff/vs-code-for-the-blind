@@ -79,9 +79,26 @@ class SchemaObjectMatch {
   }
 }
 
+class InflatedCache {
+  #cache = [];
+  constructor() {
+  }
+  put(key, data) {
+    const tupel = this.#cache.find(i=>i.key===key);
+    if( tupel )
+      tupel.data = data;
+    else
+      this.#cache.push({key,data});
+  }
+  get(key) {
+    return this.#cache.find(i=>i.key===key||i.data===key)?.data;
+  }
+}
+
 class JsonSchemaObjectMapper {
   #options;
   #schema; #data;
+  #inflatedCache = new InflatedCache();
   #matches = []; #pauseMappingCount = 0;
   #validators = {
     $: { 
@@ -390,7 +407,7 @@ class JsonSchemaObjectMapper {
   
   #resolveSubSchema(schema) {
     if( schema == undefined ) return undefined;
-    const path = schema['$ref'];
+    const path = schema.$ref;
     if( path == undefined )
       return schema;
       
@@ -402,6 +419,24 @@ class JsonSchemaObjectMapper {
     return steps.reduce((acc,s)=>{
       return acc == undefined || s == '.'? acc : (acc[s] ?? acc.properties?.[s]);
     },schema);
+  }
+  #inflate(schema) {
+    let inflated = this.#inflatedCache.get(schema);
+    if( inflated ) return inflated;
+    
+    const resolved = this.#resolveSubSchema(schema);
+    inflated = this.#inflatedCache.get(resolved);
+    if( inflated ) return inflated;
+    
+    inflated = Array.isArray(resolved)? [...resolved] : {...resolved};
+    this.#inflatedCache.put(schema, inflated);
+    if( resolved != schema ) this.#inflatedCache.put(resolved, inflated);
+    
+    for( const k in inflated ) {
+      if( typeof inflated[k] == 'object' )
+        inflated[k] = this.#inflate(inflated[k]);
+    }
+    return inflated;
   }
   #pauseMapping() {
     ++this.#pauseMappingCount;
@@ -483,6 +518,9 @@ class JsonSchemaObjectMapper {
       default:
         return []; 
     }
+  }
+  getFullyExpandedSchema(schema) {
+    return this.#inflate(schema) ?? schema;
   }
 }
 
