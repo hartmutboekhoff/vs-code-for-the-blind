@@ -283,9 +283,9 @@ async function loadCommands(context,rootDir,rootNS) {
       return;
     }
 
-	  context.subscriptions.push(vscode.commands.registerCommand(key, ()=>{
+	  context.subscriptions.push(vscode.commands.registerCommand(key, async ()=>{
 	    try {
-	      func.function(context);
+	      await func.function(context);
 	    }
 	    catch(e) {
 	      console.warn('Failed to execute command '+key, e);

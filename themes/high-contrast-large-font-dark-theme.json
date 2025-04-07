@@ -1,0 +1,62 @@
+{
+    "name": "High Contrast Large Font",
+    "type": "high-contrast",
+    "colors": {
+        "panel.background": "#000000",
+        "settings.background": "#000000",
+        
+        "editor.background": "#F0F0F0F0",
+        "editor.foreground": "#000000",
+        "editor.lineHighlightBackground": "#F1E181",
+        "editor.selectionBackground": "#61E1D1",
+        "editorCursor.foreground": "#0000FF",
+        "editorWhitespace.foreground": "#404040",
+        "sideBar.background": "#000000",
+        "sideBar.foreground": "#FFFFFF",
+        "activityBar.background": "#000000",
+        "activityBar.foreground": "#FFFFFF",
+        "statusBar.background": "#000000",
+        "statusBar.foreground": "#FFFFFF",
+        "titleBar.activeBackground": "#000000",
+        "titleBar.activeForeground": "#FFFFFF"
+    },
+    "tokenColors": [
+        {
+            "scope": ["comment"],
+            "settings": {
+                "foreground": "#87CEEB",
+                "fontStyle": "italic"
+            }
+        },
+        {
+            "scope": ["string"],
+            "settings": {
+                "foreground": "#98FB98"
+            }
+        },
+        {
+            "scope": ["keyword"],
+            "settings": {
+                "foreground": "#FF69B4",
+                "fontStyle": "bold"
+            }
+        },
+        {
+            "scope": ["variable"],
+            "settings": {
+                "foreground": "#FFD700"
+            }
+        },
+        {
+            "scope": ["function"],
+            "settings": {
+                "foreground": "#00BFFF",
+                "fontStyle": "bold"
+            }
+        }
+    ],
+    "editor.fontSize": 40,
+    "editor.lineHeight": 46,
+    "editor.fontFamily": "Consolas, 'Courier New', monospace",
+    "editor.fontWeight": "500"
+} 

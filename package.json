@@ -1,8 +1,8 @@
 {
-  "name": "spark-siteconfig-vscode-plugin",
-  "displayName": "Spark Siteconfig Editor",
-  "publisher": "funkeservices",
-  "description": "",
+  "name": "vscode-for-the-blind",
+  "displayName": "VS Code for the blind extension",
+  "publisher": "Hartmut Boekhoff",
+  "description": "A Visual Studio Code extension that supports visually impaired developers",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.82.0"
@@ -15,103 +15,70 @@
   "contributes": {
     "commands": [
       {
-        "command": "SparkSiteConfig.helloWorld",
-        "title": "Hello World"
+        "command": "VsCodeForTheBlind.speakWord",
+        "title": "VS Code for the blind - Speak Word"
       },
       {
-        "command": "SparkSiteConfig.FactoryDiagnostics",
-        "title": "Factory Diagnostics"
+        "command": "VsCodeForTheBlind.speakLine",
+        "title": "VS Code for the blind - Speak Line"
+      },
+      {
+        "command": "VsCodeForTheBlind.FactoryDiagnostics",
+        "title": "Open VS Code for the blind factory diagnostics view"
       }
     ],
     "customEditors": [
       {
-        "viewType": "SparkSiteConfig.SectionNavigationEditor",
-        "displayName": "Index-Subnavigation Editor",
-        "selector": [
-          {
-            "filenamePattern": "**/section-config/categories-config.json"
-          }
-        ]
-      },
-      {
-        "viewType": "SparkSiteConfig.MenuEditor",
-        "displayName": "Menü Editor",
-        "selector": [
-          {
-            "filenamePattern": "**/menu/*.json"
-          }
-        ]
-      },
-      {
-        "viewType": "SparkSiteConfig.PageConfigEditor",
-        "displayName": "Page-Config Editor",
-        "priority": "option",
-        "selector": [
-          {
-            "filenamePattern": "**/pages/escenic/*.json"
-          },
-          {
-            "filenamePattern": "**/pages/cue/*.json"
-          }
-        ]
-      },
-      
-      {
-        "viewType": "SparkSiteConfig.SimplePageConfigEditor",
-        "displayName": "Simple Page-Config Editor",
-        "priority": "default",
-        "selector": [
-          {
-            "filenamePattern": "**/pages/escenic/*.json"
-          },
-          {
-            "filenamePattern": "**/pages/cue/*.json"
-          }
-        ]
-      },
-
-
-
-      {
-        "viewType": "SparkSiteConfig.RedirectsEditor",
-        "displayName": "Redirects Editor",
-        "selector": [
-          {
-            "filenamePattern": "redirects.json"
-          }
-        ]
-      },
-      {
-        "viewType": "SparkSiteConfig.JsonView",
-        "displayName": "JSON Viewer",
+        "viewType": "VsCodeForTheBlind.JsonView",
+        "displayName": "VS Code for the blind JSON Viewer",
         "selector": [
           {
             "filenamePattern": "*.json"
           }
         ]
-      },
-      {
-        "viewType": "SparkSiteConfig.GenericSchemaEditor",
-        "displayName": "Generic Schema Editor",
-        "selector": [
-          {
-            "filenamePattern": "**/pages/*.json"
-          }
-        ]
       }
-      
-
     ],
     "configuration": {
-      "title": "Spark Siteconfig Editor",
+      "title": "VS Code for the blind",
       "properties": {
-        "SparkSiteeconfigEditor.developerMode": {
+        "VsCodeForTheBlind.developerMode": {
           "type": "boolean",
           "default": false,
-          "description": "Enable develoer-mode to highligt special elements in the editor-view"
+          "description": "Enable develoer-mode"
+        },
+        "VsCodeForTheBlind.rate": {
+          "type": "number",
+          "default": 10,
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Speed for code narration (1-100)"
         }
       }
-    }
+    },
+    "themes": [
+      {
+        "label": "VS Code for the blind dark",
+        "uiTheme": "vs-dark-whatever",
+        "path": "./themes/high-contrast-large-font-dark-theme.json"
+      },
+      {
+        "label": "VS Code for the blind light",
+        "uiTheme": "vs-light-whatever",
+        "path": "./themes/high-contrast-large-font-light-theme.json"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "VsCodeForTheBlind.speakWord",
+        "key": "F8",
+        "mac": "F8"
+      },
+      {
+        "command": "VsCodeForTheBlind.speakLine",
+        "key": "ctrl+F8",
+        "mac": "cmd+F8"
+      }
+    ]    
   },
   "scripts": {
     "lint": "eslint .",
@@ -129,6 +96,7 @@
     "typescript": "^5.1.6"
   },
   "dependencies": {
-    "deep-diff": "^1.0.2"
+    "deep-diff": "^1.0.2",
+    "gtts": "^0.2.1"
   }
 }

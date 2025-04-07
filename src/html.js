@@ -24,7 +24,7 @@ class ChildElements extends Array {
       if( p instanceof Element ) return p;
       if( typeof p == 'string' ) return new PlainText(p);
       if( Array.isArray(p) ) return this.#ensureElements(p);
-    }).flat(Infinity);
+    }).filter(e=>!!e).flat(Infinity);
   }
   push(...elements) { super.push(...this.#ensureElements(elements)); }
   append(...elements) { 

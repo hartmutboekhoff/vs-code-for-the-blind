@@ -18,8 +18,8 @@ async function activate(context) {
 //	console.log(__filename);
 	//console.log(await loadModules('','*.js',true));
 
-  loadCommands(context, 'commands', 'SparkSiteConfig');
-  loadCustomEditors(context, 'custom-editors', 'SparkSiteConfig');
+  loadCommands(context, 'commands', 'VsCodeForTheBlind');
+  loadCustomEditors(context, 'custom-editors', 'VsCodeForTheBlind');
 }
 
 // This method is called when your extension is deactivated

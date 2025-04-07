@@ -57,7 +57,8 @@ li.collapsed>ul {
 
 
 .hint {
-  color: grey;
+  color: #00a;
+  font-family: serif;
   font-style: italic;
   margin-left: 2em;
   display:none;

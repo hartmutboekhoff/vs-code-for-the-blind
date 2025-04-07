@@ -16,7 +16,7 @@ class FactoryDiagnostics {
     this.#context = context;
 
 		this.#panel = vscode.window.createWebviewPanel(
-			'SparkSiteConfig.FactoryDiagnostics',
+			'VsCodeForTheBlind.FactoryDiagnostics',
 			'Factory Diagnostics',
 			getViewColumn(),
 			{
