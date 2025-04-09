@@ -93,7 +93,7 @@ span.array-size {
 ol, ul {
   list-style:none;
   padding-left:0;
-  margin-left: 25px;
+  margin-left: 20px;
   grid-area: children;
 }
 
@@ -125,6 +125,8 @@ li:has(ul):before {
   line-height: 10px;
   vertical-align: middle;
   font-weight: bold;
+  position:relative;
+  top: 2px;
 }
 li.collapsed:has(ol):before,
 li.collapsed:has(ul):before {
@@ -138,12 +140,18 @@ li.collapsed>ul {
 
 
 span.hint {
-  color: #00a;
+  color: #a80;
   font-family: cursive;
   font-style: italic;
   padding-left: 2em;
-  display:none;
+  -display:none;
   grid-area: value;
+}
+span.hint.preview-value {
+  color: #00a;
+}
+li:has(ol,ul) > .hint {
+  display:none;
 }
 li.collapsed > .hint {
   display:inline;
@@ -156,30 +164,24 @@ li.collapsed > .hint-off {
 }
 
 li:hover>span {
-  background-color: #99f;
+  background-color: #88f;
 }
 li:hover:has(li:hover)>span {
-  background-color: #ccf;
+  background-color: #bbf;
 }
 li:hover:has(li:hover li:hover)>span {
-  background-color: #ddd;
+  background-color: #cce;
+}
+
+li:hover:has(li:hover li:hover li:hover)>span {
+  background-color: #ccc;
 }
 
 ul, 
 ol {
   position: relative;
 }
-li ul:before, 
-li ol:before {
-  content: "\0009";
-  display: block;
-  position:absolute;
-  top: 5px;
-  bottom: 13px;
-  left: -15px;
-  width: 15px;
-  border-left: 2px solid grey;
-}
+
 
 
 
@@ -189,3 +191,30 @@ li ol:before {
   color: #c00;
   font-style: italic;
 }
+
+
+/*
+li li:after {
+    content: "";
+    display: inline-block;
+    position: absolute;
+    top: 11px;
+    left: -10px;
+    height: 2px;
+    width: 25px;
+    background-color: #aaa;
+    z-index: -1;
+}
+li>ul:before, 
+li>ol:before {
+    content: "\0009";
+    display: block;
+    position: absolute;
+    top: -2px;
+    bottom: 14px;
+    left: -12px;
+    width: 2px;
+    background-color: #aaa;
+}
+
+*/

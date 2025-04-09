@@ -2,7 +2,19 @@
     "name": "High Contrast Large Font Light",
     "type": "light",
     "colors": {
-      
+
+        "list.hoverBackground": "#FFA",
+        "list.hoverForeground": "#220",
+        "list.highlightBackground": "#f00",
+        "list.highlightForeground": "#fcc",
+        
+        "list.activeSelectionBackground": "#a95",
+        "list.inactiveSelectionBackground": "#965",
+        
+        "sideBarStickyScroll.background": "#875",
+        "sideBarStickyScroll.border": "#ff0",
+        
+        
         "editorGroupHeader.tabsBackground": "#848",
         "editorGroupHeader.noTabsBackground": "#848",
         "tab.activeBackground": "#b0b",
@@ -53,11 +65,11 @@
         
         "notifications.background": "#222",
         
-        "-sideBar.background": "#F0F0F0",
-        "-sideBar.foreground": "#000000",
+        "sideBar.background": "#255",
+        "sideBar.foreground": "#FFF",
         "-sideBarTitle.foreground": "#000000",
-        "-sideBarSectionHeader.background": "#E0E0E0",
-        "-sideBarSectionHeader.foreground": "#000000",
+        "sideBarSectionHeader.background": "#919",
+        "sideBarSectionHeader.foreground": "#FFF",
         
         "-activityBar.background": "#FFFFFF",
         "-activityBar.foreground": "#000000",

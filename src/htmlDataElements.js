@@ -34,9 +34,9 @@ function createHint(value, options) {
   if( !Array.isArray(value) ) {
     const hintProperty = options.hintProperties?.find(hp=>value[hp]);
     if( hintProperty != undefined )
-      return new Hint(value[hintProperty]);
+      return new Hint(value[hintProperty],{class:'preview-value'});
     const len = Object.keys(value).length;
-    return new Hint(len==0? '{ empty object }' : len==1? '{ 1 property }' : `{ ${len} properties }`)
+    return new Hint(len==0? '{ empty object }' : len==1? '{ 1 property }' : `{ ${len} properties }`);
   }
   else if( value.length == 0 ) {
     return new Hint('[ empty Array ]');
@@ -75,7 +75,7 @@ class TypeName extends Element {
     super('span', tn, attributes);
     this.classList.add('typename');
     if( Array.isArray(value) ) 
-      this.children.append(new Element('span',`(${value.length})`, {class:'array-size'}));
+      this.children.append(new Element('span',`[${value.length}]`, {class:'array-size'}));
   }
 }
 class FormattedValue extends Element {
@@ -85,8 +85,8 @@ class FormattedValue extends Element {
   }
 }
 class Hint extends Element {
-  constructor(text) {
-    super('span',text,{class:'hint'});
+  constructor(text, attributes) {
+    super('span',text,{class:'hint '+(attributes?.class??'')});
   }
 }
 class MaxDepthExceeded extends Element {
