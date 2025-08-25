@@ -78,6 +78,13 @@ span.label {
   width: 100%;
   padding-left: .5em;
 }
+ol.array > li > span.label:before {
+  content: "[";
+}
+ol.array > li > span.label:after {
+  content: "]";
+}
+
 span.typename {
   color: #660;
   padding-left: 1em;
@@ -161,6 +168,10 @@ li.collapsed > span.value:has(+span.hint) {
 }
 li.collapsed > .hint-off {
   display:none;
+}
+
+li.highlight>span {
+  background-color: #dd0;
 }
 
 li:hover>span {

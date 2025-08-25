@@ -1,7 +1,7 @@
 {
   "name": "vscode-for-the-blind",
   "displayName": "VS Code for the blind extension",
-  "publisher": "Hartmut Boekhoff",
+  "publisher": "hartmut.boekhoff",
   "description": "A Visual Studio Code extension that supports visually impaired developers",
   "version": "0.0.1",
   "engines": {
@@ -15,16 +15,24 @@
   "contributes": {
     "commands": [
       {
-        "command": "VsCodeForTheBlind.speakWord",
-        "title": "VS Code for the blind - Speak Word"
+        "command": "VsCodeForTheBlind.FactoryDiagnostics",
+        "title": "Factory Diagnostics"
       },
       {
         "command": "VsCodeForTheBlind.speakLine",
-        "title": "VS Code for the blind - Speak Line"
+        "title": "Speak Line"
       },
       {
-        "command": "VsCodeForTheBlind.FactoryDiagnostics",
-        "title": "Open VS Code for the blind factory diagnostics view"
+        "command": "VsCodeForTheBlind.speakWord",
+        "title": "Speak Word"
+      },
+      {
+        "command": "VsCodeForTheBlind.speakStatement",
+        "title": "Speak Statement"
+      },
+      {
+        "command": "VsCodeForTheBlind.jsonViewGotoPath",
+        "title": "Goto JSON Path"
       }
     ],
     "customEditors": [
@@ -77,6 +85,16 @@
         "command": "VsCodeForTheBlind.speakLine",
         "key": "ctrl+F8",
         "mac": "cmd+F8"
+      },
+      {
+        "command": "VsCodeForTheBlind.speakStatement",
+        "key": "shift+F8",
+        "mac": "shift+F8"
+      },
+      {
+        "command": "VsCodeForTheBlind.jsonViewGotoPath",
+        "key": "ctrl+shift+G",
+        "mac": "cmd+shift+G"
       }
     ]    
   },

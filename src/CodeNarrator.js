@@ -1,9 +1,7 @@
 const vscode = require('vscode');
 const speaker = require('./speak-service');
 
-console.log('speaker', speaker);
 class CodeNarrator {
-
   constructor() {
   }
   
@@ -242,7 +240,6 @@ console.log(position, editor.selection);
             return 'block';
     }
   }
-
 
   async speakWord() {
     const context = await this.#getContextInformation();

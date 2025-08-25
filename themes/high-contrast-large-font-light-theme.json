@@ -2,6 +2,12 @@
     "name": "High Contrast Large Font Light",
     "type": "light",
     "colors": {
+      
+        "menu.background": "#330033",
+        "menu.foreground": "#FFF",
+        "menu.border": "#FFF",
+        "menu.selectionBackground": "#FFA",
+        "menu.selectionForeground": "#000",
 
         "list.hoverBackground": "#FFA",
         "list.hoverForeground": "#220",
@@ -99,7 +105,10 @@
         
         "-button.background": "#0000FF",
         "-button.foreground": "#FFFFFF",
-        "-button.hoverBackground": "#0066FF"
+        "-button.hoverBackground": "#0066FF",
+        
+        "settings.background": "#0f0",
+        "settings.rowHoverBackground": "#ff0"
     },
     "tokenColors": [
         {

@@ -105,7 +105,7 @@ class CustomEditorBase {
     if( typeof type == 'object' )
       this.#panel.webview.postMessage(type);
     else
-      this.#panel.webview.postMessage(Object.assign({},msg,{type}));
+      this.#panel.webview.postMessage({...msg, type});
   }
   async onDocumentChanged(ev) {
     //if( this.#differences.length > 0 ) {

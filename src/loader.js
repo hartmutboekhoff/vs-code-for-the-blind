@@ -6,6 +6,13 @@ const RootDir = __dirname;
 
 const ModuleCache = {};
 
+function isFunction(f) {
+  return typeof f == 'function';
+}
+function isClass(c) {
+  return typeof c == 'function' && /^\s*class\s+/.test(c.toString());
+}
+
 class ModuleWrapper {
   static #idCounter = 0;
   #id;
@@ -41,7 +48,7 @@ class ModuleWrapper {
 	  }
 	  const fromTarget = prop=>{
 	    const value = target[prop];
-	    return value instanceof Function
+	    return isFunction(value) && !isClass(value)// instanceof Function
 	            //? (...args)=>value.apply(target,args)
 	            ? new Proxy(value,{
 	                apply:(func,thisArg,argumentList)=>Reflect.apply(func,target,argumentList),
@@ -208,18 +215,14 @@ async function loadModule(path, name, relPath='') {
 }	
 
 function verifyContribution(context, type, key) {
-  const cmp = {
+  const compareFunction = {
     commands: v=>v.command==key,
     customEditors: v=>v.viewType==key,
   }[type];
   
-  return context.extension.packageJSON.contributes[type]?.find?.(cmp) != undefined;
+  return context.extension.packageJSON.contributes[type]?.find?.(compareFunction) != undefined;
 }
 function getClassObject(module) {
-  function isClass(c) {
-    return typeof c == 'function' && /^\s*class\s+/.test(c.toString());
-  }
-  
 	if( isClass(module) )
 	  return { info: 'module', classObject: module };
 	else if( isClass(module.default) )
@@ -230,10 +233,6 @@ function getClassObject(module) {
 	  return undefined;
 }
 function getFunction(module) {
-  function isFunction(f) {
-    return typeof f == 'function';
-  }
-
 	if( isFunction(module) )
 	  return { info: 'module', function: module };
 	else if( isFunction(module.default) )
@@ -266,6 +265,7 @@ async function loadModules(relativepath, extensions, recursive) {
 }
 
 async function loadCommands(context,rootDir,rootNS) {
+  const exposedAPIs = {};
   const commandModules = await loadModules(rootDir,'*.js',true);
 
   commandModules.loaded.forEach(m=>{
@@ -285,7 +285,7 @@ async function loadCommands(context,rootDir,rootNS) {
 
 	  context.subscriptions.push(vscode.commands.registerCommand(key, async ()=>{
 	    try {
-	      await func.function(context);
+	      return await func.function(context);
 	    }
 	    catch(e) {
 	      console.warn('Failed to execute command '+key, e);
@@ -293,11 +293,16 @@ async function loadCommands(context,rootDir,rootNS) {
 	    
 	  }));
     console.log(`Registered command "${key}" from ${func.info}`);
+    
+    if( m.API != undefined ) exposedAPIs[m.$plainName] = m.API;
   });
+  return exposedAPIs;
 }
 
 async function loadCustomEditors(context, rootDir, rootNS) {
+  const exposedAPIs = {};
   const editorModules = await loadModules(rootDir,'*.js',false);
+
   editorModules.loaded.forEach(m=>{
     let key = m.$getKey(rootNS);
 
@@ -315,8 +320,11 @@ async function loadCustomEditors(context, rootDir, rootNS) {
     const provider = new GenericCustomEditorProvider(context, cls.classObject);
     context.subscriptions.push(vscode.window.registerCustomEditorProvider(key, provider, provider.getPanelOptions()));
     console.log(`Registered custom-editor "${key}" from ${cls.info}`);
-  
+
+    if( m.API != undefined ) exposedAPIs[m.$plainName] = m.API;
   });
+  
+  return exposedAPIs;
 }
 
 module.exports = {

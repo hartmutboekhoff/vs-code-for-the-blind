@@ -4,10 +4,35 @@ const { HtmlFrame } = require('../html');
 const { RootValue } = require('../htmlDataElements');
 
 
+class ApiFacade extends EventTarget {
+  gotoJsonPath(path) {
+    if( path == undefined || activeEditor == undefined ) return;
+console.log('goting to ', path)    ;
+    activeEditor.gotoJsonPath(path);
+  }
+}
+
+const apiInstance = new ApiFacade();
+let activeEditor;
+
 class JsonView extends JsonEditorBase {
 
 	constructor(context, document, webviewPanel, token) {
 	  super(context, document, webviewPanel, token);
+	  activeEditor = this;
+
+    webviewPanel.onDidChangeViewState(ev=>{
+      if( this.panel == ev.webviewPanel ) {
+        if( ev.webviewPanel.active )
+          activeEditor = this;
+        else
+          activeEditor = undefined;
+      }
+    });
+  }
+  
+  gotoJsonPath(path) {
+    this.postMessage('gotoJsonPath', {path});
   }
 
 	renderHtml() {
@@ -26,4 +51,7 @@ class JsonView extends JsonEditorBase {
 
 }
 
-module.exports = JsonView;
+module.exports = {
+  JsonView,
+  API: apiInstance,
+};

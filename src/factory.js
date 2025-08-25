@@ -1,5 +1,5 @@
 const {loadModules, loadJsonData} = require('./loader');
-const {Categories, ModuleSelectors, ModuleMatch, SearchSelector} = require('./selectors');
+const {Categories, ModuleSelectors, ModuleMatch, SearchSelector} = require('./factorySelectors');
 
 const factoryDiagnostics = {};
 

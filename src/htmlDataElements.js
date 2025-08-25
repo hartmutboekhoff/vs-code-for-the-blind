@@ -101,6 +101,7 @@ class DataElement extends Element {
 
     this.options = options;
     this.classList.add('data-element');
+    this.dataset.key = name;
     this.children.append(new Element('span', name, {'class':'label'}));
   }  
 }
@@ -173,8 +174,9 @@ class ArrayValue extends DataElement {
           continue;
         
         const childValue = value[n];
-        const outputName = Number.isInteger(+n)? `[${n}]` : n;
-        ol.children.append(createDataValueElement(outputName, childValue, options));
+        const child = createDataValueElement(n, childValue, options);
+        if( Number.isInteger(+n) ) child.classList.add('braced');
+        ol.children.append(child);
       }
       this.children.append(ol);
     }

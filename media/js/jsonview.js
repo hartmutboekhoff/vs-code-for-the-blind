@@ -1,4 +1,17 @@
 (function() {
+  function gotoJsonPath({path}) {
+  const selector = path.trim(/[\.\/]/).split(/[\.\/]/).map(p=>`li[data-key="${p}"]`).join(' ');
+    const target = document.querySelector(selector);
+    if( target ) {
+      for( let parent = target.parentElement.closest('li') ; parent ; parent = parent.parentElement.closest('li') ) {
+        parent.classList.remove('collapsed');
+      }
+      target.scrollIntoView(true);
+      target.classList.add('highlight') ;
+      window.setTimeout(()=>target.classList.remove('highlight'), 3000);
+    }
+  }
+
   window.addEventListener('load', ()=>{
     document.querySelectorAll('li li:has(ol),li li:has(ul)')
       .forEach(e=>e.classList.add('collapsed'));
@@ -25,5 +38,12 @@
         ev.preventDefault();
       });
     });
+    
+    window.addEventListener('message',ev=>{
+      console.log('MESSAGE RECEIVED', ev);
+      if( typeof eval(ev.data.type) == 'function' )
+        eval(ev.data.type)(ev.data);
+    });
+
   });
 })();
