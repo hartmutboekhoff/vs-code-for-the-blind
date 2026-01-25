@@ -10,7 +10,6 @@ class CodeNarrator {
     if( !editor ) return {};
     
     const position = editor.selection.active;
-console.log(position, editor.selection);
     
     const wordRange = editor.document.getWordRangeAtPosition(position);
     
@@ -249,13 +248,297 @@ console.log(position, editor.selection);
   async speakLine() {
     const context = await this.#getContextInformation();
     if( context.lineText )
-      speaker.speak(`Zeile ${context.lineNumber+1}: ${context.lineText}`);
+      speaker.speak(`Line ${context.lineNumber+1}: ${context.lineText}`);
   }
-  speakStatement() {
-    speaker.speak('This eature is not yet implemented.');
+  async speakStatement() {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) return;
+
+    const position = editor.selection.active;
+    const line = editor.document.lineAt(position.line).text;
+    const trimmed = line.trim();
+
+    if (!trimmed) {
+      speaker.speak('Empty line.');
+      return;
+    }
+
+    const semanticInfo = await this.#getSemanticTokens(position);
+    const description = this.#describeStatement(trimmed, semanticInfo);
+
+    speaker.speak(description);
   }
+
+  #describeStatement(line, semanticInfo) {
+    const contextPrefix = semanticInfo.containerName
+      ? `In ${semanticInfo.containerName}: `
+      : '';
+
+    const description = this.#parseStatement(line);
+    return contextPrefix + description;
+  }
+
+  #parseStatement(line) {
+    // Remove trailing semicolons and braces for cleaner parsing
+    const cleaned = line.replace(/[;{}]*\s*$/, '').trim();
+
+    // Single closing brace
+    if (/^\}?\s*$/.test(line.trim()) || line.trim() === '}') {
+      return 'End of block.';
+    }
+
+    // else if
+    if (/^\}\s*else\s+if\s*\((.+)\)/.test(line)) {
+      const condition = line.match(/else\s+if\s*\((.+)\)/)[1];
+      return `Otherwise, if ${this.#humanizeExpression(condition)}.`;
+    }
+
+    // else
+    if (/^\}\s*else\s*\{?\s*$/.test(line.trim())) {
+      return 'Otherwise.';
+    }
+
+    // Import/require statements
+    const requireMatch = cleaned.match(/(?:const|let|var)\s+(\{[^}]+\}|\w+)\s*=\s*require\(\s*['"]([^'"]+)['"]\s*\)/);
+    if (requireMatch) {
+      return `We import ${requireMatch[1]} from ${requireMatch[2]}.`;
+    }
+    const importMatch = cleaned.match(/import\s+(.+?)\s+from\s+['"]([^'"]+)['"]/);
+    if (importMatch) {
+      return `We import ${importMatch[1]} from ${importMatch[2]}.`;
+    }
+
+    // Class declaration
+    const classMatch = cleaned.match(/class\s+(\w+)(?:\s+extends\s+(\w+))?/);
+    if (classMatch) {
+      const ext = classMatch[2] ? `, extending ${classMatch[2]}` : '';
+      return `We define a class ${classMatch[1]}${ext}.`;
+    }
+
+    // Arrow function declaration
+    const arrowMatch = cleaned.match(/(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?\(?([^)]*)\)?\s*=>/);
+    if (arrowMatch) {
+      const params = arrowMatch[2].trim();
+      const paramDesc = params ? ` taking ${this.#humanizeParams(params)}` : '';
+      return `We define ${arrowMatch[1]}${paramDesc}.`;
+    }
+
+    // Function declaration
+    if (cleaned.match(/^(?:async\s+)?function\s+/)) {
+      const m = cleaned.match(/(?:async\s+)?function\s+(\w+)\s*\(([^)]*)\)/);
+      if (m) {
+        const params = m[2].trim();
+        const paramDesc = params ? ` taking ${this.#humanizeParams(params)}` : '';
+        const asyncPrefix = cleaned.startsWith('async') ? 'an async function' : 'a function';
+        return `We define ${asyncPrefix} ${m[1]}${paramDesc}.`;
+      }
+    }
+
+    // Method declaration (class methods, including private #methods)
+    const methodMatch = cleaned.match(/^(?:async\s+)?(#?\w+)\s*\(([^)]*)\)\s*\{?\s*$/);
+    if (methodMatch && !cleaned.match(/^(if|for|while|switch|catch)\s*\(/)) {
+      const params = methodMatch[2].trim();
+      const paramDesc = params ? ` taking ${this.#humanizeParams(params)}` : '';
+      const asyncPrefix = cleaned.startsWith('async') ? 'an async method' : 'a method';
+      return `We define ${asyncPrefix} ${methodMatch[1]}${paramDesc}.`;
+    }
+
+    // Variable declaration with assignment
+    const varDeclMatch = cleaned.match(/^(const|let|var)\s+(\w+)\s*=\s*(.+)$/);
+    if (varDeclMatch) {
+      const kind = varDeclMatch[1] === 'const' ? 'constant' : 'variable';
+      const value = this.#humanizeExpression(varDeclMatch[3]);
+      return `We declare a ${kind} ${varDeclMatch[2]} and set it to ${value}.`;
+    }
+
+    // Variable declaration without assignment
+    const varOnlyMatch = cleaned.match(/^(let|var)\s+(\w+)\s*$/);
+    if (varOnlyMatch) {
+      return `We declare a variable ${varOnlyMatch[2]}.`;
+    }
+
+    // Return statement
+    const returnMatch = cleaned.match(/^return\s*(.*)$/);
+    if (returnMatch) {
+      if (!returnMatch[1].trim()) return 'We return.';
+      return `We return ${this.#humanizeExpression(returnMatch[1])}.`;
+    }
+
+    // Throw statement
+    const throwMatch = cleaned.match(/^throw\s+(.+)$/);
+    if (throwMatch) {
+      return `We throw ${this.#humanizeExpression(throwMatch[1])}.`;
+    }
+
+    // If statement
+    const ifMatch = cleaned.match(/^if\s*\((.+)\)/);
+    if (ifMatch) {
+      return `We check if ${this.#humanizeExpression(ifMatch[1])}.`;
+    }
+
+    // For loop
+    const forOfMatch = cleaned.match(/^for\s*\(\s*(?:const|let|var)\s+(\w+)\s+of\s+(.+)\)/);
+    if (forOfMatch) {
+      return `We loop over ${this.#humanizeExpression(forOfMatch[2])}, calling each item ${forOfMatch[1]}.`;
+    }
+    const forInMatch = cleaned.match(/^for\s*\(\s*(?:const|let|var)\s+(\w+)\s+in\s+(.+)\)/);
+    if (forInMatch) {
+      return `We loop over the keys of ${this.#humanizeExpression(forInMatch[2])}, calling each key ${forInMatch[1]}.`;
+    }
+    const forMatch = cleaned.match(/^for\s*\(\s*(?:let|var|const)?\s*(\w+)\s*=\s*([^;]+);\s*(.+);\s*(.+)\)/);
+    if (forMatch) {
+      return `We loop with ${forMatch[1]} starting at ${forMatch[2]}, while ${this.#humanizeExpression(forMatch[3])}, ${this.#humanizeIncrement(forMatch[4])}.`;
+    }
+
+    // While loop
+    const whileMatch = cleaned.match(/^while\s*\((.+)\)/);
+    if (whileMatch) {
+      return `We loop while ${this.#humanizeExpression(whileMatch[1])}.`;
+    }
+
+    // Do-while
+    if (cleaned === 'do') {
+      return 'We begin a do-while loop.';
+    }
+
+    // Switch statement
+    const switchMatch = cleaned.match(/^switch\s*\((.+)\)/);
+    if (switchMatch) {
+      return `We switch on ${this.#humanizeExpression(switchMatch[1])}.`;
+    }
+
+    // Case
+    const caseMatch = cleaned.match(/^case\s+(.+):$/);
+    if (caseMatch) {
+      return `Case ${this.#humanizeExpression(caseMatch[1])}.`;
+    }
+
+    // Default case
+    if (cleaned === 'default:') {
+      return 'Default case.';
+    }
+
+    // Break/continue
+    if (cleaned === 'break') return 'We break out of the loop.';
+    if (cleaned === 'continue') return 'We skip to the next iteration.';
+
+    // Try/catch/finally
+    if (cleaned === 'try') return 'We try the following.';
+    const catchMatch = cleaned.match(/^catch\s*\(\s*(\w+)\s*\)/);
+    if (catchMatch) return `If an error occurs, we catch it as ${catchMatch[1]}.`;
+    if (cleaned === 'finally') return 'Finally, we always do the following.';
+
+    // Await expression
+    const awaitMatch = cleaned.match(/^await\s+(.+)$/);
+    if (awaitMatch) {
+      return `We await ${this.#humanizeExpression(awaitMatch[1])}.`;
+    }
+
+    // Assignment
+    const assignMatch = cleaned.match(/^(.+?)\s*([\+\-\*\/]?=)\s*(.+)$/);
+    if (assignMatch && !assignMatch[1].match(/^(const|let|var)\s/)) {
+      const op = assignMatch[2];
+      const opDesc = op === '+=' ? 'increase' : op === '-=' ? 'decrease' : op === '*=' ? 'multiply' : op === '/=' ? 'divide' : 'set';
+      if (opDesc === 'set') {
+        return `We set ${this.#humanizeExpression(assignMatch[1])} to ${this.#humanizeExpression(assignMatch[3])}.`;
+      }
+      return `We ${opDesc} ${this.#humanizeExpression(assignMatch[1])} by ${this.#humanizeExpression(assignMatch[3])}.`;
+    }
+
+    // Method/function call
+    const callMatch = cleaned.match(/^(?:await\s+)?(.+?\w)\s*\((.*)$/);
+    if (callMatch) {
+      const fn = callMatch[1];
+      const argsRaw = callMatch[2].replace(/\)\s*$/, '');
+      const argsDesc = argsRaw.trim() ? ` with ${this.#humanizeExpression(argsRaw)}` : '';
+      return `We call ${fn}${argsDesc}.`;
+    }
+
+    // Comment
+    const commentMatch = cleaned.match(/^\/\/\s*(.+)$/);
+    if (commentMatch) {
+      return `Comment: ${commentMatch[1]}.`;
+    }
+    const blockCommentMatch = cleaned.match(/^\/\*\*?\s*(.+?)(\*\/)?\s*$/);
+    if (blockCommentMatch) {
+      return `Comment: ${blockCommentMatch[1]}.`;
+    }
+
+    // module.exports
+    const exportsMatch = cleaned.match(/^module\.exports\s*=\s*(.+)$/);
+    if (exportsMatch) {
+      return `We export ${this.#humanizeExpression(exportsMatch[1])}.`;
+    }
+
+    // Fallback
+    return `Code: ${line}.`;
+  }
+
+  #humanizeExpression(expr) {
+    if (!expr) return '';
+    expr = expr.trim().replace(/;$/, '');
+
+    // new Constructor(args)
+    const newMatch = expr.match(/^new\s+(\w+)\s*\((.*)?\)$/);
+    if (newMatch) {
+      const args = newMatch[2]?.trim();
+      const argsDesc = args ? ` with ${args}` : '';
+      return `a new ${newMatch[1]}${argsDesc}`;
+    }
+
+    // Ternary
+    const ternaryMatch = expr.match(/^(.+?)\s*\?\s*(.+?)\s*:\s*(.+)$/);
+    if (ternaryMatch) {
+      return `${this.#humanizeExpression(ternaryMatch[1])} then ${this.#humanizeExpression(ternaryMatch[2])}, otherwise ${this.#humanizeExpression(ternaryMatch[3])}`;
+    }
+
+    // Comparisons
+    expr = expr.replace(/\s*===\s*/g, ' equals ')
+               .replace(/\s*!==\s*/g, ' does not equal ')
+               .replace(/\s*==\s*/g, ' equals ')
+               .replace(/\s*!=\s*/g, ' does not equal ')
+               .replace(/\s*>=\s*/g, ' is greater than or equal to ')
+               .replace(/\s*<=\s*/g, ' is less than or equal to ')
+               .replace(/\s*>\s*/g, ' is greater than ')
+               .replace(/\s*<\s*/g, ' is less than ');
+
+    // Logical operators
+    expr = expr.replace(/\s*&&\s*/g, ' and ')
+               .replace(/\s*\|\|\s*/g, ' or ');
+
+    // Negation
+    expr = expr.replace(/!\s*(\w)/g, 'not $1');
+
+    // typeof
+    expr = expr.replace(/typeof\s+/g, 'the type of ');
+
+    // null/undefined
+    expr = expr.replace(/\bnull\b/g, 'null')
+               .replace(/\bundefined\b/g, 'undefined');
+
+    return expr;
+  }
+
+  #humanizeParams(params) {
+    const paramList = params.split(',').map(p => p.trim()).filter(Boolean);
+    if (paramList.length === 0) return '';
+    if (paramList.length === 1) return paramList[0];
+    if (paramList.length === 2) return `${paramList[0]} and ${paramList[1]}`;
+    return paramList.slice(0, -1).join(', ') + ', and ' + paramList[paramList.length - 1];
+  }
+
+  #humanizeIncrement(expr) {
+    expr = expr.trim();
+    if (expr.match(/\w+\+\+/)) return `incrementing ${expr.replace('++', '')}`;
+    if (expr.match(/\w+--/)) return `decrementing ${expr.replace('--', '')}`;
+    if (expr.match(/\w+\s*\+=\s*(.+)/)) {
+      const m = expr.match(/(\w+)\s*\+=\s*(.+)/);
+      return `adding ${m[2]} to ${m[1]}`;
+    }
+    return expr;
+  }
+
   describeContext() {
-  
   }
 }
 

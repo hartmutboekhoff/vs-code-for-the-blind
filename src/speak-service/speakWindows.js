@@ -10,7 +10,13 @@ class SpeakWindows extends Speak {
         Add-Type -AssemblyName System.Speech;
         $synthesizer = New-Object System.Speech.Synthesis.SpeechSynthesizer;
         $synthesizer.Rate = ${rate /10};
-        $synthesizer.SelectVoiceByHint(1, 30, 0, "en-US");
+        $culture = New-Object System.Globalization.CultureInfo("en-US");
+        $voices = $synthesizer.GetInstalledVoices($culture);
+        if ($voices.Count -gt 0) {
+            $synthesizer.SelectVoice($voices[0].VoiceInfo.Name);
+        } else {
+            $synthesizer.SelectVoiceByHints([System.Speech.Synthesis.VoiceGender]::NotSet, [System.Speech.Synthesis.VoiceAge]::NotSet, 0, $culture);
+        }
         $synthesizer.Speak([Console]::In.ReadLine());
       `;
 

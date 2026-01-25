@@ -14,7 +14,7 @@ class SpeakMacOS extends Speak {
                           ? MIN_RATE + (DEFAULT_RATE-MIN_RATE)*(rate-1)/(10-1)
                           : DEFAULT_RATE + (MAX_RATE-DEAULT_RATE)*(rate-10)*(100-90);
 
-    return this.executeCommand('say', ['-r', Math.floor(adjustedRate).toString(), text]);
+    return this.executeCommand('say', ['-v', 'Samantha', '-r', Math.floor(adjustedRate).toString(), text]);
   }
   async stopSpeaking() {
     await this.executeCommand('pkill', ['-f', 'say']);

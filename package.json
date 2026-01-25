@@ -34,7 +34,7 @@
         "command": "VsCodeForTheBlind.jsonViewGotoPath",
         "title": "Goto JSON Path"
       }
-    ],
+  ],
     "customEditors": [
       {
         "viewType": "VsCodeForTheBlind.JsonView",
