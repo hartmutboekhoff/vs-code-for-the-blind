@@ -33,6 +33,14 @@
       {
         "command": "VsCodeForTheBlind.jsonViewGotoPath",
         "title": "Goto JSON Path"
+      },
+      {
+        "command": "VsCodeForTheBlind.speakClipboard",
+        "title": "Speak Clipboard"
+      },
+      {
+        "command": "VsCodeForTheBlind.stopSpeaking",
+        "title": "Stop Speaking"
       }
   ],
     "customEditors": [
@@ -95,8 +103,23 @@
         "command": "VsCodeForTheBlind.jsonViewGotoPath",
         "key": "ctrl+shift+G",
         "mac": "cmd+shift+G"
+      },
+      {
+        "command": "VsCodeForTheBlind.speakClipboard",
+        "key": "ctrl+shift+F8",
+        "mac": "cmd+shift+F8"
+      },
+      {
+        "command": "VsCodeForTheBlind.speakClipboard",
+        "key": "ctrl+D",
+        "mac": "cmd+D"
+      },
+      {
+        "command": "VsCodeForTheBlind.stopSpeaking",
+        "key": "Escape",
+        "mac": "Escape"
       }
-    ]    
+    ]
   },
   "scripts": {
     "lint": "eslint .",

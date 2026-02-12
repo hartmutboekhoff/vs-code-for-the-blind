@@ -25,7 +25,7 @@ class SpeakWindows extends Speak {
 
   }
   async stopSpeaking() {
-    await this.executeCommand('powershell', ['-Command', 'Stop-Speech']);
+    await this.stop();
   }
 }
 
