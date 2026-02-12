@@ -13,8 +13,8 @@ class SpeakWindows extends Speak {
     const isSSML = text.trimStart().startsWith('<speak');
 
     const speakCall = isSSML
-      ? '$synthesizer.SpeakSsml($input)'
-      : '$synthesizer.Speak($input)';
+      ? '$synthesizer.SpeakSsml($text)'
+      : '$synthesizer.Speak($text)';
 
     const script = `
         Add-Type -AssemblyName System.Speech;
@@ -27,7 +27,9 @@ class SpeakWindows extends Speak {
         } else {
             $synthesizer.SelectVoiceByHints([System.Speech.Synthesis.VoiceGender]::NotSet, [System.Speech.Synthesis.VoiceAge]::NotSet, 0, $culture);
         }
-        $input = [Console]::In.ReadToEnd();
+        $reader = New-Object System.IO.StreamReader([Console]::OpenStandardInput());
+        $text = $reader.ReadToEnd();
+        $reader.Close();
         ${speakCall};
       `;
 
