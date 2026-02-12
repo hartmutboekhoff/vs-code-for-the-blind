@@ -3,44 +3,48 @@ const cp = require('child_process');
 
 class Speak {
   #isSpeaking = false;
-  
+  #child = null;
+
   constructor() {
   }
 
   async executeCommand(command, args, input) {
     return new Promise((resolve, reject) => {
       const child = cp.spawn(command, args);
-        
+      this.#child = child;
+
       child.on('error', error=>{
+        this.#child = null;
         if( error.message.includes('ENOENT') )
           reject(new Error(`Command not found: ${command}. Please ensure ${command} is installed.`));
         else
           reject(error);
       });
       child.on('exit', code=>{
-        if( code === 0 )
+        this.#child = null;
+        if( code === 0 || code === null )
           resolve();
         else
           reject(new Error(`Command failed with code ${code}`));
       });
-      
+
       if( input != undefined ) {
         child.stdin.write(input + '\n');
         child.stdin.end();
       }
     });
-  }    
+  }
   async speak(text, rateFactor=1) {
-    rateFactor = rateFactor == undefined? 1 
-                 : rateFactor <= 0? .5 
-                 : rateFactor >= 10? 10 
+    rateFactor = rateFactor == undefined? 1
+                 : rateFactor <= 0? .5
+                 : rateFactor >= 10? 10
                  : rateFactor;
-                 
+
     const workbenchConfig = vscode.workspace.getConfiguration('VsCodeForTheBlind');
     const rate = (workbenchConfig.get('rate') ?? 10) * rateFactor;
 
     if( this.#isSpeaking )
-      await this.stopSpeaking();
+      await this.stop();
 
     this.#isSpeaking = true;
     try {
@@ -54,19 +58,13 @@ class Speak {
     }
   }
   async stop() {
-    if( this.#isSpeaking ) {
-      try {
-        await this.stopSpeaking();
-      }
-      catch(error) {
-        throw error;
-      }
-      finally {
-        this.#isSpeaking = false;
-      }
+    if( this.#child ) {
+      this.#child.kill();
+      this.#child = null;
     }
+    this.#isSpeaking = false;
   }
-  async isSpeaking() { 
+  async isSpeaking() {
     return this.#isSpeaking;
   }
 
@@ -74,7 +72,7 @@ class Speak {
     throw new Error('Implementation is missing. Please override in derived class.');
   };
   async stopSpeaking() {
-    throw new Error('Implementation is missing. Please override in derived class.');
+    this.stop();
   };
 }
 
