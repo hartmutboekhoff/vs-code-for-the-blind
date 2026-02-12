@@ -1,5 +1,6 @@
 const vscode = require('vscode');
 const speaker = require('./speak-service');
+const ssml = require('./speak-service/ssml');
 
 class CodeNarrator {
   constructor() {
@@ -266,7 +267,12 @@ class CodeNarrator {
     const semanticInfo = await this.#getSemanticTokens(position);
     const description = this.#describeStatement(trimmed, semanticInfo);
 
-    speaker.speak(description);
+    if (speaker.supportsSSML) {
+      const ssmlText = this.#toSSML(description, trimmed, semanticInfo);
+      speaker.speak(ssmlText);
+    } else {
+      speaker.speak(description);
+    }
   }
 
   #describeStatement(line, semanticInfo) {
@@ -276,6 +282,51 @@ class CodeNarrator {
 
     const description = this.#parseStatement(line);
     return contextPrefix + description;
+  }
+
+  #toSSML(description, line, semanticInfo) {
+    let body = '';
+
+    // Add container context with a pause before the main description
+    if (semanticInfo.containerName) {
+      body += ssml.prosody(`In ${semanticInfo.containerName}`, { rate: 'fast' });
+      body += ssml.pause(300);
+      // Strip the context prefix from description since we handled it
+      description = description.replace(/^In [^:]+:\s*/, '');
+    }
+
+    // Emphasize identifiers found in the code line
+    const identifiers = this.#extractIdentifiers(line);
+    let parts = ssml.escapeXml(description);
+
+    for (const id of identifiers) {
+      // Only emphasize identifiers that appear in the spoken description
+      const escaped = ssml.escapeXml(id);
+      parts = parts.replace(
+        new RegExp(`\\b${escaped.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`),
+        `</prosody>${ssml.emphasis(id)}<prosody rate="medium">`
+      );
+    }
+
+    body += `<prosody rate="medium">${parts}</prosody>`;
+
+    return ssml.wrap(body);
+  }
+
+  #extractIdentifiers(line) {
+    // Extract meaningful identifiers (variable names, function names, etc.)
+    // Skip JS keywords and very short tokens
+    const keywords = new Set([
+      'const', 'let', 'var', 'function', 'class', 'extends', 'return',
+      'if', 'else', 'for', 'while', 'do', 'switch', 'case', 'default',
+      'break', 'continue', 'try', 'catch', 'finally', 'throw', 'new',
+      'async', 'await', 'import', 'export', 'from', 'require', 'module',
+      'exports', 'typeof', 'instanceof', 'this', 'true', 'false', 'null',
+      'undefined', 'of', 'in'
+    ]);
+
+    const matches = line.match(/[a-zA-Z_$][a-zA-Z0-9_$]*/g) || [];
+    return matches.filter(id => !keywords.has(id) && id.length > 1);
   }
 
   #parseStatement(line) {

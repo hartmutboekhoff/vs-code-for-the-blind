@@ -8,6 +8,10 @@ class Speak {
   constructor() {
   }
 
+  get supportsSSML() {
+    return false;
+  }
+
   async executeCommand(command, args, input) {
     return new Promise((resolve, reject) => {
       const child = cp.spawn(command, args);

@@ -122,6 +122,7 @@
     ]
   },
   "scripts": {
+    "package": "vsce package --allow-missing-repository",
     "lint": "eslint .",
     "pretest": "npm run lint",
     "test": "node ./test/runTest.js"
