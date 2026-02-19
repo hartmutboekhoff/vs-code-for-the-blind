@@ -33,16 +33,14 @@ async function speakClipboard() {
   console.log('[speakClipboard] after stripping code blocks, length:', plainText.length);
 
   if (plainText) {
-    console.log('[speakClipboard] speaking text:', plainText.substring(0, 80) + (plainText.length > 80 ? '...' : ''));
+    console.log('[speakClipboard] speaking text:', plainText.substring(0, 200) + (plainText.length > 200 ? '...' : ''));
     await speaker.speak(plainText);
     console.log('[speakClipboard] speech finished');
-  } else if( rawText ) {
-    console.log('[speakClipboard] speaking text:', rawText.substring(0, 80) + (rawText.length > 80 ? '...' : ''));
+  } else {  
+    console.log('[speakClipboard] speaking text:', rawText.substring(0, 200) + (rawText.length > 200 ? '...' : ''));
     await speaker.speak(rawText);
     console.log('[speakClipboard] speech finished');
-  } else {
-    console.log('[speakClipboard] text was empty after stripping code blocks');
-  }
+  } 
 }
 
 module.exports = speakClipboard;
